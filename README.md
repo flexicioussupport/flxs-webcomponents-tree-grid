@@ -4,22 +4,7 @@ A TreeGrid component built to render highly complex, Hierarchical/Nested as well
 
 ## Install
 
-First, make sure you `npm install` and `bower install`. Then run `polyserve` to serve your application locally.
-
-
-## Viewing Your Application
-
-```
-http://127.0.0.1:8081/
-```
-
-## Building Your Application
-
-```
-$ npm run build
-```
-
-This will create a `build/` folder containing a bundled build, both run through HTML, CSS, and JS optimizers.
+First, make sure you `bower install`. Then run `polyserve` to serve your application locally.
 
 ## Running Tests
 

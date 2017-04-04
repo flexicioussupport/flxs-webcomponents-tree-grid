@@ -1,0 +1,49 @@
+<link rel="import" href="flxs-tree-grid-styles.html">
+
+<!--
+flxs-tree-grid is a web-components wrapper for the Flexicious HTML DataGrid component. Along with the following sub-components,
+flxs-tree-grid-column, flxs-tree-grid-column-group, flxs-tree-grid-column-level.
+
+Example:
+
+```html
+    <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true"
+                                  style="width:100%;height:100%;" itemClick="[[itemClick]]">
+      <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+      <flxs-tree-grid-column dataField="nm" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+      <flxs-tree-grid-column dataField="cty" headerText="Country" filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+      <flxs-tree-grid-column dataField="hse" headerText="House"></flxs-tree-grid-column>
+      <flxs-tree-grid-column dataField="yrs" headerText="Years"></flxs-tree-grid-column>
+    </flxs-tree-grid>
+```
+
+### Styling
+
+For a full list of custom styling properties, please refer the flxs-tree-grid.js file, and for defaults, please refer settings-parser.js file:
+
+Custom property                  | Description                            | Default
+---------------------------------|----------------------------------------|--------------------
+`--flxs-multi-column-sort-number-width`        | Width of multi-column           | ""
+`--flxs-multi-column-sort-number-height`      | Height of multi-column           | {}
+`--flxs-multi-column-sort-number-style-name`  | Style name of multi-column       | ""
+
+@group App Elements
+@element flxs-tree-grid
+@demo demo/index.html Simple Flxs Tree Grid
+-->
+
+
+<dom-module id="flxs-tree-grid">
+  <template>
+
+    <style include="flxs-tree-grid-styles"></style>
+    <div id="gridContainer" style="width:100%;height:100%"></div>
+    <content></content>
+  </template>
+  <script src="jquery-1.8.2.js"></script>
+  <script src="jquery-ui-1.9.1.custom.min.js"></script>
+  <script src="jquery.toaster.js"></script>
+  <script src="lib_private/minified-compiled-jquery.js"></script>
+  <script src="settings-parser.js"></script>
+  <script src="flxs-tree-grid.js"></script>
+</dom-module>

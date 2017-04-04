@@ -1,0 +1,6 @@
+bower_components/
+lib_private/
+build/
+node_modules/
+.idea/
+debug.log

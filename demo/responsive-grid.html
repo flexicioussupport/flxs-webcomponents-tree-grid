@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+
+<link rel="import" href="../bower_components/paper-styles/demo-pages.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../flxs-tree-grid.html">
+<link rel="import" href="../flxs-tree-grid-column.html">
+  <custom-style>
+    <style is="custom-style">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+      
+      flxs-tree-grid {
+        --flxs-alternating-item-colors: [0xd9d9d9, 0xffffff];
+        --flxs-alternating-text-colors: [0x1F1F1F, 0x0028a0];
+        --flxs-vertical-grid-lines: false;
+        --flxs-header-vertical-grid-lines: false;
+        --flxs-filter-vertical-grid-lines: false;
+      }
+        </style>
+  </custom-style>
+</head>
+<body class="fullbleed" unresolved>
+<dom-module id="responsive-grid-demo">
+    <template>
+      <style>
+        iron-image {
+          background-color: lightgray;
+          margin: 1em;
+        }
+        .horizontal-section-container {
+          display: flex;
+          display: -ms-flexbox;
+          display: -webkit-flex;
+          -ms-flex-pack: center;
+          -webkit-justify-content: center;
+          justify-content: center;
+          -ms-flex-wrap: wrap;
+          -webkit-flex-wrap: wrap;
+          flex-wrap: wrap;
+        }
+        .horizontal-section {
+          background-color: white;
+          padding: 24px;
+          margin-right: 24px;
+          min-width: 200px;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                      0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                      0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          max-width: 300px;
+          margin-bottom: 24px;
+        }
+      </style>
+
+      <iron-ajax auto url="data/englishmonarchs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Responsive grid demo</h1>
+        <button on-click="_handleClick">Switch view</button>
+        <iron-pages class="flexchild" selected="0">
+            <div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque suscipit commodo ultricies. Duis mollis dolor in sapien posuere fermentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Curabitur at elit lacinia, ultricies metus nec, ultrices augue. Sed nunc ex, dictum at massa a, semper vestibulum diam. Sed convallis mattis lectus, ut imperdiet nibh elementum vel. Pellentesque lectus tellus, condimentum ut gravida vitae, maximus in urna. Donec nibh quam, hendrerit ut ipsum a, convallis bibendum lorem. Ut nec venenatis turpis. Praesent hendrerit volutpat nunc, non fermentum nibh ultrices at. Integer felis libero, pretium eget tellus id, luctus rutrum lacus. Sed magna justo, mollis ac volutpat euismod, consequat vel magna.</p><p>Mauris rhoncus vehicula leo, vel posuere eros luctus sit amet. Etiam malesuada urna auctor lacus pulvinar malesuada. In vitae tellus nunc. In pulvinar efficitur ex, at tristique nulla facilisis ac. Praesent id odio nibh. Nulla tincidunt ut ipsum a suscipit. Maecenas dictum turpis sit amet nisi pretium lobortis. Aenean tempor venenatis elit. Quisque ullamcorper eros ac tortor condimentum ultrices eget eu ligula. Curabitur feugiat sit amet dolor in varius. Vivamus id risus sit amet neque condimentum laoreet. Fusce euismod convallis odio non interdum. Duis viverra rhoncus ex, vel cursus massa aliquet id. Cras viverra a sapien eget bibendum. Praesent eu augue et quam euismod viverra a eget est.</p></div>
+            <div>
+              <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:100%;height:100%"
+                itemClick="[[itemClick]]">
+                <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+                <flxs-tree-grid-column dataField="nm" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+                <flxs-tree-grid-column dataField="cty" headerText="Country" filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+                <flxs-tree-grid-column dataField="hse" headerText="House"></flxs-tree-grid-column>
+                <flxs-tree-grid-column dataField="yrs" headerText="Years"></flxs-tree-grid-column>
+              </flxs-tree-grid>
+            </div>
+          </iron-pages>
+
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function() {
+        Polymer({
+          is: 'responsive-grid-demo',
+          _itemClick: function(evt) {
+            console.log("Clicked On " + evt.item.nm);
+            alert("Clicked On " + evt.item.nm);
+          },
+          _handleClick: function() {
+            var pages = this.$$('iron-pages');
+            pages.selectNext();
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <responsive-grid-demo></responsive-grid-demo>
+
+</body>
+</html>

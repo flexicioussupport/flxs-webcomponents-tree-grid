@@ -63,10 +63,10 @@
         }
       </style>
 
-      <iron-ajax auto url="/demo/data/englishmonarchs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+      <iron-ajax auto url="data/englishmonarchs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
 
       <div class="card">
-        <h1>Basic grid</h1>
+        <h1>Basic grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px"
           itemClick="[[itemClick]]">
           <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>

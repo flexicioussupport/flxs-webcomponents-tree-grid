@@ -72,7 +72,7 @@
         <iron-pages class="flexchild" selected="0">
             <div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque suscipit commodo ultricies. Duis mollis dolor in sapien posuere fermentum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Curabitur at elit lacinia, ultricies metus nec, ultrices augue. Sed nunc ex, dictum at massa a, semper vestibulum diam. Sed convallis mattis lectus, ut imperdiet nibh elementum vel. Pellentesque lectus tellus, condimentum ut gravida vitae, maximus in urna. Donec nibh quam, hendrerit ut ipsum a, convallis bibendum lorem. Ut nec venenatis turpis. Praesent hendrerit volutpat nunc, non fermentum nibh ultrices at. Integer felis libero, pretium eget tellus id, luctus rutrum lacus. Sed magna justo, mollis ac volutpat euismod, consequat vel magna.</p><p>Mauris rhoncus vehicula leo, vel posuere eros luctus sit amet. Etiam malesuada urna auctor lacus pulvinar malesuada. In vitae tellus nunc. In pulvinar efficitur ex, at tristique nulla facilisis ac. Praesent id odio nibh. Nulla tincidunt ut ipsum a suscipit. Maecenas dictum turpis sit amet nisi pretium lobortis. Aenean tempor venenatis elit. Quisque ullamcorper eros ac tortor condimentum ultrices eget eu ligula. Curabitur feugiat sit amet dolor in varius. Vivamus id risus sit amet neque condimentum laoreet. Fusce euismod convallis odio non interdum. Duis viverra rhoncus ex, vel cursus massa aliquet id. Cras viverra a sapien eget bibendum. Praesent eu augue et quam euismod viverra a eget est.</p></div>
             <div>
-              <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:100%;height:100%"
+              <flxs-tree-grid id="grid" dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:100%;height:100%"
                 itemClick="[[itemClick]]">
                 <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
                 <flxs-tree-grid-column dataField="nm" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
@@ -97,6 +97,8 @@
           _handleClick: function() {
             var pages = this.$$('iron-pages');
             pages.selectNext();
+            var flxsGrid =this.$$('#grid');
+            flxsGrid.grid.checkResize();
           }
         });
       })

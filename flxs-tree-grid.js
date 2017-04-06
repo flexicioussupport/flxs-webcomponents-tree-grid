@@ -3,18 +3,39 @@
     var uiUtil = flexiciousNmsp.UIUtils;
     var flxConstants = flexiciousNmsp.Constants;
 
+    /**
+     * Check for changes to the div that holds us. HTML does not have a resize event, so we have to periodically inspect
+     * the dom element to see if there were any changes to the container size.
+     * @method checkResize
+     */
+
+    flexiciousNmsp.FlexDataGrid.prototype.checkResize = function () {
+        if (this.getBodyContainer()._inEdit)
+            return;
+
+        if (!this.domElement) {
+            this.resizeTimer.kill();
+        }
+        if ((this.domElement.offsetWidth != this.placedWidth) && (this.domElement.offsetWidth > 0)) {
+            this.invalidateWidth();
+        }
+        //this means we are percent based.
+        if ((this.domElement.offsetHeight != this.placedHeight) && (this.domElement.offsetHeight > 0)) {
+            this.invalidateHeight();
+        }
+    };
     flexiciousNmsp.UIComponent.prototype.globalToLocal = function (ptIn) {
         var offset = uiUtil.adapter.offset(this.domElement);
-        if (offset && offset.top==0 && offset.left==0){
-            var rect=this.domElement.getBoundingClientRect();
+        if (offset && offset.top == 0 && offset.left == 0) {
+            var rect = this.domElement.getBoundingClientRect();
             offset = rect;
         }
-         return new flexiciousNmsp.Point(ptIn.x - (offset ? offset.left : 0) + this.domElement.scrollLeft, ptIn.y - (offset ? offset.top : 0) + this.domElement.scrollTop);
+        return new flexiciousNmsp.Point(ptIn.x - (offset ? offset.left : 0) + this.domElement.scrollLeft, ptIn.y - (offset ? offset.top : 0) + this.domElement.scrollTop);
     };
     flexiciousNmsp.UIComponent.prototype.localToGlobal = function (ptIn) {
         var offset = uiUtil.adapter.offset(this.domElement);
-        if (offset && offset.top==0 && offset.left==0){
-            var rect=this.domElement.getBoundingClientRect();
+        if (offset && offset.top == 0 && offset.left == 0) {
+            var rect = this.domElement.getBoundingClientRect();
             offset = rect;
         }
         return new flexiciousNmsp.Point(offset.left + ptIn.x, offset.top + ptIn.y);

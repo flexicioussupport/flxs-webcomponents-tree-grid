@@ -1451,7 +1451,7 @@
         is: 'flxs-tree-grid',
         properties: properties,
         behaviors: [
-            behaviors
+            Polymer.IronResizableBehavior
         ],
 
         /**
@@ -1479,6 +1479,8 @@
          * On attached element to DOM
          */
         attached: function () {
+            this.listen(this, 'iron-resize', '_resizeHandler');
+
             if (this.width) {
                 this.$.gridContainer.style.width = this.width;
             }
@@ -1514,8 +1516,16 @@
          */
         detached: function () {
             //this.grid.kill()
+            this.unlisten(this, 'iron-resize', '_resizeHandler');
         },
+        /**
+         * A handler for the `iron-resize` event triggered by `IronResizableBehavior`
+         * when the element is resized.
+         */
+        _resizeHandler: function () {
+            this.grid.checkResize();
 
+        },
         attributeChanged: function () {
             this._onChanged();
         },

@@ -216,7 +216,7 @@
       for (var prop in flexiciousNmsp[template.typeName]) {
         if (prop.indexOf("EVENT_") == 0) {
           flexiciousNmsp[template.typeName].ALL_EVENTS.push(flexiciousNmsp[template.typeName][prop]);
-          var key=flexiciousNmsp[template.typeName][prop];
+          var key = flexiciousNmsp[template.typeName][prop];
           properties[key.toLowerCase()] = {
             observer: '_onChanged',
             orig: key
@@ -247,6 +247,9 @@
         } else {
 
           behaviors[thisKey] = function () {
+            if (!this.grid) {
+              return;
+            }
             return this.grid[key].apply(this.grid, arguments);
           };
         }

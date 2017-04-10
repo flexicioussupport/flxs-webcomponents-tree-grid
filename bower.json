@@ -3,7 +3,8 @@
   "description": "A TreeGrid component built to render highly complex, Hierarchical/Nested/Flat Data",
   "main": "flxs-tree-grid.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^2.0.0-rc.2"
+    "polymer": "Polymer/polymer#^2.0.0-rc.2",
+    "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^2.0.0-rc.2"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#2.0-preview",

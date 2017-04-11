@@ -92,8 +92,65 @@
             this.close(flxConstants.ALERT_OK);
         }
     };
+    /**
+     * 
+     */
+    flexiciousNmsp.FlexDataGridBodyContainer.prototype.saveRowInCache=function (row){
 
 
+        row.showHide(false);
+        var key=row.rowPositionInfo.getLevelNestDepth()+""+row.rowPositionInfo.getRowType();
+        if(!this._rowCache[key]){
+            this._rowCache[key]=[];
+        }
+        //trace(key + "" + _rowCache[key].length)
+        if(this._rowCache[key].indexOf(row)==-1)
+            this._rowCache[key].push(row);
+        for(var i=0;i<row.cells.length;i++){
+            var comp=row.cells[i];
+            var headerCell= comp.component.implementsOrExtends("FlexDataGridHeaderCell")?comp.component:null;
+            if(headerCell){
+                headerCell.destroySortIcon();
+            }
+        }
+
+    };
+    flexiciousNmsp.FlexDataGridBodyContainer.prototype.processItemPositionInfoUsingCache = function (seed, insertionPoint, scrollDown) {
+        if (typeof scrollDown == "undefined") scrollDown = true;
+
+        var row;
+        var found = false;
+        var index = 0;
+
+        var seedKey = seed.getLevelNestDepth() + "" + seed.getRowType();
+
+        if (this._rowCache[seedKey] && this._rowCache[seedKey].length > 0) {
+            row = this._rowCache[seedKey].pop();
+            found = true;
+        }
+        if (found) {
+            row.showHide(true);
+            row.invalidateCells();
+            row.setRowPositionInfo(seed, this.grid.variableRowHeight);
+            this.rows.splice(insertionPoint, 0, row);
+            if (this._recreateRows) {
+                var existing = row.cells;
+                row.cells = [];
+                this.processRowPositionInfo(seed, scrollDown, row, existing);
+                while (existing.length > 0) {
+                    this.removeComponent(existing[0]);
+                    existing.splice(0, 1);
+                }
+            }
+            this.grid.placeComponents(row);
+        }
+        else {
+            this.grid.currentPoint.contentY = seed.getVerticalPosition();
+            this.processRowPositionInfo(seed, scrollDown);
+
+        }
+
+    };
 
 
     var template = new flexiciousNmsp.FlexDataGrid();
@@ -1506,7 +1563,7 @@
                 if (this.grid.getColumnLevel()._tempCols && this.grid.getColumnLevel()._tempCols.length) {
                     this.grid.getColumnLevel().setColumns(this.grid.getColumnLevel()._tempCols);
                 }
-
+                this.grid.getColumnLevel().initializeLevel(this.grid);
 
             }, 1);
         },

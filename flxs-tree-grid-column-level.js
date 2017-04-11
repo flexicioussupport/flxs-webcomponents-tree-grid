@@ -16,10 +16,10 @@
       this.async(function () {
         for (var key in properties) {
           if (this[key.toLowerCase()]) {
-            this.parentNode.grid.applyAttribute(this.gridColumnLevel, properties[key].orig, this[key.toLowerCase()], true);
+            ((this.parentNode.grid || this.gridColumnLevel.grid)).applyAttribute(this.gridColumnLevel, properties[key].orig, this[key.toLowerCase()], true);
           }
         }
-        if (this.gridColumnLevel._tempCols.length) {
+        if (this.gridColumnLevel._tempCols && this.gridColumnLevel._tempCols.length) {
           this.gridColumnLevel.setColumns(this.gridColumnLevel._tempCols);
         }
       }, 1);
@@ -27,7 +27,7 @@
       if (this.parentNode.grid) {
 
       } else {
-        this.parentNode.gridColumnLevel.setNextLevel(this.gridColumnLevel);
+        this.parentNode.gridColumnLevel.nextLevel=(this.gridColumnLevel);
       }
     },
 

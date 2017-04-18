@@ -3,6 +3,36 @@
     var uiUtil = flexiciousNmsp.UIUtils;
     var flxConstants = flexiciousNmsp.Constants;
 
+    var oldBottomBarPlacementFunction = flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar;
+    flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar = function () {
+        oldBottomBarPlacementFunction.apply(this);
+        var borderSides = this.getStyle("borderSides");
+        var borderThickness = this.getStyle("borderThickness");
+        if (borderSides && this.domElement) {
+            //graphics.lineStyle(getStyle("borderThickness"), getStyle("borderColor"));
+            if (this.hasBorderSide("top")) {
+                this.domElement.style.borderTop = this.getStyle("borderThickness") + "px solid " + this.getStyle("borderColor");
+            } else {
+                this.domElement.style.borderTop = "";
+            }
+            if (this.hasBorderSide("bottom")) {
+                this.domElement.style.borderBottom = this.getStyle("borderThickness") + "px solid " + this.getStyle("borderColor");
+            } else {
+                this.domElement.style.borderBottom = "";
+            }
+            if (this.hasBorderSide("left")) {
+                this.domElement.style.borderLeft = this.getStyle("borderThickness") + "px solid " + this.getStyle("borderColor");
+            } else {
+                this.domElement.style.borderLeft = "";
+            }
+            if (this.hasBorderSide("right")) {
+                this.domElement.style.borderRight = this.getStyle("borderThickness") + "px solid " + this.getStyle("borderColor");
+            } else {
+                this.domElement.style.borderRight = "";
+            }
+        }
+
+    }
     /**
      * Check for changes to the div that holds us. HTML does not have a resize event, so we have to periodically inspect
      * the dom element to see if there were any changes to the container size.
@@ -95,21 +125,21 @@
     /**
      * 
      */
-    flexiciousNmsp.FlexDataGridBodyContainer.prototype.saveRowInCache=function (row){
+    flexiciousNmsp.FlexDataGridBodyContainer.prototype.saveRowInCache = function (row) {
 
 
         row.showHide(false);
-        var key=row.rowPositionInfo.getLevelNestDepth()+""+row.rowPositionInfo.getRowType();
-        if(!this._rowCache[key]){
-            this._rowCache[key]=[];
+        var key = row.rowPositionInfo.getLevelNestDepth() + "" + row.rowPositionInfo.getRowType();
+        if (!this._rowCache[key]) {
+            this._rowCache[key] = [];
         }
         //trace(key + "" + _rowCache[key].length)
-        if(this._rowCache[key].indexOf(row)==-1)
+        if (this._rowCache[key].indexOf(row) == -1)
             this._rowCache[key].push(row);
-        for(var i=0;i<row.cells.length;i++){
-            var comp=row.cells[i];
-            var headerCell= comp.component.implementsOrExtends("FlexDataGridHeaderCell")?comp.component:null;
-            if(headerCell){
+        for (var i = 0; i < row.cells.length; i++) {
+            var comp = row.cells[i];
+            var headerCell = comp.component.implementsOrExtends("FlexDataGridHeaderCell") ? comp.component : null;
+            if (headerCell) {
                 headerCell.destroySortIcon();
             }
         }
@@ -158,6 +188,17 @@
     var behaviors = gridPropsAndBehaviors.behaviors, properties = gridPropsAndBehaviors.properties;
     properties["dataprovider"].observer = "_onDataProviderChanged";
     var allStyles = [
+
+        /**
+         *  Bounding box sides.
+         *  A space-delimited String that specifies the sides of the border to show.
+         *  The String can contain <code>"left"</code>, <code>"top"</code>,
+         *  <code>"right"</code>, and <code>"bottom"</code> in any order.
+         *  The default value is <code>"left top right bottom"</code>,
+         *  which shows all four sides.
+         *
+         */
+        "border-sides",
         /**
          *  The width of  the numeric value representing the order of the column sort.
          *  @default 10

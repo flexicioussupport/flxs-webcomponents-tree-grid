@@ -29,6 +29,7 @@
         --flxs-vertical-grid-lines: false;
         --flxs-header-vertical-grid-lines: false;
         --flxs-filter-vertical-grid-lines: false;
+        --flxs-border-sides : "none";
       }
     </style>
   </custom-style>
@@ -70,7 +71,7 @@
 
       <div class="card">
         <h1>Hierarchical grid demo</h1>
-        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" itemClick="[[_itemClick]]">
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}"  forcePagerRow="true" enableFilters="true" enableExport="true" itemClick="[[_itemClick]]">
           <flxs-tree-grid-column-level childrenField="sub" >
             <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="id" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>

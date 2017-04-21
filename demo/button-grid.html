@@ -78,12 +78,13 @@
     </template>
 
     <script>
-      window.addEventListener('WebComponentsReady', function() {
-
-        function showDetails(span){
+              function showDetails(span){
           var cell = span.parentNode.parentNode.component;
           alert(cell.getRowInfo().getData().nm);
         }
+      window.addEventListener('WebComponentsReady', function() {
+
+
 
     var TextInputRenderer, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
     /**

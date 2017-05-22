@@ -1,0 +1,151 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../library/webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../library/paper-styles/demo-pages.html">
+  <link rel="import" href="../library/iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../flxs-tree-grid-column-level.html">
+  <custom-style>
+    <style is="custom-style">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+      
+      flxs-tree-grid {
+        --flxs-alternating-item-colors: [0xd9d9d9, 0xffffff];
+        --flxs-alternating-text-colors: [0x1F1F1F, 0x0028a0];
+        --flxs-vertical-grid-lines: false;
+        --flxs-header-vertical-grid-lines: false;
+        --flxs-filter-vertical-grid-lines: false;
+        --flxs-border-sides: "none";
+      }
+    </style>
+  </custom-style>
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="hierarchical-grid-demo">
+    <template>
+      <style>
+        iron-image {
+          background-color: lightgray;
+          margin: 1em;
+        }
+        
+        .horizontal-section-container {
+          display: flex;
+          display: -ms-flexbox;
+          display: -webkit-flex;
+          -ms-flex-pack: center;
+          -webkit-justify-content: center;
+          justify-content: center;
+          -ms-flex-wrap: wrap;
+          -webkit-flex-wrap: wrap;
+          flex-wrap: wrap;
+        }
+        
+        .horizontal-section {
+          background-color: white;
+          padding: 24px;
+          margin-right: 24px;
+          min-width: 200px;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          max-width: 300px;
+          margin-bottom: 24px;
+        }
+      </style>
+
+      <iron-ajax auto url="data/hierarchy.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Hierarchical grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" itemClick="[[_itemClick]]">
+          <flxs-tree-grid-column-level childrenField="sub">
+            <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="id" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="type" headerText="Type" filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="price" headerText="Price"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="id" headerText="Years" itemRenderer="{{itemRenderer}}" enableCellClickRowSelect="false"></flxs-tree-grid-column>
+
+            <flxs-tree-grid-column-level reusePreviousLevelColumns="true">
+            </flxs-tree-grid-column-level>
+          </flxs-tree-grid-column-level>
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function() {
+        
+
+    var ButtonRenderer, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
+    /**
+     * A ButtonRenderer is a custom item renderer, that defines how to use custom cells with logic that you can control
+     * @constructor
+     * @namespace com.flexicious.controls
+     * @extends UIComponent
+     */
+    ButtonRenderer=function(){
+        //make sure to call constructor
+        flexiciousNmsp.UIComponent.apply(this,["div"]);//second parameter is the tag name for the dom element.
+        /**
+         * This is a getter/setter for the data property. When the cell is created, it belongs to a row
+         * The data property points to the item in the grids dataprovider that is being rendered by this cell.
+         * @type {*}
+         */
+        this.data=null;
+        //the add event listener will basically proxy all DomEvents to your code to handle.
+        this.addEventListener(this,flxConstants.EVENT_CLICK,this.onClick);
+        //we can use innerHTML in the constructor - this makes subsequent setData calls not recreate the dom tree.
+        this.domElement.innerHTML ="<input type='button' value='View'></input><input type='button' value='Edit'></input>"
+    };
+    flexiciousNmsp.CustomButtonRenderer = ButtonRenderer; //add to name space
+    ButtonRenderer.prototype = new flexiciousNmsp.UIComponent(); //setup hierarchy
+    ButtonRenderer.prototype.typeName = ButtonRenderer.typeName = 'ButtonRenderer';//for quick inspection
+    ButtonRenderer.prototype.getClassNames=function(){
+        return ["ButtonRenderer","UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
+    };
+    ButtonRenderer.prototype.onClick=function(evt){
+        var cell = this.parent; //this is an instance of FlexDataGridDataCell (For data rows)
+        var column = cell.getColumn();//this is an instance of FlexDataGridColumn.
+        //the evt is the flexicious wrapper around the browser native event. evt.triggerEvent is the browser native event
+        //here we look at the target which the user actually clicked on.
+        alert("Clicked on " + evt.triggerEvent.target.value +" for " + cell.getRowInfo().getData().id);
+    }
+
+    //This sets  the inner html, and grid will try to set it. Since we are an input field, IE 8 will complain. So we ignore it since we dont need it anyway.
+    ButtonRenderer.prototype.setText=function(val){
+
+    };
+
+
+
+        Polymer({
+          is: 'hierarchical-grid-demo',
+          _itemClick: function(evt) {
+            console.log("Clicked On " + evt.item.id);
+          },
+          itemRenderer : new flexiciousNmsp.ClassFactory(flexiciousNmsp.CustomButtonRenderer)
+
+        });
+      })
+    </script>
+  </dom-module>
+
+  <hierarchical-grid-demo></hierarchical-grid-demo>
+
+</body>
+
+</html>

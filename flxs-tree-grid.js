@@ -1605,6 +1605,7 @@
                     this.grid.getColumnLevel().setColumns(this.grid.getColumnLevel()._tempCols);
                 }
                 this.grid.getColumnLevel().initializeLevel(this.grid);
+                this.grid.dispatchEvent(new flexiciousNmsp.BaseEvent(flxConstants.EVENT_CREATION_COMPLETE));
 
             }, 1);
         },

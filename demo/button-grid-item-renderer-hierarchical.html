@@ -117,6 +117,10 @@
     ButtonRenderer.prototype.getClassNames=function(){
         return ["ButtonRenderer","UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
     };
+    ButtonRenderer.prototype.setData=function(evt){
+        var cell = this.parent; //this is an instance of FlexDataGridDataCell (For data rows)
+        this.domElement.style.display = (cell.level.getNestDepth() == 2) ? "" : "none";
+    }
     ButtonRenderer.prototype.onClick=function(evt){
         var cell = this.parent; //this is an instance of FlexDataGridDataCell (For data rows)
         var column = cell.getColumn();//this is an instance of FlexDataGridColumn.

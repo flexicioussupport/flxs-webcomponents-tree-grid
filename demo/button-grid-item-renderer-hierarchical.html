@@ -17,6 +17,8 @@
   <link rel="import" href="../flxs-tree-grid.html">
   <link rel="import" href="../flxs-tree-grid-column.html">
   <link rel="import" href="../flxs-tree-grid-column-level.html">
+  <link rel="import" href="../library/paper-styles/shadow.html">
+
   <custom-style>
     <style is="custom-style">
       :host {
@@ -67,10 +69,18 @@
           margin-bottom: 24px;
         }
       </style>
+      <paper-button>link</paper-button>
+      <paper-button raised>raised</paper-button>
+      <paper-button toggles raised>toggles</paper-button>
+      <paper-button disabled>disabled</paper-button>
+
+      <paper-toolbar>
+        <paper-button raised>View</paper-button>
+        <paper-button raised>Edit</paper-button>
+      </paper-toolbar>
 
       <iron-ajax auto url="data/hierarchy.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
       <div class="card">
-<paper-toolbar><paper-button>View</paper-button><paper-button>Edit</paper-button></paper-toolbar>
         <h1>Hierarchical grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" itemClick="[[_itemClick]]">
           <flxs-tree-grid-column-level childrenField="sub">

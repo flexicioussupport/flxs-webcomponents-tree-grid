@@ -72,7 +72,7 @@
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px"
           itemClick="[[itemClick]]" creationComplete="[[creationComplete]]">
           <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="nm" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="nm" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith" enableRecursiveSearch="true"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="cty" headerText="Country" filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="hse" headerText="House"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="yrs" headerText="Years"></flxs-tree-grid-column>

@@ -3,6 +3,14 @@
     var uiUtil = flexiciousNmsp.UIUtils;
     var flxConstants = flexiciousNmsp.Constants;
 
+    var oldSortIconPlacementFunction = flexiciousNmsp.FlexDataGridHeaderCell.prototype.placeSortIcon;
+    flexiciousNmsp.FlexDataGridHeaderCell.prototype.placeSortIcon = function () {
+        oldSortIconPlacementFunction.apply(this);
+        if (this.level && this.level && this.level.grid && this.level.grid.sortIconPlacementFunction) {
+            this.level.grid.sortIconPlacementFunction(this);
+        }
+    };
+
     var oldBottomBarPlacementFunction = flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar;
     flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar = function () {
         oldBottomBarPlacementFunction.apply(this);
@@ -1591,11 +1599,17 @@
                 this.applyCustomStyle(allStyles[i]);
             }
             this.async(function () {
+                var pendingDataProvider = null;
                 for (var key in properties) {
                     if (this[key.toLowerCase()]) {
                         if (key === "style") {
                             //this is thehtmlstyle
+                        }
+                        else if (key.toLowerCase() === "dataprovider") {
+                            pendingDataProvider = this[key.toLowerCase()];
                         } else {
+                            console.log(key + ":" + this[key.toLowerCase()]);
+
                             this.grid.applyAttribute(this.grid, properties[key].orig, this[key.toLowerCase()], true);
                         }
                     }
@@ -1605,6 +1619,11 @@
                     this.grid.getColumnLevel().setColumns(this.grid.getColumnLevel()._tempCols);
                 }
                 this.grid.getColumnLevel().initializeLevel(this.grid);
+
+                if (pendingDataProvider) {
+                    this.grid.setDataProvider(pendingDataProvider);
+                }
+                this.grid.initComplete = true;
                 this.grid.dispatchEvent(new flexiciousNmsp.BaseEvent(flxConstants.EVENT_CREATION_COMPLETE));
 
             }, 1);
@@ -1634,7 +1653,7 @@
             //TODO - dynamic updates
         },
         _onDataProviderChanged: function (value) {
-            if (this.grid) {
+            if (this.grid && this.grid.initComplete) {
                 this.grid.setDataProvider(value);
             }
         }

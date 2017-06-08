@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <!--
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  -->
+
+
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../bower_components/paper-styles/demo-pages.html">
+  <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+
+
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../flxs-tree-grid-column-level.html">
+
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"> 
+  <custom-style>
+    <style is="custom-style">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+      
+      /*flxs-tree-grid {
+        --flxs-alternating-item-colors: [0xd9d9d9, 0xffffff];
+        --flxs-alternating-text-colors: [0x1F1F1F, 0x0028a0];
+        --flxs-vertical-grid-lines: false;
+        --flxs-header-vertical-grid-lines: false;
+        --flxs-filter-vertical-grid-lines: false;
+        --flxs-border-sides : "none";
+      }*/
+    </style>
+  </custom-style>
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="hierarchical-grid-demo">
+    <template>
+      <style>
+        iron-image {
+          background-color: lightgray;
+          margin: 1em;
+        }
+        
+        .horizontal-section-container {
+          display: flex;
+          display: -ms-flexbox;
+          display: -webkit-flex;
+          -ms-flex-pack: center;
+          -webkit-justify-content: center;
+          justify-content: center;
+          -ms-flex-wrap: wrap;
+          -webkit-flex-wrap: wrap;
+          flex-wrap: wrap;
+        }
+        
+        .horizontal-section {
+          background-color: white;
+          padding: 24px;
+          margin-right: 24px;
+          min-width: 200px;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          max-width: 300px;
+          margin-bottom: 24px;
+        }
+
+      </style>
+
+      <iron-ajax auto url="data/hierarchy.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Hierarchical grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableActiveCellHighlight="false" forcePagerRow="true" enableFilters="true" enableExport="false" variableRowHeight="true"
+          headerColors="[0x222222, 0x222222]" pagerColors="[0x222222, 0x222222]" filterColors="[0x222222, 0x222222]" alternatingTextColors="[0xffffff, 0xffffff]" alternatingItemColors="[0x222222, 0x222222]" rollOverColor="{0x111111}"
+          cellTextColorFunction="[[_cellTextColorFunction]]" sortIconPlacementFunction="[[_placeSortIcon]]"
+          disclosureOpenIcon="/collapseWhite.png" disclosureClosedIcon="/expandWhite.png" sortArrowSkin="/sortArrowWhite.png"
+          style="font-family: 'Roboto', sans-serif;height: 400px" itemClick="[[_itemClick]]" >
+          <flxs-tree-grid-column-level childrenField="sub" >
+            <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="id" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="type" headerText="Type" filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="price" headerText="Price"></flxs-tree-grid-column>
+            <flxs-tree-grid-column-level reusePreviousLevelColumns="true">
+            </flxs-tree-grid-column-level>
+          </flxs-tree-grid-column-level>
+        </flxs-tree-grid>
+      </div>
+    </template>
+ 
+    <script type="text/javascript" src="customscreens/CustomPagerControl.1.js"></script>
+    <script>
+  flexiciousNmsp.Constants.IMAGE_PATH = "http://localhost:8081/demo/assets";
+  flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+
+
+      window.addEventListener('WebComponentsReady', function() {
+        Polymer({
+          is: 'hierarchical-grid-demo',
+          _itemClick: function(evt) {
+            console.log("Clicked On " + evt.item.nm);
+            alert("Clicked On " + evt.item.nm);
+          },
+          _cellTextColorFunction: function() {
+            return 0xffffff;
+          },
+          _placeSortIcon:function(cell){
+            if(cell.icon){
+              cell.icon.move(cell.icon.getX()-12, cell.icon.getY()+8)
+            }
+          }
+
+        });
+      })
+    </script>
+  </dom-module>
+
+  <hierarchical-grid-demo></hierarchical-grid-demo>
+
+</body>
+
+</html>

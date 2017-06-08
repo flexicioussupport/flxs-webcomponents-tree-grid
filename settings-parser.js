@@ -231,6 +231,7 @@
 
 
     var templateGrid = template;
+    templateGrid.sortIconPlacementFunction=null;//can be removed after upgradingto latest version.
     for (var key in templateGrid) {
       if (typeof templateGrid[key] === "function") {
         var thisKey = key;

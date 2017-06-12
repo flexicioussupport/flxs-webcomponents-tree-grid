@@ -84,10 +84,10 @@
       <div class="card">
         <h1>Hierarchical grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableActiveCellHighlight="false" forcePagerRow="true" enableFilters="true" enableExport="false" variableRowHeight="true"
-          headerColors="[0x222222, 0x222222]" pagerColors="[0x222222, 0x222222]" filterColors="[0x222222, 0x222222]" alternatingTextColors="[0xffffff, 0xffffff]" alternatingItemColors="[0x222222, 0x222222]" rollOverColor="{0x111111}"
-          cellTextColorFunction="[[_cellTextColorFunction]]" sortIconPlacementFunction="[[_placeSortIcon]]"
-          disclosureOpenIcon="/collapseWhite.png" disclosureClosedIcon="/expandWhite.png" sortArrowSkin="/sortArrowWhite.png"
-          style="font-family: 'Roboto', sans-serif;height: 400px" itemClick="[[_itemClick]]" pagerRenderer="[[customPageRenderer]]">
+          headerColors="[0x262626, 0x262626]" pagerColors="[0x222222, 0x222222]" filterColors="[0x595959, 0x595959]" rollOverColor="{0x111111}"
+          cellTextColorFunction="[[_cellTextColorFunction]]" cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" sortIconPlacementFunction="[[_placeSortIcon]]"
+          disclosureOpenIcon="/collapseWhite.png" disclosureClosedIcon="/expandWhite.png" sortArrowSkin="/sortArrowWhite.png" useRollOver="false"
+          style="font-family: 'Roboto', sans-serif;height: 400px" itemClick="[[_itemClick]]" pagerRenderer="[[customPageRenderer]]" rowHeight="30">
           <flxs-tree-grid-column-level childrenField="sub" >
             <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="id" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
@@ -115,6 +115,10 @@
           },
           _cellTextColorFunction: function() {
             return 0xffffff;
+          },
+          _cellBackgroundColorFunction: function(cell) {
+            return  cell.rowInfo.rowPositionInfo.rowIndex === undefined ? null : cell.rowInfo.getIsHeaderRow() ? 0x222222 :
+                    cell.rowInfo.rowPositionInfo.levelNestDepth==1 ? 0x808080 : cell.rowInfo.rowPositionInfo.rowIndex % 2 == 0 ? 0x404040 : 0x262626;
           },
           _placeSortIcon:function(cell){
             if(cell.icon){

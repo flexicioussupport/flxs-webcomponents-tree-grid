@@ -16,7 +16,6 @@
   <link rel="import" href="../flxs-tree-grid-column.html">
   <link rel="import" href="../flxs-tree-grid-column-level.html">
 
-  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"> 
   <custom-style>
     <style is="custom-style">
       :host {
@@ -74,10 +73,11 @@
       <div class="card">
         <h1>Hierarchical grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableActiveCellHighlight="false" forcePagerRow="true" enableFilters="true" enableExport="false" variableRowHeight="true"
-          alternatingItemColors="[0x404040 , 0x262626]" headerColors="[0x262626, 0x262626]" pagerColors="[0x222222, 0x222222]" filterColors="[0x595959, 0x595959]" rollOverColor="{0x111111}"
+          alternatingItemColors="[0x404040, 0x262626]" headerColors="[0x262626, 0x262626]" pagerColors="[0x222222, 0x222222]" filterColors="[0x222222, 0x222222]"
           cellTextColorFunction="[[_cellTextColorFunction]]" cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" sortIconPlacementFunction="[[_placeSortIcon]]"
           disclosureOpenIcon="/collapseWhite.png" disclosureClosedIcon="/expandWhite.png" sortArrowSkin="/sortArrowWhite.png" useRollOver="false"
-          style="font-family: 'Roboto', sans-serif;height: 400px" itemClick="[[_itemClick]]" pagerRenderer="[[customPageRenderer]]" rowHeight="30">
+          style="font-family: 'Roboto', sans-serif;height: 400px" itemClick="[[_itemClick]]" pagerRenderer="[[customPageRenderer]]" rowHeight="30"
+          cellBorderFunction="[[_cellBorderFunction]]">
           <flxs-tree-grid-column-level childrenField="sub" >
             <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="id" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
@@ -103,12 +103,42 @@
             console.log("Clicked On " + evt.item.nm);
             alert("Clicked On " + evt.item.nm);
           },
-          _cellTextColorFunction: function() {
+          _cellTextColorFunction: function(cell) {
+            if(cell.rowInfo.getIsHeaderRow()) {
+              return 0x999999;
+            }
+            if(this.currentCell.rowInfo === cell.rowInfo && !cell.rowInfo.getIsHeaderRow()) {
+              if(cell.rowInfo.rowPositionInfo.levelNestDepth>1) {
+                return 0x61A6ED;
+              }
+            }
             return 0xffffff;
           },
           _cellBackgroundColorFunction: function(cell) {
-            return  cell.rowInfo.rowPositionInfo.rowIndex === undefined ? null : cell.rowInfo.getIsHeaderRow() ? 0x222222 :
-                    cell.rowInfo.rowPositionInfo.levelNestDepth==1 ? 0x808080 : cell.rowInfo.rowPositionInfo.rowIndex % 2 == 0 ? 0x404040 : 0x262626;
+            // on mouse roll over
+            if(this.currentCell.rowInfo && cell.rowInfo && this.currentCell.rowInfo === cell.rowInfo && !cell.rowInfo.getIsHeaderRow()) {
+              if(cell.rowInfo.rowPositionInfo.levelNestDepth==1) {
+                return 0x488EFB;
+              }
+            } else if(cell.level.isItemSelected(cell.rowInfo.data)) {
+              return 0x1E90FF;
+            } else {
+              return  cell.rowInfo.rowPositionInfo.rowIndex === undefined ? null : cell.rowInfo.getIsHeaderRow() ? 0x222222 :
+                      cell.rowInfo.rowPositionInfo.levelNestDepth==1 ? 0x222222 : cell.rowInfo.rowPositionInfo.rowIndex % 2 == 0 ? 0x333333 : 0x222222;
+            }
+          },
+          _cellBorderFunction: function(cell) {
+            if(cell.rowInfo.getIsDataRow()) {
+              if(cell.rowInfo.rowPositionInfo.levelNestDepth===1) {
+                cell.domElement.style.borderBottom = "1px solid #61A6ED";
+                cell.domElement.style.fontSize = "14px";
+              } else {
+                cell.domElement.style.border = "1px solid #FFFF00";
+                cell.domElement.style.fontSize = "13px";
+              }
+              return false;
+            }
+            return true;
           },
           _placeSortIcon:function(cell){
             if(cell.icon){

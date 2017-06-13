@@ -181,8 +181,8 @@
     borderThickness: 1,
     borderColor: 0x666666,
 
-    headerStyleName: "dataGridStyles",
-    footerStyleName: "dataGridStyles",
+    headerStyleName: "dataGridHeader",
+    footerStyleName: "dataGridHeader",
     pagerStyleName: "",
     columnGroupStyleName: "columnGroupStyle",
     columnGroupClosedIcon: "/expand.png",

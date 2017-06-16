@@ -13,6 +13,7 @@
     attached: function () {
 
       this.gridColumnLevel = this.parentNode.grid ? this.parentNode.grid.getColumnLevel() : new flexiciousNmsp.FlexDataGridColumnLevel();
+      this.gridColumnLevel.cellBorderFunction = this._cellBorderFunction;
       this.async(function () {
         for (var key in properties) {
           if (this[key.toLowerCase()]) {
@@ -27,7 +28,7 @@
       if (this.parentNode.grid) {
 
       } else {
-        this.parentNode.gridColumnLevel.nextLevel=(this.gridColumnLevel);
+        this.parentNode.gridColumnLevel.nextLevel = (this.gridColumnLevel);
       }
     },
 
@@ -36,6 +37,20 @@
     },
 
     _onChanged: function () {
+    },
+    
+    _cellBorderFunction: function (cell) {
+      if (cell.rowInfo.getIsDataRow()) {
+        if (cell.rowInfo.rowPositionInfo.levelNestDepth == 1) {
+          cell.domElement.style.borderBottom = "1px solid #61A6ED";
+          cell.domElement.style.fontSize = "14px";
+        } else {
+          cell.domElement.style.border = "1px solid #3F3F3F";
+          cell.domElement.style.fontSize = "13px";
+        }
+        return false;
+      }
+      return true;
     }
   });
-} ());
+}());

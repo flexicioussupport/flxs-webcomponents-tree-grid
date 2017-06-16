@@ -73,7 +73,7 @@
       <div class="card">
         <h1>Hierarchical grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableActiveCellHighlight="false" forcePagerRow="true" enableFilters="true" enableExport="false"
-          sortIconPlacementFunction="[[_placeSortIcon]]" itemClick="[[_itemClick]]" pagerRenderer="[[customPageRenderer]]" rowHeight="30" 
+          itemClick="[[_itemClick]]" pagerRenderer="[[customPageRenderer]]" rowHeight="30" 
           style="font-family: 'Roboto', sans-serif;height: 400px">
           <flxs-tree-grid-column-level childrenField="sub">
             <flxs-tree-grid-column type="checkbox" ></flxs-tree-grid-column>
@@ -105,11 +105,6 @@
               return  item[column.dataField] + " (" + _totalChildren + ") ";
             }
             return item[column.dataField];
-          },
-          _placeSortIcon:function(cell){
-            if(cell.icon){
-              cell.icon.move(cell.icon.getX()-12, cell.icon.getY()+8);
-            }
           },
           customPageRenderer: new flexiciousNmsp.ClassFactory(flexiciousNmsp.CustomPagerControl),
 

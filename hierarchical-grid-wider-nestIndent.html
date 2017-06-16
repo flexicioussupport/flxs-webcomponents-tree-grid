@@ -71,8 +71,8 @@
       <div class="card">
         <h1>Hierarchical grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableActiveCellHighlight="false" forcePagerRow="true" enableFilters="true"
-          enableExport="false" variableRowHeight="true" sortIconPlacementFunction="[[_placeSortIcon]]" style="font-family: 'Roboto', sans-serif;height: 400px"
-          itemClick="[[_itemClick]]">
+          enableExport="false" variableRowHeight="true" itemClick="[[_itemClick]]" 
+          style="font-family: 'Roboto', sans-serif;height: 400px">
           <flxs-tree-grid-column-level childrenField="sub" nestIndent="30">
             <flxs-tree-grid-column enableHierarchicalNestIndent="true" dataField="id" headerText="ID" filterControl="TextInput" labelFunction="[[_filterCount]]"
               filterOperation="BeginsWith"></flxs-tree-grid-column>
@@ -95,11 +95,6 @@
           _itemClick: function (evt) {
             console.log("Clicked On " + evt.item.nm);
             alert("Clicked On " + evt.item.nm);
-          },
-          _placeSortIcon: function (cell) {
-            if (cell.icon) {
-              cell.icon.move(cell.icon.getX() - 12, cell.icon.getY() + 8);
-            }
           }
         });
       })

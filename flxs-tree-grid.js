@@ -1596,6 +1596,7 @@
 
             this.grid = new flexiciousNmsp.FlexDataGrid(this.$.gridContainer);
 
+            this.grid.sortIconPlacementFunction = this._placeSortIcon;
             this.grid.cellTextColorFunction = this._cellTextColorFunction;
             this.grid.cellBackgroundColorFunction = this._cellBackgroundColorFunction;
             
@@ -1659,6 +1660,12 @@
         _onDataProviderChanged: function (value) {
             if (this.grid && this.grid.initComplete) {
                 this.grid.setDataProvider(value);
+            }
+        },
+        
+        _placeSortIcon:function(cell){
+            if(cell.icon){
+              cell.icon.move(cell.icon.getX()-12, cell.icon.getY()+8);
             }
         },
 

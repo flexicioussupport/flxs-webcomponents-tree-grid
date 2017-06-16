@@ -1595,6 +1595,10 @@
             }
 
             this.grid = new flexiciousNmsp.FlexDataGrid(this.$.gridContainer);
+
+            this.grid.cellTextColorFunction = this._cellTextColorFunction;
+            this.grid.cellBackgroundColorFunction = this._cellBackgroundColorFunction;
+            
             for (var i = 0; i < allStyles.length; i++) {
                 this.applyCustomStyle(allStyles[i]);
             }
@@ -1655,6 +1659,39 @@
         _onDataProviderChanged: function (value) {
             if (this.grid && this.grid.initComplete) {
                 this.grid.setDataProvider(value);
+            }
+        },
+
+        _cellTextColorFunction: function(cell) {
+            if(cell.rowInfo.getIsHeaderRow()) {
+              return 0x999999;
+            }
+            if(this.currentCell && this.currentCell.rowInfo === cell.rowInfo && !cell.rowInfo.getIsHeaderRow()) {
+              if(cell.rowInfo.rowPositionInfo.levelNestDepth>1) {
+                return 0x61A6ED;
+              }
+            }
+            return 0xffffff;
+        },
+          
+        _cellBackgroundColorFunction: function(cell) {
+            // on mouse roll over
+            if(this.currentCell && this.currentCell.rowInfo && cell.rowInfo && this.currentCell.rowInfo === cell.rowInfo && cell.rowInfo.getIsDataRow()) {
+              if(cell.level.isItemSelected(cell.rowInfo.getData())) {
+                return 0x1E90FF;
+              }
+              if(cell.rowInfo.rowPositionInfo.levelNestDepth===1) {
+                return 0x488EFB;
+              } else {
+                return cell.rowInfo.rowPositionInfo.rowIndex % 2 == 0 ? 0x333333 : 0x222222;
+              }
+            } else if(cell.rowInfo.getIsFilterRow() || cell.rowInfo.getIsPagerRow()) {
+                return 0x222222;
+            } else if(cell.level.isItemSelected(cell.rowInfo.getData())) {
+              return 0x1E90FF;
+            } else {
+              return  cell.rowInfo.rowPositionInfo.rowIndex === undefined ? null : cell.rowInfo.getIsHeaderRow() ? 0x222222 :
+                      cell.rowInfo.rowPositionInfo.levelNestDepth===1 ? 0x222222 : cell.rowInfo.rowPositionInfo.rowIndex % 2 == 0 ? 0x333333 : 0x222222;
             }
         }
     });

@@ -197,6 +197,9 @@
     crossIconClass: '/notAvailable.png'
   };
 
+  flexiciousNmsp.Constants.IMAGE_PATH = "./assets";
+  flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+  flexiciousNmsp.StyleDefaults.defaults.toolbarImagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
   var properties = Object.keys(flexiciousNmsp.StyleDefaults.defaults);
 
   /**

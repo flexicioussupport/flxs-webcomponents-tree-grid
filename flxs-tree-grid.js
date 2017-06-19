@@ -11,6 +11,33 @@
         }
     };
 
+
+    //for MSCB - so it uses the template document to insert itself - and not the main window document
+    //and lets add some positioning code because the older code assumes that the parent is the top level
+    //document, but in our case, we are the document fragment, which could mean we are placed 
+    //anywhere within the overall document.
+    var oldMSCBShowDialog = flexiciousNmsp.MultiSelectComboBox.prototype.showPopup;
+    flexiciousNmsp.MultiSelectComboBox.prototype.showPopup = function (parent) {
+        var documentComponent = new flexiciousNmsp.UIComponent();
+        documentComponent.setDomElement(this.grid.domElement);
+        this.alwaysVisible = false;
+        oldMSCBShowDialog.apply(this, [parent || documentComponent]);
+        var pt=new flexiciousNmsp.Point(0,0);
+        pt=this.localToGlobal(pt);
+        var pt1=new flexiciousNmsp.Point(0,0);
+        pt1=documentComponent.localToGlobal(pt1);
+        this.popup.move(pt.x-pt1.x, pt.y-pt1.y+this.getHeight());
+    };
+    flexiciousNmsp.MultiSelectComboBox.prototype.onDocumentMouseUp=function(e){
+        if(e.triggerEvent.path && (e.triggerEvent.path.indexOf(this.popup.domElement)>=0)){
+
+        }
+        else if(this.owns(e.triggerEvent.target)){
+
+        }  else{
+            this.restoreStateAndDestroyPopup();
+        }
+    };
     var oldBottomBarPlacementFunction = flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar;
     flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar = function () {
         oldBottomBarPlacementFunction.apply(this);

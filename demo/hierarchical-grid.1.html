@@ -9,24 +9,13 @@
 
   <title>flxs-tree-grid demo</title>
 
-  <!--
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
   <link rel="import" href="../../paper-styles/demo-pages.html">
   <link rel="import" href="../../iron-ajax/iron-ajax.html">
-  -->
-
-
-  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
-  <link rel="import" href="../bower_components/paper-styles/demo-pages.html">
-  <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
-
-
-
   <link rel="import" href="../flxs-tree-grid.html">
   <link rel="import" href="../flxs-tree-grid-column.html">
   <link rel="import" href="../flxs-tree-grid-column-level.html">
 
-  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"> 
   <custom-style>
     <style is="custom-style">
       :host {
@@ -83,18 +72,15 @@
 
       <div class="card">
         <h1>Hierarchical grid demo</h1>
-        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableActiveCellHighlight="false" forcePagerRow="true" enableFilters="true" enableExport="false" variableRowHeight="true"
-          headerColors="[0x222222, 0x222222]" pagerColors="[0x222222, 0x222222]" filterColors="[0x222222, 0x222222]" alternatingTextColors="[0xffffff, 0xffffff]" alternatingItemColors="[0x222222, 0x222222]" rollOverColor="{0x111111}"
-          cellTextColorFunction="[[_cellTextColorFunction]]" sortIconPlacementFunction="[[_placeSortIcon]]"
-          disclosureOpenIcon="/collapseWhite.png" disclosureClosedIcon="/expandWhite.png" sortArrowSkin="/sortArrowWhite.png"
-          style="font-family: 'Roboto', sans-serif;height: 400px" itemClick="[[_itemClick]]" pagerRenderer="[[customPageRenderer]]">
-          <flxs-tree-grid-column-level childrenField="sub" >
-            <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
-            <flxs-tree-grid-column dataField="id" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableActiveCellHighlight="false" forcePagerRow="true" enableFilters="true" enableExport="false"
+          itemClick="[[_itemClick]]" pagerRenderer="[[customPageRenderer]]" rowHeight="30"  sortArrowSkin="/sortArrowOrange.png"
+          style="font-family: 'Roboto', sans-serif;height: 400px">
+          <flxs-tree-grid-column-level childrenField="sub">
+            <flxs-tree-grid-column type="checkbox" ></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="id" headerText="ID" filterControl="TextInput"  labelFunction="[[_filterCount]]" filterOperation="BeginsWith" enableRecursiveSearch="true"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="type" headerText="Type" filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="price" headerText="Price"></flxs-tree-grid-column>
-            <flxs-tree-grid-column-level reusePreviousLevelColumns="true">
-            </flxs-tree-grid-column-level>
+            <flxs-tree-grid-column-level rowHeight="21" reusePreviousLevelColumns="true"></flxs-tree-grid-column-level>
           </flxs-tree-grid-column-level>
         </flxs-tree-grid>
       </div>
@@ -102,8 +88,6 @@
  
     <script type="text/javascript" src="customscreens/CustomPagerControl.1.js"></script>
     <script>
-  flexiciousNmsp.Constants.IMAGE_PATH = "http://localhost:8081/demo/assets";
-  flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
 
 
       window.addEventListener('WebComponentsReady', function() {
@@ -113,13 +97,12 @@
             console.log("Clicked On " + evt.item.nm);
             alert("Clicked On " + evt.item.nm);
           },
-          _cellTextColorFunction: function() {
-            return 0xffffff;
-          },
-          _placeSortIcon:function(cell){
-            if(cell.icon){
-              cell.icon.move(cell.icon.getX()-12, cell.icon.getY()+8)
+          _filterCount: function(item, column) {
+            let _totalChildren = column.level.grid.getChildren(item, column.level, true).length
+            if(_totalChildren > 0) {
+              return  item[column.dataField] + " (" + _totalChildren + ") ";
             }
+            return item[column.dataField];
           },
           customPageRenderer: new flexiciousNmsp.ClassFactory(flexiciousNmsp.CustomPagerControl),
 

@@ -11,6 +11,33 @@
         }
     };
 
+
+    //for MSCB - so it uses the template document to insert itself - and not the main window document
+    //and lets add some positioning code because the older code assumes that the parent is the top level
+    //document, but in our case, we are the document fragment, which could mean we are placed 
+    //anywhere within the overall document.
+    var oldMSCBShowDialog = flexiciousNmsp.MultiSelectComboBox.prototype.showPopup;
+    flexiciousNmsp.MultiSelectComboBox.prototype.showPopup = function (parent) {
+        var documentComponent = new flexiciousNmsp.UIComponent();
+        documentComponent.setDomElement(this.grid.domElement);
+        this.alwaysVisible = false;
+        oldMSCBShowDialog.apply(this, [parent || documentComponent]);
+        var pt=new flexiciousNmsp.Point(0,0);
+        pt=this.localToGlobal(pt);
+        var pt1=new flexiciousNmsp.Point(0,0);
+        pt1=documentComponent.localToGlobal(pt1);
+        this.popup.move(pt.x-pt1.x, pt.y-pt1.y+this.getHeight());
+    };
+    flexiciousNmsp.MultiSelectComboBox.prototype.onDocumentMouseUp=function(e){
+        if(e.triggerEvent.path && (e.triggerEvent.path.indexOf(this.popup.domElement)>=0)){
+
+        }
+        else if(this.owns(e.triggerEvent.target)){
+
+        }  else{
+            this.restoreStateAndDestroyPopup();
+        }
+    };
     var oldBottomBarPlacementFunction = flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar;
     flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar = function () {
         oldBottomBarPlacementFunction.apply(this);
@@ -1595,6 +1622,11 @@
             }
 
             this.grid = new flexiciousNmsp.FlexDataGrid(this.$.gridContainer);
+
+            this.grid.sortIconPlacementFunction = this._placeSortIcon;
+            this.grid.cellTextColorFunction = this._cellTextColorFunction;
+            this.grid.cellBackgroundColorFunction = this._cellBackgroundColorFunction;
+            
             for (var i = 0; i < allStyles.length; i++) {
                 this.applyCustomStyle(allStyles[i]);
             }
@@ -1655,6 +1687,45 @@
         _onDataProviderChanged: function (value) {
             if (this.grid && this.grid.initComplete) {
                 this.grid.setDataProvider(value);
+            }
+        },
+        
+        _placeSortIcon:function(cell){
+            if(cell.icon){
+              cell.icon.move(cell.icon.getX()-12, cell.icon.getY()+8);
+            }
+        },
+
+        _cellTextColorFunction: function(cell) {
+            if(cell.rowInfo.getIsHeaderRow()) {
+              return 0x999999;
+            }
+            if(this.currentCell && this.currentCell.rowInfo === cell.rowInfo && !cell.rowInfo.getIsHeaderRow()) {
+              if(cell.rowInfo.rowPositionInfo.levelNestDepth>1) {
+                return 0x61A6ED;
+              }
+            }
+            return 0xffffff;
+        },
+          
+        _cellBackgroundColorFunction: function(cell) {
+            // on mouse roll over
+            if(this.currentCell && this.currentCell.rowInfo && cell.rowInfo && this.currentCell.rowInfo === cell.rowInfo && cell.rowInfo.getIsDataRow()) {
+              if(cell.level.isItemSelected(cell.rowInfo.getData())) {
+                return 0x1E90FF;
+              }
+              if(cell.rowInfo.rowPositionInfo.levelNestDepth===1) {
+                return 0x488EFB;
+              } else {
+                return cell.rowInfo.rowPositionInfo.rowIndex % 2 == 0 ? 0x333333 : 0x222222;
+              }
+            } else if(cell.rowInfo.getIsFilterRow() || cell.rowInfo.getIsPagerRow()) {
+                return 0x222222;
+            } else if(cell.level.isItemSelected(cell.rowInfo.getData())) {
+              return 0x1E90FF;
+            } else {
+              return  cell.rowInfo.rowPositionInfo.rowIndex === undefined ? null : cell.rowInfo.getIsHeaderRow() ? 0x222222 :
+                      cell.rowInfo.rowPositionInfo.levelNestDepth===1 ? 0x222222 : cell.rowInfo.rowPositionInfo.rowIndex % 2 == 0 ? 0x333333 : 0x222222;
             }
         }
     });

@@ -1,13 +1,14 @@
 <dom-module id="flxs-tree-grid-styles">
     <template>
         <style>
+
             :host {
                 display: block;
                 height: 100%;
             }
             
             .flexiciousGrid {
-                font-family: var(--flxs-font-family, 'Tahoma, Helvetica, Sans-Serif');
+                font-family: 'Roboto', sans-serif;
                 font-size: 11px;
             }
             
@@ -2405,6 +2406,38 @@ body > #ui-toaster-br {
 .ui-toaster .ui-toaster-border-bc,
 .ui-toaster .ui-toaster-border-br { display:none; }
 
+
+
+/*custom JPMC styles*/
+
+            .dataGridHeader {
+                font-size: 14px;
+                color: rgb(153, 153, 153);
+            }
+
+            .flexiciousGrid .input {
+                background-color: #F2F2F2;
+            }
+
+            .flexiciousGrid ::-webkit-scrollbar {
+                width: 19px;
+            }
+
+            .flexiciousGrid ::-webkit-scrollbar-track {
+                border-radius: 0px;
+                background-color: #222222;
+            }
+
+            .flexiciousGrid ::-webkit-scrollbar-thumb {
+                border-radius: 3px;
+                min-height: 100px;
+                max-height: 100px;
+                background: #333333;
+            }
+            .flexiciousGrid .flexDataGridVirtualBodyContainer .flexDataGridCell .cellRenderer {
+                display: flex;
+                align-items: center;
+            }
         </style>
     </template>
 </dom-module>

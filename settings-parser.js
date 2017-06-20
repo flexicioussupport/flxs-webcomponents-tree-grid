@@ -1,7 +1,5 @@
 (function (w) {
 
-
-
   /**
    * These are defined here as a quick reference to all properties available.
    * @type {Object}
@@ -23,7 +21,7 @@
     columnMoveResizeSeparatorColor: 0x000000,
     columnMoveAlpha: 0.8,
     backgroundColor: [0xFFFFFF, 0xFFFFFF],
-    alternatingItemColors: [0xEFF3FA, 0xFFFFFF],
+    alternatingItemColors: [0x404040, 0x262626],
     alternatingTextColors: [0x000000, 0x000000],
 
     dragAlpha: 0.8,
@@ -138,9 +136,9 @@
     selectionDisabledColor: null,
     selectionDisabledTextColor: 0xDDDDDD,
 
-    disclosureClosedIcon: "/expand.png",
-    disclosureOpenIcon: "/collapse.png",
-    sortArrowSkin: "/sortArrow.png",
+    disclosureClosedIcon: "/expandGray.png",
+    disclosureOpenIcon: "/collapseGray.png",
+    sortArrowSkin: "/sortArrowWhite.png",
 
     paddingBottom: 2,
     paddingLeft: 2,
@@ -181,8 +179,8 @@
     borderThickness: 1,
     borderColor: 0x666666,
 
-    headerStyleName: "dataGridStyles",
-    footerStyleName: "dataGridStyles",
+    headerStyleName: "dataGridHeader",
+    footerStyleName: "dataGridHeader",
     pagerStyleName: "",
     columnGroupStyleName: "columnGroupStyle",
     columnGroupClosedIcon: "/expand.png",
@@ -199,6 +197,9 @@
     crossIconClass: '/notAvailable.png'
   };
 
+  flexiciousNmsp.Constants.IMAGE_PATH = "./assets";
+  flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+  flexiciousNmsp.StyleDefaults.defaults.toolbarImagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
   var properties = Object.keys(flexiciousNmsp.StyleDefaults.defaults);
 
   /**

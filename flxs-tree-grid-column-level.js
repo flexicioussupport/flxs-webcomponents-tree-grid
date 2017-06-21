@@ -20,9 +20,9 @@
             ((this.parentNode.grid || this.gridColumnLevel.grid)).applyAttribute(this.gridColumnLevel, properties[key].orig, this[key.toLowerCase()], true);
           }
         }
-        if (this.gridColumnLevel._tempCols && this.gridColumnLevel._tempCols.length) {
-          this.gridColumnLevel.setColumns(this.gridColumnLevel._tempCols);
-        }
+        // if (this.gridColumnLevel._tempCols && this.gridColumnLevel._tempCols.length) {
+        //   this.gridColumnLevel.setColumns(this.gridColumnLevel._tempCols);
+        // }
       }, 1);
 
       if (this.parentNode.grid) {

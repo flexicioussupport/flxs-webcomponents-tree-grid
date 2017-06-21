@@ -78,6 +78,7 @@
           this.parentNode.gridColumnGroup._tempCols = [];
         }
         this.parentNode.gridColumnGroup._tempCols.push(this.gridColumn);
+        this.parentNode.gridColumnGroup.setGroupedColumns(this.parentNode.gridColumnGroup._tempCols);
       } else {
         var lvl = (this.parentNode.grid) ? (this.parentNode.grid.getColumnLevel()) : this.parentNode.gridColumnLevel;
         if (!lvl._tempCols) {
@@ -88,9 +89,18 @@
 
 
       this.async(function () {
+        var gridNode = this.parentNode;
+        var grid = null;
+        while (gridNode) {
+          if (gridNode.grid) {
+            grid = gridNode.grid;
+            break;
+          }
+          gridNode = gridNode.parentNode;
+        }
         for (var key in properties) {
           if (this[key.toLowerCase()]) {
-            (this.parentNode.grid || this.gridColumn.level.grid).applyAttribute(this.gridColumn, properties[key].orig, this[key.toLowerCase()], true);
+            grid.applyAttribute(this.gridColumn, properties[key].orig, this[key.toLowerCase()], true);
           }
         }
       }, 1);

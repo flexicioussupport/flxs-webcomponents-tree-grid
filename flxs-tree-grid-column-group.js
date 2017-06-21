@@ -13,7 +13,9 @@
     attached: function () {
 
       this.gridColumnGroup = new flexiciousNmsp.FlexDataGridColumnGroup();
-
+      if (this.parentNode.grid) {
+        this.parentNode.grid._groupedColsExist = true;
+      }
       if (this.parentNode.gridColumnGroup) {
         if (!this.parentNode.gridColumnGroup._tempCols) {
           this.parentNode.gridColumnGroup._tempCols = [];
@@ -26,19 +28,12 @@
         }
         lvl._tempCols.push(this.gridColumnGroup);
       }
-
-
-
-
       this.async(function () {
         for (var key in properties) {
           if (this[key.toLowerCase()]) {
             this.parentNode.grid.applyAttribute(this.gridColumnGroup, properties[key].orig, this[key.toLowerCase()], true);
           }
         }
-
-        this.gridColumnGroup.setGroupedColumns(this.gridColumnLevel._tempCols);
-
       }, 1);
     },
 
@@ -49,4 +44,4 @@
     _onChanged: function () {
     }
   });
-} ());
+}());

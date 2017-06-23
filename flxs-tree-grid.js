@@ -1695,7 +1695,7 @@
 
         _placeSortIcon: function (cell) {
             if (cell.icon) {
-                cell.icon.move(cell.icon.getX() - 12, cell.icon.getY() + 8);
+                cell.icon.move(cell.icon.getX() - 4, cell.icon.getY() + 2);
             }
         },
 

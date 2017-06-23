@@ -119,11 +119,13 @@
 
         var container = new flexiciousNmsp.UIComponent("div");
         container.domElement.className= "settingsPopup";
+        container.domElement.style.height = "280px";
+
         this.addChild(container);
         var html = "<div>This is a custom settings popup</div>";
 
-        html += "  <div class='columnsLabel'> "+flxConstants.SETTINGS_COLUMNS_TO_SHOW+"</div> " +
-            " <div class='options'>" +
+        html += "  <div class='CustomColumnsLabel'> "+flxConstants.SETTINGS_COLUMNS_TO_SHOW+"</div> " +
+            " <div class='customOptions'>" +
             " <input type='checkbox' "+(this._enableFooters?'':'style="visibility:hidden"')+" class='cbFooter' "+(this._footerVisible?'checked':'')+"/> "
             + " <span "+(this._enableFooters?'':'style="visibility:hidden"')+"> " + flxConstants.SETTINGS_SHOW_FOOTERS+"</span>" +
             " <br/>" +

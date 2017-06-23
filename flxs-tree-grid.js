@@ -20,7 +20,6 @@
     flexiciousNmsp.MultiSelectComboBox.prototype.showPopup = function (parent) {
         var documentComponent = new flexiciousNmsp.UIComponent();
         documentComponent.setDomElement(this.grid?this.grid.domElement:parent.domElement);
-        this.alwaysVisible = false;
         oldMSCBShowDialog.apply(this, [parent || documentComponent]);
         var pt = new flexiciousNmsp.Point(0, 0);
         pt = this.localToGlobal(pt);
@@ -1623,6 +1622,8 @@
 
             this.grid = new flexiciousNmsp.FlexDataGrid(this.$.gridContainer);
 
+            this.grid.pdfOptions.popupParent = this.grid;
+            this.grid.printOptions.popupParent = this.grid;
             this.grid.sortIconPlacementFunction = this._placeSortIcon;
             this.grid.cellTextColorFunction = this._cellTextColorFunction;
             this.grid.cellBackgroundColorFunction = this._cellBackgroundColorFunction;

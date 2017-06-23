@@ -19,7 +19,7 @@
     var oldMSCBShowDialog = flexiciousNmsp.MultiSelectComboBox.prototype.showPopup;
     flexiciousNmsp.MultiSelectComboBox.prototype.showPopup = function (parent) {
         var documentComponent = new flexiciousNmsp.UIComponent();
-        documentComponent.setDomElement(this.grid.domElement);
+        documentComponent.setDomElement(this.grid?this.grid.domElement:parent.domElement);
         this.alwaysVisible = false;
         oldMSCBShowDialog.apply(this, [parent || documentComponent]);
         var pt = new flexiciousNmsp.Point(0, 0);

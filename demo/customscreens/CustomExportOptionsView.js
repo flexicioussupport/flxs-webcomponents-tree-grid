@@ -28,7 +28,7 @@
     };
 
     flexiciousNmsp.CustomExportOptionsView = CustomExportOptionsView; //add to name space
-    CustomExportOptionsView.prototype = new flexiciousNmsp.Label(); //setup hierarchy
+    CustomExportOptionsView.prototype = new flexiciousNmsp.UIComponent(); //setup hierarchy
     CustomExportOptionsView.prototype.typeName = CustomExportOptionsView.typeName = 'CustomExportOptionsView';//for quick inspection
     /**
      *
@@ -151,6 +151,7 @@
         this.cbxExporters.dataField="name";
         this.cbxExporters.setSelectedValue(this.exportOptions.getExporterName());
         this.cbxExporters.addEventListener(this,flxConstants.EVENT_CHANGE,this.onChangeExportOptions);
+        
         container.addChild(this.cbxExporters);
 
     };

@@ -16,29 +16,27 @@
   <link rel="import" href="../flxs-tree-grid.html">
   <link rel="import" href="../flxs-tree-grid-column.html">
   <link rel="import" href="../flxs-tree-grid-column-group.html">
-  
+
 </head>
 
 <body class="fullbleed" unresolved>
   <dom-module id="basic-grid-demo">
     <template>
-      
+
 
       <iron-ajax auto url="data/englishmonarchs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
 
       <div class="card">
         <h1>Basic grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px"
-          itemClick="[[itemClick]]" >
+          itemClick="[[itemClick]]" variableHeaderHeight="true">
           <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith">
           </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization"
-            filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
-          <flxs-tree-grid-column-group dataField="hse" headerText="House">
-            <flxs-tree-grid-column dataField="hse" headerText="House"></flxs-tree-grid-column>
-            <flxs-tree-grid-column dataField="yrs" headerText="Years"></flxs-tree-grid-column>
-          </flxs-tree-grid-column-group>
+          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization " filterControl="ComboBox"
+            filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="hse" headerText="House"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="yrs" headerText="Years"></flxs-tree-grid-column>
         </flxs-tree-grid>
       </div>
     </template>

@@ -55,7 +55,7 @@
     CustomExportOptionsView.prototype.onOK=function (){
         var pagingRadios = document.getElementsByName("flxsExportpaging");
 
-        for(var i = 0; i <= pagingRadios.length; i++) {
+        for(var i = 0; i < pagingRadios.length; i++) {
             if(pagingRadios[i].checked == true) {
                 this.exportOptions.printExportOption =  pagingRadios[i].value;
                 break;

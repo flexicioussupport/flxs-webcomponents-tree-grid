@@ -36,7 +36,7 @@
           <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization"
             filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
           <flxs-tree-grid-column-group dataField="hse" headerText="House">
-            <flxs-tree-grid-column dataField="hse" headerText="House"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="hse" headerText="House"  cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="yrs" headerText="Years"></flxs-tree-grid-column>
           </flxs-tree-grid-column-group>
         </flxs-tree-grid>
@@ -50,6 +50,9 @@
           _itemClick: function (evt) {
             console.log("Clicked On " + evt.item.nm);
             alert("Clicked On " + evt.item.nm);
+          },
+          _returnRed: function(cell){
+            return 0xFF0000;
           }
         });
       })

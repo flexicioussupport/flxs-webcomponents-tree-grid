@@ -19,7 +19,7 @@
     var oldMSCBShowDialog = flexiciousNmsp.MultiSelectComboBox.prototype.showPopup;
     flexiciousNmsp.MultiSelectComboBox.prototype.showPopup = function (parent) {
         var documentComponent = new flexiciousNmsp.UIComponent();
-        documentComponent.setDomElement(this.grid?this.grid.domElement:parent.domElement);
+        documentComponent.setDomElement(this.grid ? this.grid.domElement : parent.domElement);
         oldMSCBShowDialog.apply(this, [parent || documentComponent]);
         var pt = new flexiciousNmsp.Point(0, 0);
         pt = this.localToGlobal(pt);
@@ -1701,10 +1701,13 @@
         },
 
         _cellTextColorFunction: function (cell) {
-            if (cell.rowInfo.getIsHeaderRow()) {
+            if (cell._column && cell._column.cellTextColorFunction) {
+                return  cell._column.cellTextColorFunction(cell);
+            }
+            else if (cell.rowInfo.getIsHeaderRow()) {
                 return 0x999999;
             }
-            if (this.currentCell && this.currentCell.rowInfo === cell.rowInfo && !cell.rowInfo.getIsHeaderRow()) {
+            else if (this.currentCell && this.currentCell.rowInfo === cell.rowInfo && !cell.rowInfo.getIsHeaderRow()) {
                 if (cell.rowInfo.rowPositionInfo.levelNestDepth > 1) {
                     return 0x61A6ED;
                 }
@@ -1733,4 +1736,4 @@
             }
         }
     });
-}());
+} ());

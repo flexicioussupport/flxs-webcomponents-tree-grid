@@ -1704,7 +1704,7 @@
             if (cell._column && cell._column.cellTextColorFunction) {
                 return  cell._column.cellTextColorFunction(cell);
             }
-            else if (cell.rowInfo.getIsHeaderRow()) {
+            else if (cell.rowInfo.getIsHeaderRow() || cell.rowInfo.getIsColumnGroupRow() ) {
                 return 0x999999;
             }
             else if (this.currentCell && this.currentCell.rowInfo === cell.rowInfo && !cell.rowInfo.getIsHeaderRow()) {

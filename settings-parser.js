@@ -21,8 +21,8 @@
     columnMoveResizeSeparatorColor: 0x000000,
     columnMoveAlpha: 0.8,
     backgroundColor: [0xFFFFFF, 0xFFFFFF],
-    alternatingItemColors: [0x404040, 0x262626],
-    alternatingTextColors: [0x000000, 0x000000],
+    alternatingItemColors: [0x222222, 0x222222],
+    alternatingTextColors: [0xffffff, 0xffffff],
 
     dragAlpha: 0.8,
     dragRowBorderStyle: "solid",
@@ -101,26 +101,26 @@
     rendererHorizontalGridLineThickness: 1,
     rendererDrawTopBorder: false,
 
-    rollOverColor: 0xCEDBEF,
+    rollOverColor: 0x488EFB,
 
-    headerRollOverColors: [0xCEDBEF, 0xCEDBEF],
-    headerColors: [0xE6E6E6, 0xFFFFFF],
+    headerRollOverColors: [0x222222, 0x222222],
+    headerColors: [0x222222, 0x222222],
 
-    columnGroupRollOverColors: [0xCEDBEF, 0xCEDBEF],
-    columnGroupColors: [0xE6E6E6, 0xFFFFFF],
+    columnGroupRollOverColors: [0x222222, 0x222222],
+    columnGroupColors: [0x222222, 0x222222],
 
-    footerRollOverColors: [0xCEDBEF, 0xCEDBEF],
-    footerColors: [0xBFBFBF, 0xBFBFBF],
+    footerRollOverColors: [0x222222, 0x222222],
+    footerColors: [0x222222, 0x222222],
 
     fixedColumnFillColors: [0xBFBFBF, 0xBFBFBF],
 
-    filterRollOverColors: [0xCEDBEF, 0xCEDBEF],
-    filterColors: [0xCFCFCF, 0xCFCFCF],
+    filterRollOverColors: [0x222222, 0x222222],
+    filterColors: [0x222222, 0x222222],
 
     activeCellColor: 0xB7DBFF,
 
-    pagerRollOverColors: [0xE6E6E6, 0xFFFFFF],
-    pagerColors: [0xE6E6E6, 0xFFFFFF],
+    pagerRollOverColors: [0x222222, 0x222222],
+    pagerColors: [0x222222, 0x222222],
 
     rendererRollOverColors: [0xFFFFFF, 0xFFFFFF],
     rendererColors: [0xFFFFFF, 0xFFFFFF],
@@ -189,12 +189,13 @@
     multiColumnSortNumberStyleName: "multiColumnSortNumberStyle",
     multiColumnSortNumberHeight: 15,
     multiColumnSortNumberWidth: 15,
-    selectionColor: 0x7FCEFF,
+    selectionColor: 0x1E90FF,
     selectionDuration: 250,
     headerSortSeparatorColor: 0xCCCCCC,
 
     checkIconClass: '/checkGreen.png',
-    crossIconClass: '/notAvailable.png'
+    crossIconClass: '/notAvailable.png',
+    enableActiveCellHighlight:false
   };
 
   flexiciousNmsp.Constants.IMAGE_PATH = "./assets";

@@ -10,7 +10,24 @@
             this.level.grid.sortIconPlacementFunction(this);
         }
     };
-
+    var applyJustifyFromTextAlign = function (domElement) {
+        if (domElement.style.textAlign == "right") {
+            domElement.style.justifyContent = "flex-end"
+        } else if (domElement.style.textAlign == "center") {
+            domElement.style.justifyContent = "center"
+        } else {
+            domElement.style.justifyContent = "";
+        }
+    }
+    //because we made cell display to flex to vertically center align the items, the stock textAlign no longer works.
+    //we need to use justify-content
+    var stockDataCellRefresh = flexiciousNmsp.FlexDataGridDataCell.prototype.refreshCell;
+    flexiciousNmsp.FlexDataGridDataCell.prototype.refreshCell = function () {
+        stockDataCellRefresh.apply(this);
+        if (this._renderer && this._renderer.domElement) {
+            applyJustifyFromTextAlign(this._renderer.domElement);
+        }
+    }
 
     //for MSCB - so it uses the template document to insert itself - and not the main window document
     //and lets add some positioning code because the older code assumes that the parent is the top level
@@ -1701,39 +1718,25 @@
         },
 
         _cellTextColorFunction: function (cell) {
-            if (cell._column && cell._column.cellTextColorFunction) {
-                return  cell._column.cellTextColorFunction(cell);
-            }
-            else if (cell.rowInfo.getIsHeaderRow()) {
-                return 0x999999;
-            }
-            else if (this.currentCell && this.currentCell.rowInfo === cell.rowInfo && !cell.rowInfo.getIsHeaderRow()) {
+            if (this.currentCell && this.currentCell.rowInfo === cell.rowInfo) {
                 if (cell.rowInfo.rowPositionInfo.levelNestDepth > 1) {
                     return 0x61A6ED;
                 }
             }
-            return 0xffffff;
+            return null;
         },
 
         _cellBackgroundColorFunction: function (cell) {
             // on mouse roll over
-            if (this.currentCell && this.currentCell.rowInfo && cell.rowInfo && this.currentCell.rowInfo === cell.rowInfo && cell.rowInfo.getIsDataRow()) {
-                if (cell.level.isItemSelected(cell.rowInfo.getData())) {
-                    return 0x1E90FF;
-                }
-                if (cell.rowInfo.rowPositionInfo.levelNestDepth === 1) {
-                    return 0x488EFB;
-                } else {
+            if (cell.rowInfo.getIsDataRow()) {
+                if (cell.rowInfo.rowPositionInfo.levelNestDepth > 1) {
+                    if (cell.level.isItemSelected(cell.rowInfo.getData())) {
+                        return null;
+                    }
                     return cell.rowInfo.rowPositionInfo.rowIndex % 2 == 0 ? 0x333333 : 0x222222;
                 }
-            } else if (cell.rowInfo.getIsFilterRow() || cell.rowInfo.getIsPagerRow()) {
-                return 0x222222;
-            } else if (cell.level.isItemSelected(cell.rowInfo.getData())) {
-                return 0x1E90FF;
-            } else {
-                return cell.rowInfo.rowPositionInfo.rowIndex === undefined ? null : cell.rowInfo.getIsHeaderRow() ? 0x222222 :
-                    cell.rowInfo.rowPositionInfo.levelNestDepth === 1 ? 0x222222 : cell.rowInfo.rowPositionInfo.rowIndex % 2 == 0 ? 0x333333 : 0x222222;
             }
+            return null;
         }
     });
 } ());

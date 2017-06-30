@@ -29,7 +29,7 @@
       <div class="card">
         <h1>Basic grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px"
-          itemClick="[[itemClick]]" >
+          itemClick="[[itemClick]]" rollOverColor="[[_rollOverColors]]">
           <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith">
           </flxs-tree-grid-column>
@@ -37,7 +37,7 @@
             filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
           <flxs-tree-grid-column-group dataField="hse" headerText="House">
             <flxs-tree-grid-column dataField="hse" headerText="House"  cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
-            <flxs-tree-grid-column dataField="yrs" headerText="Years"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right" headerAlign="right"></flxs-tree-grid-column>
           </flxs-tree-grid-column-group>
         </flxs-tree-grid>
       </div>
@@ -53,7 +53,8 @@
           },
           _returnRed: function(cell){
             return 0xFF0000;
-          }
+          },
+          _rollOverColors : 0xFF4500
         });
       })
     </script>

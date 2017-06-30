@@ -20,6 +20,7 @@
             ((this.parentNode.grid || this.gridColumnLevel.grid)).applyAttribute(this.gridColumnLevel, properties[key].orig, this[key.toLowerCase()], true);
           }
         }
+
         // if (this.gridColumnLevel._tempCols && this.gridColumnLevel._tempCols.length) {
         //   this.gridColumnLevel.setColumns(this.gridColumnLevel._tempCols);
         // }

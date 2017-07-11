@@ -43,7 +43,7 @@
     _cellBorderFunction: function (cell) {
       if (cell.rowInfo.getIsDataRow()) {
         if (cell.rowInfo.rowPositionInfo.levelNestDepth == 1) {
-          cell.domElement.style.borderBottom = "1px solid #61A6ED";
+          cell.domElement.style.borderTop = "1px solid #61A6ED";
           cell.domElement.style.fontSize = "14px";
         } else {
           cell.domElement.style.border = "1px solid #3F3F3F";

@@ -29,7 +29,7 @@
       <div class="card">
         <h1>Basic grid demo</h1>
         <flxs-tree-grid enableDynamicLevels="true" childrenField="sub" enableHideIfNoChildren="true" enableDrillDown="true" dataProvider="{{ ajaxResponse }}"
-          forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px" itemClick="[[itemClick]]"
+          forcePagerRow="false" enableFilters="true" enableExport="true" style="width:800px;height:400px" itemClick="[[itemClick]]"
           rollOverColor="[[_rollOverColors]]" pagerRenderer="[[customPageRenderer]]">
           <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>

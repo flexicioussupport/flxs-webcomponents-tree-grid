@@ -53,6 +53,57 @@
         } else {
             this.restoreStateAndDestroyPopup();
         }
+    };    
+    flexiciousNmsp.SpinnerBehavior.prototype.showSpinner=function(msg){
+        if(typeof msg=="undefined")msg='';
+
+
+        var elsToBlur=this.ownerComponent.getElementsToBlur();
+
+        for(var i=0;i<elsToBlur.length;i++){
+            var child=elsToBlur[i];
+            uiUtil.attachClass(child.domElement||child,'lessOpacity');
+        }
+
+         var rad=this.ownerComponent.getStyle("spinnerRadius")||10;
+         var spinnerColors=this.ownerComponent.getStyle("spinnerColors") || '#000';
+
+
+
+        if(msg=='')
+            msg=this.ownerComponent.spinnerLabel;
+
+        var opts = {
+            lines: 13, // The number of lines to draw
+            length: 7, // The length of each line
+            width: 4, // The line thickness
+            radius: rad, // The radius of the inner circle
+            corners: 1, // Corner roundness (0..1)
+            rotate: 0, // The rotation offset
+            color: spinnerColors, // #rgb or #rrggbb
+            speed: 1, // Rounds per second
+            trail: 60, // Afterglow percentage
+            shadow: false, // Whether to render a shadow
+            hwaccel: false, // Whether to use hardware acceleration
+            className: 'spinner', // The CSS class to assign to the spinner
+            zIndex: 2e9, // The z-index (defaults to 2000000000)
+            top: 'inherit !important', // Top position relative to parent in px
+            left: 'inherit !important' // Left position relative to parent in px
+        };
+        if(!this.spinner){
+            this.ownerComponent.spinnerFactory.properties = opts;
+            this.spinner = this.ownerComponent.spinnerFactory.newInstance();
+            this.spinner.grid=this.ownerComponent;
+        }
+        this.spinner.spin(this.ownerComponent.domElement);
+        if(msg){
+
+            this.ownerComponent.addChild(this.label);
+            this.label.setText(msg);
+            //uiUtil.positionComponent(this.spinner.el||this.spinner.domElement,this.label,"center top","center bottom",0,30);
+        }
+
+        this.spinnerVisible=true;
     };
     flexiciousNmsp.SpinnerBehavior.prototype.showMessage=function(msg){
         if(this.spinner)

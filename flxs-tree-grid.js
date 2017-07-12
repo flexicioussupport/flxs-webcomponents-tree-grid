@@ -54,6 +54,16 @@
             this.restoreStateAndDestroyPopup();
         }
     };
+    flexiciousNmsp.SpinnerBehavior.prototype.showMessage=function(msg){
+        if(this.spinner)
+            this.spinner.stop();
+        if(this.label.parent){
+            uiUtil.removeChild(this.ownerComponent,this.label);
+        }
+        this.ownerComponent.addChild(this.label);
+        this.label.setText(msg);
+        //uiUtil.positionComponent(this.ownerComponent,this.label,"center center","center center",0,30);
+    };
     var oldBottomBarPlacementFunction = flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar;
     flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar = function () {
         oldBottomBarPlacementFunction.apply(this);

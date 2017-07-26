@@ -31,7 +31,7 @@
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px"
           itemClick="[[itemClick]]" variableHeaderHeight="true">
           <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith">
+          <flxs-tree-grid-column dataField="nm" truncateToFit="true" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization " filterControl="ComboBox"
             filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      
+
+      <iron-ajax auto url="data/englishmonarchs.2.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px"
+          itemClick="[[itemClick]]" rollOverColor="[[_rollOverColors]]">
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization"
+            filterControl="MultiSelectComboBox" useLabelFunctionForFilterCompare="true" blankValuesLabel="[NONE]" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="hse" headerText="House"  cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right" headerAlign="right"></flxs-tree-grid-column>
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          _itemClick: function (evt) {
+            console.log("Clicked On " + evt.item.nm);
+            alert("Clicked On " + evt.item.nm);
+          },
+          _returnRed: function(cell){
+            return 0xFF0000;
+          },
+          _rollOverColors : 0xFF4500
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

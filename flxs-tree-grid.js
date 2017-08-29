@@ -1703,7 +1703,8 @@
             this.grid.pdfOptions.popupParent = this.grid;
             this.grid.printOptions.popupParent = this.grid;
             this.grid.sortIconPlacementFunction = this._placeSortIcon;
-            this.grid.cellTextColorFunction = this._cellTextColorFunction;
+            if(!this.grid.cellTextColorFunction)
+                this.grid.cellTextColorFunction = this._cellTextColorFunction;
             this.grid.cellBackgroundColorFunction = this._cellBackgroundColorFunction;
 
             for (var i = 0; i < allStyles.length; i++) {

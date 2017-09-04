@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+  
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link href="http://htmltreegrid.com/demo/external/css/adapter/jquery/jquery-ui-1.9.1.custom.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="http://htmltreegrid.com/demo/flexicious/css/flexicious.css" type="text/css"/>
+  
+  
+  <!--<link href="http://www.eyecon.ro/bootstrap-datepicker/css/bootstrap.css" rel="stylesheet">-->
+  <link href="http://www.eyecon.ro/bootstrap-datepicker/css/datepicker.css" rel="stylesheet">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  
+  <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+  <script src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery-ui-1.9.1.custom.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      
+
+      <iron-ajax auto url="data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" editable="true" forcePagerRow="false" enableFilters="true" enableExport="false" enableFooters="false" style="width:800px;height:400px"
+           enableDoubleClickEdit="true" cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" rollOverColor="[[_rollOverColors]]" >
+          <!--<flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>-->
+          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column editable="true" itemEditor="[[_itemEditor]]" dataField="dob" headerWordWrap="true" headerText="Date of Birth">
+          </flxs-tree-grid-column>
+          </flxs-tree-grid>
+      </div>
+    </template>
+    
+    
+
+    
+    <script src="../lib/BootstrapAdapter.js"></script>
+    <script src="http://www.eyecon.ro/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+
+        $(function(){
+          // Store a reference to the original contains method.
+          var originalContains = jQuery.contains;
+          jQuery.contains = function(parent, child){
+              var re = /datepicker|dp|textBox/i;
+              if(child.className.match(re)) {
+                return true;
+              }
+              // Execute the original method.
+              return originalContains.apply( this, arguments );
+          }
+        });
+
+        var TextEditor, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
+        /**
+        * A TextEditor is a custom item renderer, that defines how to use custom cells with logic that you can control
+        * @constructor
+        * @namespace com.flexicious.controls
+        * @extends UIComponent
+        */
+        TextEditor=function(){
+            //make sure to call constructor
+            flexiciousNmsp.TextInput.apply(this);//we extend from the built in flexicious combobox, which gives us a bunch of properties (like selected value etc)
+            /**
+            * This is a getter/setter for the data property. When the cell is created, it belongs to a row
+            * The data property points to the item in the grids dataprovider that is being rendered by this cell.
+            * @type {*}
+            */
+            this.data=null;
+
+            //the add event listener will basically proxy all DomEvents to your code to handle.
+            this.addEventListener(this,flxConstants.EVENT_CHANGE,this.onChange);
+        };
+        flexiciousNmsp.EditableCells_TextEditor = TextEditor; //add to name space
+        TextEditor.prototype = new flexiciousNmsp.TextInput(); //setup hierarchy
+        TextEditor.prototype.typeName = TextEditor.typeName = 'TextEditor';//for quick inspection
+        TextEditor.prototype.getClassNames=function(){
+            return ["TextEditor", "TextInput", "UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
+        };
+
+        /**
+        * This is important, because the grid looks for a "setData" method on the renderer.
+        * In here, we intercept the call to setData, and inject our logic to populate the combo box.
+        * @param val
+        */
+        TextEditor.prototype.initialize=function(){
+            flexiciousNmsp.UIComponent.prototype.initialize.apply(this);
+            this.datePickerInput = uiUtil.adapter.getElementByClassName(this.domElement, "textBox");
+            $(this.datePickerInput).datepicker().on('changeDate', function(e) {
+              $(this).datepicker('hide');
+              cell.getRowInfo().getData()[cell.getColumn().dataField] = $(this).val();
+            });
+            var cell = this.grid.getCurrentEditCell();//each editor gets a grid parameter. Also parent object of this cell is either the leftLocked or the rightLocked, or the unlocked containers, all of which have a grid property.
+            this.setValue(cell.getRowInfo().getData()[cell.getColumn().dataField]);
+        };
+        /**
+        * This event is dispatched when the user clicks on the icon. The event is actually a flexicious event, and has a trigger event
+        * property that points back to the original domEvent.
+        * @param event
+        */
+        TextEditor.prototype.onChange=function(evt){
+
+            //in the editor you have a handle to the grid iteself.
+            // this.grid.getCurrentEditCell().getRowInfo().getData().headquarterAddress.state=this.getSelectedItem();
+
+        }
+
+        Polymer({
+          is: 'basic-grid-demo',
+          _rollOverColors : 0x707070,
+          _cellTextColorFunction: function (cell) {
+            return 0xffffff;
+          },
+          _itemEditor: new flexiciousNmsp.ClassFactory(flexiciousNmsp.EditableCells_TextEditor)
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

@@ -1,16 +1,4 @@
-$(function(){
-  // Store a reference to the original contains method.
-  var originalContains = jQuery.contains;
-  jQuery.contains = function(parent, child){
-      var re = /datepicker|dp/i;
-      if(child.className.match(re)) {
-        return true;
-      }
-      // Execute the original method.
-      return originalContains.apply( this, arguments );
-  }
-});
-
+ 
 /**
  * Flexicious
  * Copyright 2011, Flexicious LLC

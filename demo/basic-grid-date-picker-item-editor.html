@@ -58,6 +58,12 @@
           _handleResponse: function(event){
             console.log("_handleResponse... ");
             debugger;
+            var data = event.detail.response || [];
+            var re = /(\d{2})\-(\d{2})\-(\d{4})/;
+
+            for(var i=0;i<data.length;i++) {
+              data[i].dob = new Date(data[i].dob.replace(re,'$3-$2-$1'));
+            }
             // this.$.resultado.innerHTML = event.detail.innerHTML;
         }
         });

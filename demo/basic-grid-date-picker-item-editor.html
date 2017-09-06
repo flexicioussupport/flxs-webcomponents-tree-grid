@@ -9,15 +9,14 @@
 
   <title>flxs-tree-grid demo</title>
   
- 
-  <link rel="stylesheet" href="http://htmltreegrid.com/demo/flexicious/css/flexicious.css" type="text/css"/>
-  <link href="http://htmltreegrid.com/demo/external/css/adapter/jquery/jquery-ui-1.9.1.custom.min.css" rel="stylesheet">
-  
-   
 
+  <link href="http://htmltreegrid.com/demo/external/css/adapter/jquery/jquery-ui-1.9.1.custom.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="http://htmltreegrid.com/demo/flexicious/css/flexicious.css" type="text/css"/>
   
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
+  
+  
   <link rel="import" href="../../paper-styles/demo-pages.html">
   <link rel="import" href="../../iron-ajax/iron-ajax.html">
   <link rel="import" href="../flxs-tree-grid.html">
@@ -33,37 +32,28 @@
 
       <div class="card">
         <h1>Basic grid demo</h1>
-        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="false" enableFilters="true" enableExport="false" style="width:800px;height:400px"
-          itemClick="[[_itemClick]]" rollOverColor="[[_rollOverColors]]" enableFooters="false" cellTextColorFunction="[[_cellTextColorFunction]]">
-          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name" filterControl="TextInput" filterOperation="BeginsWith">
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" editable="true" forcePagerRow="false" enableFilters="true" enableExport="false" enableFooters="false" style="width:800px;height:400px"
+           cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" rollOverColor="[[_rollOverColors]]" >
+          <!--<flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>-->
+          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name">
           </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name">
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
           </flxs-tree-grid-column>
-          <flxs-tree-grid-column filterRenderer="[[customFilterRenderer]]" dataField="dob" headerWordWrap="true" headerText="Date of Birth">
+          <flxs-tree-grid-column editable="true" itemEditor="[[_itemEditor]]" dataField="dob" headerWordWrap="true" headerText="Date of Birth">
           </flxs-tree-grid-column>
           </flxs-tree-grid>
       </div>
     </template>
-    
-    
-
-    <script src="customscreens/CustomDatePicker.js"></script>
     <script>
       window.addEventListener('WebComponentsReady', function () {
+
         Polymer({
           is: 'basic-grid-demo',
-          _itemClick: function (evt) {
-            console.log(evt.target.grid);
-          },
           _rollOverColors : 0x707070,
           _cellTextColorFunction: function (cell) {
             return 0xffffff;
           },
-          // dateLabelFunction: function (data, column) {
-          //   return data[column.getDataField()].toUTCString();
-          // },
-          customFilterRenderer: new flexiciousNmsp.ClassFactory(flexiciousNmsp.CustomDatePicker)
+          _itemEditor: new flexiciousNmsp.ClassFactory(flexiciousNmsp.DatePicker)
         });
       })
     </script>

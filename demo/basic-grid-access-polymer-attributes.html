@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+  
+
+  <link href="http://htmltreegrid.com/demo/external/css/adapter/jquery/jquery-ui-1.9.1.custom.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="http://htmltreegrid.com/demo/flexicious/css/flexicious.css" type="text/css"/>
+  
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      
+
+      <iron-ajax auto url="data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="false" enableFilters="true" enableExport="false" style="width:800px;height:400px"
+          itemClick="[[_itemClick]]" enableDoubleClickEdit="true" cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" rollOverColor="[[_rollOverColors]]" enableFooters="false" cellTextColorFunction="[[_cellTextColorFunction]]">
+          <!--<flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>-->
+          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column itemRenderer="[[_itemRenderer]]" dataField="dob" headerWordWrap="true" headerText="Date of Birth">
+          </flxs-tree-grid-column>
+          </flxs-tree-grid>
+      </div>
+    </template>
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+
+        var CustomButtonRenderer, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
+        /**
+         * A CustomButtonRenderer is a custom item renderer, that defines how to use custom cells with logic that you can control
+         * @constructor
+         * @namespace com.flexicious.controls
+         * @extends UIComponent
+         */
+        CustomButtonRenderer=function(){
+            //make sure to call constructor
+            flexiciousNmsp.UIComponent.apply(this,["div"]);//second parameter is the tag name for the dom element.
+            /**
+             * This is a getter/setter for the data property. When the cell is created, it belongs to a row
+             * The data property points to the item in the grids dataprovider that is being rendered by this cell.
+             * @type {*}
+             */
+            this.data=null;
+            this.text="";
+            //the add event listener will basically proxy all DomEvents to your code to handle.
+            this.addEventListener(this,flxConstants.EVENT_CLICK,this.onClick);
+        };
+        flexiciousNmsp._CustomButtonRenderer = CustomButtonRenderer; //add to name space
+        CustomButtonRenderer.prototype = new flexiciousNmsp.UIComponent(); //setup hierarchy
+        CustomButtonRenderer.prototype.typeName = CustomButtonRenderer.typeName = 'CustomButtonRenderer';//for quick inspection
+        CustomButtonRenderer.prototype.getClassNames=function(){
+          return ["CustomButtonRenderer","UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
+        };
+        CustomButtonRenderer.prototype.initialize = function() {
+          flexiciousNmsp.UIComponent.prototype.initialize.apply(this);
+          var cell = this.parent;
+          var column = cell.getColumn();
+          this.text = cell.getRowInfo().getData()[column.dataField];
+          this.domElement.innerHTML ="<input type='button' value='" + this.text + "'></input>"
+        };
+        CustomButtonRenderer.prototype.onClick=function(evt){
+          var doAlert = document.querySelector('basic-grid-demo').doAlert;
+          doAlert("Clicked on " + this.text);
+        }
+
+        CustomButtonRenderer.prototype.setText=function(val){
+
+        };
+
+        Polymer({
+          is: 'basic-grid-demo',
+          doAlert: function(msg){
+            alert(msg); 
+          },
+          _itemClick: function (evt) {
+            console.log(evt.target);
+          },
+          _rollOverColors : 0x707070,
+          _cellTextColorFunction: function (cell) {
+            return 0xffffff;
+          },
+          _cellBackgroundColorFunction: function(cell) {
+            return 0x000000;
+          },
+          _itemRenderer: new flexiciousNmsp.ClassFactory(flexiciousNmsp._CustomButtonRenderer)
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

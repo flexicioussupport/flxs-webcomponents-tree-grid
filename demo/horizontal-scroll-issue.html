@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <link href="http://htmltreegrid.com/demo/external/css/adapter/jquery/jquery-ui-1.9.1.custom.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="http://htmltreegrid.com/demo/flexicious/css/flexicious.css" type="text/css" />
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous">
+
+    </script>
+  <script src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery-ui-1.9.1.custom.min.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../flxs-tree-grid-column-level.html">
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+
+
+      <h2>Grid Test</h2>
+      <div class="wrapper flex-vertical">
+        <div class="flexchild">
+          <!--<h2>Button Section</h2>-->
+          <flxs-tree-grid id="flxDataGrid" dataProvider="[[grid]]" forcePagerRow="false" enableFilters="true" enableDrillDown="false"
+            enableCellClickRowSelect="false" enableFooters="true" enablePreferencePersistence="false" horizontalScrollPolicy="on"
+            variableHeaderHeight="true" enableDynamicLevels="true">
+            <flxs-tree-grid-column-level childrenField="children" enableFilters="true" rowSelectableFunction="false">
+              <flxs-tree-grid-column id="col1" labelFunction="[[_labelFunction]]" dataField="id" headerText="Legal Name of the Organization"
+                headerWordWrap="true" /></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col2" dataField="type" headerText="Col 2" filterControl="ComboBox"
+                filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col3" dataField="type" headerText="Col 3" ></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col4" dataField="type" headerText="Col 4" filterControl="ComboBox"
+                filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col5" dataField="type" headerText="Col 5" ></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col6" dataField="type" headerText="Col 6" filterControl="ComboBox"
+                filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col7" dataField="type" headerText="Col 7" ></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col8" dataField="type" headerText="Col 8" filterControl="ComboBox"
+                filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col9" dataField="type" headerText="Col 9" ></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col10" dataField="type" headerText="Col 10" filterControl="ComboBox"
+                filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col11" dataField="type" headerText="Col 11" ></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col12" dataField="type" headerText="Col 12" filterControl="ComboBox"
+                filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+              <flxs-tree-grid-column id="col13" dataField="type" headerText="Col 13" ></flxs-tree-grid-column>
+
+            </flxs-tree-grid-column-level>
+
+          </flxs-tree-grid>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+        var buckets = {};
+        var key;
+        var result = [];
+        var dp = [
+          { "id": "5001", "type": "None" },
+          { "id": "5002", "type": "Glazed" },
+          { "id": "5005", "type": "Sugar" },
+          { "id": "5007", "type": "Powdered Sugar" },
+          { "id": "5006", "type": "Chocolate with Sprinkles" },
+          { "id": "5003", "type": "Chocolate" },
+          { "id": "5004", "type": "Maple" },
+          { "id": "5001", "type": "None" },
+          { "id": "5002", "type": "Glazed" },
+          { "id": "5005", "type": "Sugar" },
+          { "id": "5007", "type": "Powdered Sugar" },
+          { "id": "5006", "type": "Chocolate with Sprinkles" },
+          { "id": "5003", "type": "Chocolate" },
+          { "id": "5004", "type": "Maple" }
+        ];
+        var _flat = dp;//myCompanyNameSpace.FlexiciousMockGenerator.instance().getAllLineItems();
+        //iterate through the flat list and create a hierarchy
+        for (var i = 0; i < _flat.length; i++) {
+          var item = _flat[i];
+          key = flexiciousNmsp.UIUtils.resolveExpression(item, "id"); //the parent
+          if (!buckets[key]) {
+            buckets[key] = [];//the children
+          }
+          buckets[key].push(item); //add to the parents child list
+        }
+        for (key in buckets) {
+          result.push({ id: key, children: buckets[key] }); //create the final structure
+        }
+        dp = result;
+
+        Polymer({
+          is: 'basic-grid-demo', 
+            _dataProvider : dp,
+            _labelFunction  : function(item, column) {
+            let _totalChildren = column.level.grid.getChildren(item, column.level, true).length;
+            if (_totalChildren > 0) {
+              column.paddingLeft = "5";
+              return `${item.id} (${_totalChildren})`;
+            }
+            return item.id;
+          },
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

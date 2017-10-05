@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+  
+  <link href="http://htmltreegrid.com/demo/external/css/adapter/jquery/jquery-ui-1.9.1.custom.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="http://htmltreegrid.com/demo/flexicious/css/flexicious.css" type="text/css"/>
+  
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  
+  <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+
+  <script src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery-ui-1.9.1.custom.min.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../paper-input/paper-input.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      
+
+      <iron-ajax auto url="data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" editable="true" forcePagerRow="false" enableFilters="true" enableExport="false" enableFooters="false" style="width:800px;height:400px"
+           enableDoubleClickEdit="true" editItemColors="[0xffff00, 0xffff00]" cellTextColorFunction="[[_cellTextColorFunction]]" cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" rollOverColor="[[_rollOverColors]]" 
+           enableTrackChanges="true">
+          <!--<flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>-->
+          <flxs-tree-grid-column editable="true" itemEditor="[[_itemEditor]]" dataField="first_name" headerText="Fist Name">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column editable="true" itemEditor="[[_itemEditor]]" dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth">
+          </flxs-tree-grid-column>
+          </flxs-tree-grid>
+      </div>
+    </template>
+    
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+
+        var TextEditor2, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
+        /**
+        * A TextEditor2 is a custom item renderer, that defines how to use custom cells with logic that you can control
+        * @constructor
+        * @namespace com.flexicious.controls
+        * @extends UIComponent
+        */
+        TextEditor2=function(){
+            //make sure to call constructor
+            flexiciousNmsp.UIComponent.apply(this);//we extend from the built in flexicious combobox, which gives us a bunch of properties (like selected value etc)
+            /**
+            * This is a getter/setter for the data property. When the cell is created, it belongs to a row
+            * The data property points to the item in the grids dataprovider that is being rendered by this cell.
+            * @type {*}
+            */
+            this.data=null;
+
+            var html = '<paper-input value="" style="margin-top: -30px"></paper-input>';
+            this.domElement.innerHTML = html;
+            //the add event listener will basically proxy all DomEvents to your code to handle.
+            this.addEventListener(this.domElement.firstChild,flxConstants.EVENT_CHANGE,this.onChange);
+        };
+        flexiciousNmsp.EditableCells_TextEditor2 = TextEditor2; //add to name space
+        TextEditor2.prototype = new flexiciousNmsp.UIComponent(); //setup hierarchy
+        TextEditor2.prototype.typeName = TextEditor2.typeName = 'TextEditor2';//for quick inspection
+        TextEditor2.prototype.getClassNames=function(){
+            return ["TextEditor2", "UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
+        };
+
+        /**
+        * This is important, because the grid looks for a "setData" method on the renderer.
+        * In here, we intercept the call to setData, and inject our logic to populate the combo box.
+        * @param val
+        */
+        TextEditor2.prototype.initialize=function(){
+            flexiciousNmsp.UIComponent.prototype.initialize.apply(this);
+          
+            
+            // each editor gets a grid parameter. Also parent object of this cell is either the leftLocked or the rightLocked, or the unlocked containers, all of which have a grid property.
+            var cell = this.grid.getCurrentEditCell();
+            // this.setValue(cell.getRowInfo().getData()[cell.getColumn().dataField]);
+            var input = this.domElement.firstChild;
+            input.value = cell.getRowInfo().getData()[cell.getColumn().dataField];
+            this.grid.addEventListener(this, "rowChanged", this.onRowChanged);
+        };
+
+        TextEditor2.prototype.onRowChanged = function(evt) {
+          var changeInfos = evt.target.getChanges();
+          changeInfos.forEach( function(info) {
+            if( info.previousValue !== info.newValue)
+              console.log('oldValue: ' + info.previousValue + ", newValue: " + info.newValue);
+          });
+        }
+        /**
+        * This event is dispatched when the user clicks on the icon. The event is actually a flexicious event, and has a trigger event
+        * property that points back to the original domEvent.
+        * @param event
+        */
+        TextEditor2.prototype.onChange=function(evt){
+
+            //in the editor you have a handle to the grid iteself.
+            // this.grid.getCurrentEditCell().getRowInfo().getData().headquarterAddress.state=this.getSelectedItem();
+            var grid = evt.target.grid;
+            var cell = grid.getCurrentEditCell();
+            var val = uiUtil.resolveExpression(cell.rowInfo.getData(), cell.getColumn().getDataField());
+            cell.getRowInfo().getData()[cell.getColumn().dataField] = evt.triggerEvent.target.value;
+            cell.getRowInfo().getData()["editedDataField"] = cell.getColumn().dataField;
+            if(val !== evt.triggerEvent.target.value)
+              grid.trackChange(cell.rowInfo.getData(),flexiciousNmsp.ChangeInfo.CHANGE_TYPE_UPDATE,cell.level,
+              cell.getColumn().getDataField(), val, evt.triggerEvent.target.value);
+        }
+
+        Polymer({
+          is: 'basic-grid-demo',
+          _rollOverColors : 0x707070,
+          _cellTextColorFunction: function (cell) {
+            if (cell.rowInfo.getIsDataRow()) {
+              if(cell.rowInfo.getData().hasOwnProperty('editedDataField') && cell.rowInfo.getData()["editedDataField"] == cell.getColumn().dataField) {
+                return 0xdd0000;
+              }
+            }
+            return null;
+          },
+          _cellBackgroundColorFunction: function(cell) {
+            if (cell.rowInfo.getIsDataRow()) {
+              if(cell.rowInfo.getData().hasOwnProperty('editedDataField') && cell.rowInfo.getData()["editedDataField"] == cell.getColumn().dataField) {
+                return 0xffff00;
+              }
+            }
+            return null;
+          },
+          _itemEditor: new flexiciousNmsp.ClassFactory(flexiciousNmsp.EditableCells_TextEditor2)
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

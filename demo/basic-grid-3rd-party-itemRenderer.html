@@ -1,0 +1,199 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+  <script type="text/javascript" src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery-1.8.2.js"></script>
+  <script type="text/javascript" src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery-ui-1.9.1.custom.min.js"></script>
+  <script type="text/javascript" src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery.maskedinput-1.3.js"></script>
+  <script type="text/javascript" src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery.watermarkinput.js"></script>
+  <script type="text/javascript" src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery.ui.menu.js"></script>
+  <script type="text/javascript" src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery.toaster.js"></script>
+  <!--End-->
+  
+  <!--These are specific to htmltreegrid-->
+  <script type="text/javascript" src="http://htmltreegrid.com/demo/minified-compiled-jquery.js"></script>
+  <script type="text/javascript" src="http://htmltreegrid.com/demo/examples/js/Configuration.js"></script>
+  <script type="text/javascript" src="http://htmltreegrid.com/demo/themes.js"></script>
+      <script type="text/javascript" src="http://htmltreegrid.com/demo/external/js/thirdparty/jspdf-combined.js"></script>
+  <!--End-->
+  <!--css imports-->
+  <link rel="stylesheet" href="http://htmltreegrid.com/demo/flexicious/css/flexicious.css" type="text/css"/>
+  <link rel="stylesheet" href="http://htmltreegrid.com/demo/external/css/adapter/jquery/jquery-ui-1.9.1.custom.min.css" type="text/css"/>
+  <!--End-->
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css">
+  
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../paper-dropdown-menu/paper-dropdown-menu.html">
+  <link rel="import" href="../../paper-item/paper-item.html">
+  <link rel="import" href="../../paper-listbox/paper-listbox.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+        <style is="custom-style">
+            :host{
+              --primary-text-color: #cccccc;
+              --paper-input-container-label: {
+                  color:yellow;
+              }
+              --paper-listbox-background-color: #222222;
+              --paper-input-container-shared-input-style_-_vertical-align: middle;
+              --paper-font-subhead_-_line-height: 140%;
+            }
+
+            
+        </style>+
+      
+
+      <iron-ajax auto url="data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px"
+          itemClick="[[itemClick]]" rollOverColor="[[_rollOverColors]]" cellTextColorFunction="[[_cellTextColorFunction]]" enableTrackChanges="true">
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="id" headerText="ID ">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column headerText="Location" itemRenderer="[[_itemRenderer]]" filterControl="TextInput" filterTriggerEvent="enterKeyUp">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="first_name" headerWordWrap="true" headerText="First Name" filterOperation="BeginsWith">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth">
+          </flxs-tree-grid-column>
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.js"></script>
+    <script>
+
+      /**
+       * Flexicious
+       * Copyright 2011, Flexicious LLC
+       */
+      (function(window)
+      {
+          "use strict";
+          var AutoCompleteRenderer, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
+          /**
+           * A CheckBoxRenderer is a custom item renderer, that defines how to use custom cells with logic that you can control
+           * @constructor
+           * @namespace flexiciousNmsp
+           * @extends UIComponent
+           */
+          AutoCompleteRenderer=function(){
+              //make sure to call constructor
+              flexiciousNmsp.UIComponent.apply(this,["div"]);//second parameter is the tag name for the dom element.
+              
+
+              /**
+               * This is a getter/setter for the data property. When the cell is created, it belongs to a row
+               * The data property points to the item in the grids dataprovider that is being rendered by this cell.
+               * @type {*}
+               */
+              this.data=null;
+
+          };
+          flexiciousNmsp.ItemRenderers_AutoCompleteRenderer = AutoCompleteRenderer; //add to name space
+          AutoCompleteRenderer.prototype = new flexiciousNmsp.UIComponent(); //setup hierarchy
+          AutoCompleteRenderer.prototype.typeName = AutoCompleteRenderer.typeName = 'AutoCompleteRenderer';//for quick inspection
+          AutoCompleteRenderer.prototype.getClassNames=function(){
+              return ["AutoCompleteRenderer","UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
+          };
+
+          flexiciousNmsp.ItemRenderers_AutoCompleteRenderer.prototype.initialize = function() {
+            flexiciousNmsp.UIComponent.prototype.initialize.apply(this);
+
+            var html='<paper-dropdown-menu style="width: 250px" label="Dinosaurs">' +
+                        '<paper-listbox style="width: 250px" slot="dropdown-content" selected="1">' + 
+                          '<paper-item>allosaurus</paper-item>' + 
+                          '<paper-item>brontosaurus</paper-item>' +
+                          '<paper-item>carcharodontosaurus</paper-item>' +
+                          '<paper-item>diplodocus</paper-item>' +
+                        '</paper-listbox>' +
+                      '</paper-dropdown-menu>';
+            this.domElement.innerHTML=html;
+            this.select = this.domElement.firstChild;
+            var $eventSelect =$(this.select);
+            $eventSelect.select2();
+            $eventSelect.on("change", this.onChange.bind(this));
+          }
+
+          /**
+           * This is important, because the grid looks for a "setData" method on the renderer.
+           * In here, we intercept the call to setData, and inject our logic to populate the text input.
+           * @param val
+           */
+          AutoCompleteRenderer.prototype.setData=function(val){
+              flexiciousNmsp.UIComponent.prototype.setData.apply(this,[val]);
+              var cell = this.parent; //this is an instance of FlexDataGridDataCell (For data rows)
+              var column = cell.getColumn();//this is an instance of FlexDataGridColumn.
+              if(this.data[column.getDataField()])
+                this.select.value=this.data[column.getDataField()];
+              
+          };
+          /**
+           * This event is dispatched when the user clicks on the icon. The event is actually a flexicious event, and has a trigger event
+           * property that points back to the original domEvent.
+           * @param evt
+           */
+          AutoCompleteRenderer.prototype.onChange=function(evt){
+
+              //in the renderer, you have the handle to the cell that the renderer belongs to, via the this.parent property that you inherit from flexiciousNmsp.UIComponent.
+
+              var cell = this.parent; //this is an instance of FlexDataGridDataCell (For data rows)
+              var column = cell.getColumn();//this is an instance of FlexDataGridColumn.
+          console.log('setting value to' + this.select.value)
+              this.data[column.getDataField()]=this.select.value;//we use the dom element to wire back the value to the data object.
+              
+              var grid = cell.grid;
+              grid.trackChange(cell.rowInfo.getData(),flexiciousNmsp.ChangeInfo.CHANGE_TYPE_UPDATE,cell.level,
+              cell.getColumn().getDataField(),uiUtil.resolveExpression(cell.rowInfo.getData(), cell.getColumn().getDataField())
+              ,this.select.value);
+          };
+          //This sets  the inner html, and grid will try to set it. Since we are an input field, IE 8 will complain. So we ignore it since we dont need it anyway.
+          AutoCompleteRenderer.prototype.setText=function(val){
+
+          };
+      }(window));
+
+
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          _itemClick: function (evt) {
+            console.log("Clicked On " + evt.item.nm);
+            alert("Clicked On " + evt.item.nm);
+          },
+          _cellTextColorFunction: function(cell){
+            return 0xFFFFFF;
+          },
+          _rollOverColors : 0xFF4500,
+          _itemRenderer: new flexiciousNmsp.ClassFactory(flexiciousNmsp.ItemRenderers_AutoCompleteRenderer)
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

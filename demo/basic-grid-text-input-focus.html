@@ -57,7 +57,19 @@
         Polymer({
           is: 'basic-grid-demo',
           _focusToTextInput: function(e) {
+            var rowIndex = 1;
+            var columnIndex = 1;
             var grid = e.target.nextElementSibling.grid;
+            var rowPos = grid.getBodyContainer().itemVerticalPositions[rowIndex];
+            var level = rowPos.getLevel(grid);
+            var cols = level.getVisibleColumns();
+
+            var cell = grid.getBodyContainer().getCellForRowColumn(rowPos.rowData, cols[columnIndex]);
+            if (!cell) {
+                throw new Error("Cell at Column index " + columnIndex + ", RowIndex " + rowIndex + " not found");
+            }
+            grid.getBodyContainer().emulateClick(cell);
+            
             var textInput = grid.getCurrentEditor();
             if( textInput ) {
               textInput.focus();

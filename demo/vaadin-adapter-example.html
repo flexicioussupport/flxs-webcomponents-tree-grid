@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <link href="http://htmltreegrid.com/demo/external/css/adapter/jquery/jquery-ui-1.9.1.custom.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="http://htmltreegrid.com/demo/flexicious/css/flexicious.css" type="text/css" />
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <script src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery-ui-1.9.1.custom.min.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+
+  <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+  <link rel="import" href="../bower_components/paper-button/paper-button.html">
+  <link rel="import" href="../bower_components/vaadin-valo-theme/vaadin-date-picker.html">
+  <link rel="import" href="../bower_components/vaadin-date-picker/vaadin-date-picker.html">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment.min.js"></script>
+  <script src="adapter/VaadinAdapter.js"></script>
+
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+
+
+      <iron-ajax auto url="data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" on-response="_handleResponse" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableFilters="true" enableExport="false" enableFooters="false" style="width:800px;height:400px"
+          cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" rollOverColor="[[_rollOverColors]]">
+          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column filterControl="DateComboBox" dataField="dob" headerWordWrap="true" headerText="Date of Birth" format="date">
+          </flxs-tree-grid-column>
+        </flxs-tree-grid>
+      </div>
+    </template>
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+
+        Polymer({
+          is: 'basic-grid-demo',
+          _rollOverColors: 0x707070,
+          _cellTextColorFunction: function (cell) {
+            return 0xffffff;
+          },
+          _handleResponse: function (event) {
+            var data = event.detail.response || [];
+            var re = /(\d{2})\-(\d{2})\-(\d{4})/;
+
+            for (var i = 0; i < data.length; i++) {
+              data[i].dob = new Date(data[i].dob.replace(re, '$3-$2-$1'));
+            }
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

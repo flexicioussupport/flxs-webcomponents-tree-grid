@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../../flxs-tree-grid.html">
+  <link rel="import" href="../../flxs-tree-grid-column.html">
+  
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      
+
+      <iron-ajax auto url="../data/englishmonarchs.3.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid id="demo-grid" dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:100%;height:600px"
+          itemClick="[[itemClick]]" rollOverColor="[[_rollOverColors]]" horizontalScrollPolicy="auto" cellBorderFunction="[[_cellBorderFunction]]">
+          
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          _itemClick: function (evt) {
+            console.log("Clicked On " + evt.item.nm);
+            alert("Clicked On " + evt.item.nm);
+          },
+          _returnRed: function(cell){
+            return 0xFF0000;
+          },
+          _rollOverColors : 0xFF4500,
+          ready: function() {
+            var grid = this.shadowRoot.getElementById('demo-grid').grid;
+            
+            grid.rebuildGridOnDataProviderChange = false;
+            grid.clearColumns();
+            
+            var columns = [];
+
+            for(var i=0;i<10;i++) {
+              var col1 = new flexiciousNmsp.FlexDataGridColumn();
+              col1.setDataField("nm");
+              col1.setHeaderText("Name (" + i + ")");
+              col1.setColumnWidthMode('fitToContent');
+              columns.push(col1);
+              var col2 = new flexiciousNmsp.FlexDataGridColumn();
+              col2.setDataField("hse");
+              col2.setHeaderText("House (" + i + ")");
+              col2.setColumnWidthMode('fitToContent');
+              columns.push(col2);
+              var col3 = new flexiciousNmsp.FlexDataGridColumn();
+              col3.setDataField("cty");
+              col3.setHeaderText("City (" + i + ")");
+              col3.setColumnWidthMode('fitToContent');
+              columns.push(col3);
+              var col4 = new flexiciousNmsp.FlexDataGridColumn();
+              col4.setDataField("yrs");
+              col4.setHeaderText("Years (" + i + ")");
+              col4.setColumnWidthMode('fitToContent');
+              columns.push(col4);
+            }
+
+            grid.setColumns(columns);
+
+            setTimeout(function(g) {
+              g.rebuild();
+              g.checkNoDataMessage();
+            }, 200, grid);
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

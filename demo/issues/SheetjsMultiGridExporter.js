@@ -53,24 +53,31 @@
         this.data.push(columns);
 
     };
-    SheetJs_Multigrid_Exporter.prototype.generate = function (grids, multiTab) {
+
+    /**
+     *
+     * @param gridProps each property should have {grid: <grid>, sheet: <sheet-name>} such structure
+     * @param multiTab default set to false
+     */
+    SheetJs_Multigrid_Exporter.prototype.generate = function (gridProps, multiTab) {
 
         if (typeof multiTab === 'undefined') multiTab = false;
+
+        var i;
 
         /* build workbook */
         var new_wb = XLSX.utils.book_new();
 
-
-        for (var i = 0; i < grids.length; i++) {
-            this.getHeaderColumns(grids[i]);
-            [].forEach.call(grids[i].getDataProvider(), function (data) {
-                this.writeRecord(grids[i], data);
+        for (i = 0; i < gridProps.length; i++) {
+            this.getHeaderColumns(gridProps[i].grid);
+            [].forEach.call(gridProps[i].grid.getDataProvider(), function (data) {
+                this.writeRecord(gridProps[i].grid, data);
             }, this);
-            
-            this.writeFooter(grids[i], grids[i].getDataProvider());
+             
+            this.writeFooter(gridProps[i].grid, gridProps[i].grid.getDataProvider());
 
             if (multiTab) {
-                XLSX.utils.book_append_sheet(new_wb, XLSX.utils.aoa_to_sheet(this.data));
+                XLSX.utils.book_append_sheet(new_wb, XLSX.utils.aoa_to_sheet(this.data), this.getValidSheetName(gridProps[i]));
                 this.data = [];
             } else {
                 this.data.push([]);
@@ -80,7 +87,7 @@
         if (!multiTab) {
             /* build excel-sheet */
             var new_ws = XLSX.utils.aoa_to_sheet(this.data);
-            XLSX.utils.book_append_sheet(new_wb, new_ws);
+            XLSX.utils.book_append_sheet(new_wb, new_ws, this.getValidSheetName(gridProps[gridProps.length-1]));
         }
 
         /* write file and trigger a download */
@@ -172,6 +179,10 @@
      */
     SheetJs_Multigrid_Exporter.prototype.getExtension = function () {
         return "xlsx";
+    };
+
+    SheetJs_Multigrid_Exporter.prototype.getValidSheetName = function(gridProps) {
+        return gridProps.hasOwnProperty('sheet') && gridProps.sheet ? gridProps.sheet : undefined;
     };
 
 }(window));

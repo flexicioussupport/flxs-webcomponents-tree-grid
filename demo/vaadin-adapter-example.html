@@ -9,18 +9,16 @@
 
   <title>flxs-tree-grid demo</title>
 
-  <link href="http://htmltreegrid.com/demo/external/css/adapter/jquery/jquery-ui-1.9.1.custom.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="http://htmltreegrid.com/demo/flexicious/css/flexicious.css" type="text/css" />
-
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-
-  <script src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery-ui-1.9.1.custom.min.js"></script>
 
   <link rel="import" href="../../paper-styles/demo-pages.html">
   <link rel="import" href="../../iron-ajax/iron-ajax.html">
   <link rel="import" href="../flxs-tree-grid.html">
   <link rel="import" href="../flxs-tree-grid-column.html">
 
+  <link rel="import" href="../bower_components/paper-styles/element-styles/paper-material-styles.html">
+  <!-- <link rel="import" href="../bower_components/paper-autocomplete/paper-autocomplete.html"> -->
+  <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
   <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
   <link rel="import" href="../bower_components/paper-button/paper-button.html">
   <link rel="import" href="../bower_components/vaadin-valo-theme/vaadin-date-picker.html">
@@ -28,6 +26,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment.min.js"></script>
   <script src="adapter/VaadinAdapter.js"></script>
+  <script src="adapter/VaadinAdapterNonJquery.js"></script>
 
 </head>
 
@@ -41,7 +40,7 @@
       <div class="card">
         <h1>Basic grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableFilters="true" enableExport="false" enableFooters="false" style="width:800px;height:400px"
-          cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" rollOverColor="[[_rollOverColors]]">
+           rollOverColor="[[_rollOverColors]]">
           <flxs-tree-grid-column dataField="first_name" headerText="Fist Name">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">

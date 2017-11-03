@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../../iron-demo-helpers/demo-pages-shared-styles.html">
+
+  <link rel="import" href="../../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../../flxs-tree-grid.html">
+  <link rel="import" href="../../flxs-tree-grid-column.html">
+
+  <link rel="import" href="p-type-ahead.html">
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      <style is="custom-style">
+        :host {
+          /* --primary-text-color: #cccccc; */
+        }
+      </style>
+
+      <iron-ajax auto url="../data/dobs2.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableFilters="true" enableTrackChanges="true" editable="true" 
+          editItemColors="[0x806000, 0x997300]" rollOverColor="[[_rollOverColors]]" style="width:800px;height:620px">
+          <!-- <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column> -->
+          <flxs-tree-grid-column dataField="fname" headerText="Fist Name">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="lname" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="country" headerText="Location" editable="true" itemEditor="[[_itemEditor]]">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth">
+          </flxs-tree-grid-column>
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+
+      window.addEventListener('WebComponentsReady', function () {
+
+        var VaadinComboBoxEditor, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
+        /**
+        * A VaadinComboBoxEditor is a custom item renderer, that defines how to use custom cells with logic that you can control
+        * @constructor
+        * @namespace com.flexicious.controls
+        * @extends UIComponent
+        */
+        VaadinComboBoxEditor = function () {
+
+          //make sure to call constructor
+          flexiciousNmsp.UIComponent.apply(this);//we extend from the built in flexicious combobox, which gives us a bunch of properties (like selected value etc)
+          /**
+          * This is a getter/setter for the data property. When the cell is created, it belongs to a row
+          * The data property points to the item in the grids dataprovider that is being rendered by this cell.
+          * @type {*}
+          */
+          this.data = null;
+
+          this.domElement.innerHTML = '<p-type-ahead></p-type-ahead>';
+        };
+
+        flexiciousNmsp.VaadinComboBoxEditor = VaadinComboBoxEditor; //add to name space
+        VaadinComboBoxEditor.prototype = new flexiciousNmsp.UIComponent(); //setup hierarchy
+        VaadinComboBoxEditor.prototype.typeName = VaadinComboBoxEditor.typeName = 'VaadinComboBoxEditor';//for quick inspection
+        VaadinComboBoxEditor.prototype.getClassNames = function () {
+          return ["VaadinComboBoxEditor", "UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
+        };
+
+        VaadinComboBoxEditor.prototype.initialize = function () {
+          flexiciousNmsp.UIComponent.prototype.initialize.apply(this);
+
+          this.combobox = this.domElement.firstChild.$.combo;
+          this.combobox.items = this.getItems();
+          this.combobox.opened = true;
+          this.combobox.overlayVerticalOffset = 5;
+          this.combobox.addEventListener('value-changed', this.onChange.bind(this));
+
+          this.overlay = this.combobox.$.overlay.$.dropdown.$.overlay
+          this.overlay.modeless = true;
+
+          this.combobox.inputElement.$.container.style.padding = '0';
+
+          this.input = this.combobox.inputElement.$.nativeInput;
+          this.input.style.fontSize = '16px';
+          this.input.style.fontWeight = 'bold';
+          this.input.style.lineHeight = '130%';
+          this.input.focus();
+
+          
+        };
+
+        /**
+        * This event is dispatched when the user clicks on the icon. The event is actually a flexicious event, and has a trigger event
+        * property that points back to the original domEvent.
+        * @param event
+        */
+        VaadinComboBoxEditor.prototype.onChange = function (evt) {
+          var cell = this.grid.getCurrentEditCell();
+          var data = cell.rowInfo.getData();
+          var dataField = cell.getColumn().dataField;
+
+          data[dataField] = evt.target.value;
+          data["editedDataField"] = dataField;
+        }
+
+        VaadinComboBoxEditor.prototype.getItems = function() {
+
+          var dataProvider = this.grid._dataProvider,
+              col = this.grid.getCurrentEditCell().getColumn(),
+              items = [];
+
+          [].forEach.call(col.getDistinctValues(dataProvider), function(data) {
+            items.push(data.data);
+          });
+
+          return items;
+        }
+
+        Polymer({
+          is: 'basic-grid-demo',
+          _rollOverColors: 0x404040,
+          _itemEditor: new flexiciousNmsp.ClassFactory(flexiciousNmsp.VaadinComboBoxEditor)
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

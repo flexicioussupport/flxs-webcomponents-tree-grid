@@ -53,25 +53,25 @@
         } else {
             this.restoreStateAndDestroyPopup();
         }
-    };    
-    flexiciousNmsp.SpinnerBehavior.prototype.showSpinner=function(msg){
-        if(typeof msg=="undefined")msg='';
+    };
+    flexiciousNmsp.SpinnerBehavior.prototype.showSpinner = function (msg) {
+        if (typeof msg == "undefined") msg = '';
 
 
-        var elsToBlur=this.ownerComponent.getElementsToBlur();
+        var elsToBlur = this.ownerComponent.getElementsToBlur();
 
-        for(var i=0;i<elsToBlur.length;i++){
-            var child=elsToBlur[i];
-            uiUtil.attachClass(child.domElement||child,'lessOpacity');
+        for (var i = 0; i < elsToBlur.length; i++) {
+            var child = elsToBlur[i];
+            uiUtil.attachClass(child.domElement || child, 'lessOpacity');
         }
 
-         var rad=this.ownerComponent.getStyle("spinnerRadius")||10;
-         var spinnerColors=this.ownerComponent.getStyle("spinnerColors") || '#000';
+        var rad = this.ownerComponent.getStyle("spinnerRadius") || 10;
+        var spinnerColors = this.ownerComponent.getStyle("spinnerColors") || '#000';
 
 
 
-        if(msg=='')
-            msg=this.ownerComponent.spinnerLabel;
+        if (msg == '')
+            msg = this.ownerComponent.spinnerLabel;
 
         var opts = {
             lines: 13, // The number of lines to draw
@@ -90,61 +90,32 @@
             top: 'inherit !important', // Top position relative to parent in px
             left: 'inherit !important' // Left position relative to parent in px
         };
-        if(!this.spinner){
+        if (!this.spinner) {
             this.ownerComponent.spinnerFactory.properties = opts;
             this.spinner = this.ownerComponent.spinnerFactory.newInstance();
-            this.spinner.grid=this.ownerComponent;
+            this.spinner.grid = this.ownerComponent;
         }
         this.spinner.spin(this.ownerComponent.domElement);
-        if(msg){
+        if (msg) {
 
             this.ownerComponent.addChild(this.label);
             this.label.setText(msg);
             //uiUtil.positionComponent(this.spinner.el||this.spinner.domElement,this.label,"center top","center bottom",0,30);
         }
 
-        this.spinnerVisible=true;
+        this.spinnerVisible = true;
     };
-    flexiciousNmsp.SpinnerBehavior.prototype.showMessage=function(msg){
-        if(this.spinner)
+    flexiciousNmsp.SpinnerBehavior.prototype.showMessage = function (msg) {
+        if (this.spinner)
             this.spinner.stop();
-        if(this.label.parent){
-            uiUtil.removeChild(this.ownerComponent,this.label);
+        if (this.label.parent) {
+            uiUtil.removeChild(this.ownerComponent, this.label);
         }
         this.ownerComponent.addChild(this.label);
         this.label.setText(msg);
         //uiUtil.positionComponent(this.ownerComponent,this.label,"center center","center center",0,30);
     };
-    var oldBottomBarPlacementFunction = flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar;
-    flexiciousNmsp.FlexDataGrid.prototype.placeBottomBar = function () {
-        oldBottomBarPlacementFunction.apply(this);
-        var borderSides = this.getStyle("borderSides");
-        var borderThickness = this.getStyle("borderThickness");
-        if (borderSides && this.domElement) {
-            //graphics.lineStyle(getStyle("borderThickness"), getStyle("borderColor"));
-            if (this.hasBorderSide("top")) {
-                this.domElement.style.borderTop = this.getStyle("borderThickness") + "px solid " + this.getStyle("borderColor");
-            } else {
-                this.domElement.style.borderTop = "";
-            }
-            if (this.hasBorderSide("bottom")) {
-                this.domElement.style.borderBottom = this.getStyle("borderThickness") + "px solid " + this.getStyle("borderColor");
-            } else {
-                this.domElement.style.borderBottom = "";
-            }
-            if (this.hasBorderSide("left")) {
-                this.domElement.style.borderLeft = this.getStyle("borderThickness") + "px solid " + this.getStyle("borderColor");
-            } else {
-                this.domElement.style.borderLeft = "";
-            }
-            if (this.hasBorderSide("right")) {
-                this.domElement.style.borderRight = this.getStyle("borderThickness") + "px solid " + this.getStyle("borderColor");
-            } else {
-                this.domElement.style.borderRight = "";
-            }
-        }
 
-    }
     /**
      * Check for changes to the div that holds us. HTML does not have a resize event, so we have to periodically inspect
      * the dom element to see if there were any changes to the container size.
@@ -166,6 +137,9 @@
             this.invalidateHeight();
         }
     };
+
+    //both localToGlobal and globalToLocal are causing problems because polymer shadow dom means document is something else
+    //that is why we have to use boundingClientRect instead of the default document offset code.
     flexiciousNmsp.UIComponent.prototype.globalToLocal = function (ptIn) {
         var offset = uiUtil.adapter.offset(this.domElement);
         if (offset && offset.top == 0 && offset.left == 0) {
@@ -205,95 +179,11 @@
             }
         })
     }
+    
 
-    flexiciousNmsp.ExportOptionsView.prototype.onOK = function () {
+    
 
-        var pagingRadios = document.getElementsByName("flxsExportpaging");
-
-        for (var i = 0; i < pagingRadios.length; i++) {
-            if (pagingRadios[i].checked == true) {
-                this.exportOptions.printExportOption = pagingRadios[i].value;
-                break;
-            }
-        }
-
-        this.updateExportColumns();
-        var pgFrom = parseInt(uiUtil.adapter.findElementWithClassName(this.domElement, 'txtPageFrom').value);
-        var pgTo = parseInt(uiUtil.adapter.findElementWithClassName(this.domElement, 'txtPageTo').value);
-        if (uiUtil.adapter.findElementWithClassName(this.domElement, 'RBN_SELECT_PGS').checked) {
-            if (pgFrom >= 1 && pgTo >= 1 && pgFrom <= (this.pageCount) && pgTo <= (this.pageCount) && pgFrom <= pgTo) {
-                this.exportOptions.pageFrom = pgFrom;
-                this.exportOptions.pageTo = pgTo;
-                this.close(flxConstants.ALERT_OK);
-
-            } else {
-                window.alert("Please ensure that the 'page from' is less than or equal to 'page to'");
-            }
-        }
-        else {
-            this.close(flxConstants.ALERT_OK);
-        }
-    };
-    /**
-     * 
-     */
-    flexiciousNmsp.FlexDataGridBodyContainer.prototype.saveRowInCache = function (row) {
-
-
-        row.showHide(false);
-        var key = row.rowPositionInfo.getLevelNestDepth() + "" + row.rowPositionInfo.getRowType();
-        if (!this._rowCache[key]) {
-            this._rowCache[key] = [];
-        }
-        //trace(key + "" + _rowCache[key].length)
-        if (this._rowCache[key].indexOf(row) == -1)
-            this._rowCache[key].push(row);
-        for (var i = 0; i < row.cells.length; i++) {
-            var comp = row.cells[i];
-            var headerCell = comp.component.implementsOrExtends("FlexDataGridHeaderCell") ? comp.component : null;
-            if (headerCell) {
-                headerCell.destroySortIcon();
-            }
-        }
-
-    };
-    flexiciousNmsp.FlexDataGridBodyContainer.prototype.processItemPositionInfoUsingCache = function (seed, insertionPoint, scrollDown) {
-        if (typeof scrollDown == "undefined") scrollDown = true;
-
-        var row;
-        var found = false;
-        var index = 0;
-
-        var seedKey = seed.getLevelNestDepth() + "" + seed.getRowType();
-
-        if (this._rowCache[seedKey] && this._rowCache[seedKey].length > 0) {
-            row = this._rowCache[seedKey].pop();
-            found = true;
-        }
-        if (found) {
-            row.showHide(true);
-            row.invalidateCells();
-            row.setRowPositionInfo(seed, this.grid.variableRowHeight);
-            this.rows.splice(insertionPoint, 0, row);
-            if (this._recreateRows) {
-                var existing = row.cells;
-                row.cells = [];
-                this.processRowPositionInfo(seed, scrollDown, row, existing);
-                while (existing.length > 0) {
-                    this.removeComponent(existing[0]);
-                    existing.splice(0, 1);
-                }
-            }
-            this.grid.placeComponents(row);
-        }
-        else {
-            this.grid.currentPoint.contentY = seed.getVerticalPosition();
-            this.processRowPositionInfo(seed, scrollDown);
-
-        }
-
-    };
-
+    
 
     var template = new flexiciousNmsp.FlexDataGrid();
     var gridPropsAndBehaviors = flexiciousNmsp.SettingsParser.getPropertiesAndBehaviors(template);
@@ -1675,13 +1565,16 @@
          * On create element but not attached to DOM
          */
         created: function () {
+            flexiciousNmsp.SettingsParser.log("grid created")
+        },
+        ready: function () {
+            flexiciousNmsp.SettingsParser.log("grid ready")
 
         },
         applyCustomStyle: function (prop) {
             var styleValue = this.getComputedStyleValue("--flxs-" + prop);
             if (styleValue != '') {
                 var camelCased = prop.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
-                console.log(camelCased + ":" + styleValue);
                 this.grid.applyAttribute(this.grid, camelCased, styleValue, true);
             }
         },
@@ -1689,6 +1582,7 @@
          * On attached element to DOM
          */
         attached: function () {
+            flexiciousNmsp.SettingsParser.log("grid attached")
             this.listen(this, 'iron-resize', '_resizeHandler');
 
             if (this.width) {
@@ -1703,47 +1597,133 @@
             this.grid.pdfOptions.popupParent = this.grid;
             this.grid.printOptions.popupParent = this.grid;
             this.grid.sortIconPlacementFunction = this._placeSortIcon;
-            if(!this.grid.cellTextColorFunction)
+            if (!this.grid.cellTextColorFunction)
                 this.grid.cellTextColorFunction = this._cellTextColorFunction;
             this.grid.cellBackgroundColorFunction = this._cellBackgroundColorFunction;
 
             for (var i = 0; i < allStyles.length; i++) {
                 this.applyCustomStyle(allStyles[i]);
             }
-            this.async(function () {
-                var pendingDataProvider = null;
-                for (var key in properties) {
-                    if (this[key.toLowerCase()]) {
-                        if (key === "style") {
-                            //this is thehtmlstyle
-                        }
-                        else if (key.toLowerCase() === "dataprovider") {
-                            pendingDataProvider = this[key.toLowerCase()];
-                        } else {
-                            console.log(key + ":" + this[key.toLowerCase()]);
-
-                            this.grid.applyAttribute(this.grid, properties[key].orig, this[key.toLowerCase()], true);
-                        }
+            var pendingDataProvider = null;
+            for (var key in properties) {
+                if (this[key.toLowerCase()]) {
+                    if (key === "style") {
+                        //this is thehtmlstyle
                     }
-                }
-                if (this.grid.getColumnLevel()._tempCols && this.grid.getColumnLevel()._tempCols.length) {
-                    if (this.grid._groupedColsExist) {
-                        this.grid.getColumnLevel().setGroupedColumns(this.grid.getColumnLevel()._tempCols);
+                    else if (key.toLowerCase() === "dataprovider") {
+                        pendingDataProvider = this[key.toLowerCase()];
                     } else {
-                        this.grid.getColumnLevel().setColumns(this.grid.getColumnLevel()._tempCols);
+                        this.grid.applyAttribute(this.grid, properties[key].orig, this[key.toLowerCase()], true);
                     }
                 }
-                this.grid.getColumnLevel().initializeLevel(this.grid);
+            }
 
-                if (pendingDataProvider) {
-                    this.grid.setDataProvider(pendingDataProvider);
-                }
-                this.grid.initComplete = true;
-                this.grid.dispatchEvent(new flexiciousNmsp.BaseEvent(flxConstants.EVENT_CREATION_COMPLETE));
 
-            }, 1);
+            this.processChildren();
+
+
+
+            if (pendingDataProvider) {
+                this.grid.setDataProvider(pendingDataProvider);
+            }
+
+            this.grid.initComplete = true;
+            this.grid.dispatchEvent(new flexiciousNmsp.BaseEvent(flxConstants.EVENT_CREATION_COMPLETE));
+
         },
+        processChildren: function () {
+            var grid = this.grid;
+            var cols = [];
+            var items3 = this.childNodes;
+            for (var k = 0; k < items3.length; k++) {
+                var gridChildNode = items3[k];
+                if (!this.getLocalName(gridChildNode)) continue;
+                if (this.getLocalName(gridChildNode) == 'flxs-tree-grid-column-level') {
+                    this.extractLevel(gridChildNode, grid.getColumnLevel());
+                }
+                else if (this.getLocalName(gridChildNode) == 'flxs-tree-grid-column-group') {
+                    cols.push((gridChildNode));
+                }
+                else if (this.getLocalName(gridChildNode) == 'flxs-tree-grid-column') {
+                    cols.push((gridChildNode));
+                }
+            }
+            if (cols.length > 0)
+                this.extractColumns(grid.getColumnLevel(), cols);
+            grid.getColumnLevel().initializeLevel(grid);
+            grid.rebuild();
+        },
+        extractColumns: function (lvl, colNodes) {
+            var cols = [];
+            var hasColumnGroups = false;
+            for (var j = 0; j < colNodes.length; j++) {
+                var colNode = colNodes[j];
+                if (!this.getLocalName(colNode)) continue;
+                if (this.getLocalName(colNode) == "flxs-tree-grid-column-group") {
+                    hasColumnGroups = true;
+                    cols.push(this.extractColGroup(colNode));
+                }
+                else
+                    cols.push(this.extractCol(colNode));
+            }
+            if (hasColumnGroups)
+                lvl.setGroupedColumns(cols);
+            else
+                lvl.setColumns(cols);
+            return { cols: cols, hasColumnGroups: hasColumnGroups, j: j, colNode: colNode };
+        },
+        extractCol: function (colNode) {
+            var col = new flexiciousNmsp.FlexDataGridColumn();
+            if (colNode.attributes.getNamedItem('type') && colNode.attributes.getNamedItem('type').value == "checkbox")
+                col = new flexiciousNmsp.FlexDataGridCheckBoxColumn();
 
+            colNode.parseColumn(col, this.grid);
+            return col;
+        },
+        extractLevel: function (levelNode, level) {
+            var cols = [];
+            levelNode.parseLevel(level, this.grid);
+            var items2 = levelNode.childNodes;
+            for (var i = 0; i < items2.length; i++) {
+                var levelNodeChild = items2[i];
+                if (!this.getLocalName(levelNodeChild)) continue;
+                if (this.getLocalName(levelNodeChild) == 'flxs-tree-grid-column-level') {
+                    level.nextLevel = new flexiciousNmsp.FlexDataGridColumnLevel(level.grid);
+                    this.extractLevel(levelNodeChild, level.nextLevel);
+                }
+                else if (this.getLocalName(levelNodeChild) == 'flxs-tree-grid-column') {
+                    cols.push((levelNodeChild));
+                }
+            }
+            this.extractColumns(level, cols);
+        },
+        extractColGroup: function (cgNode) {
+            var cg = new flexiciousNmsp.FlexDataGridColumnGroup();
+            cgNode.parseColumnGroup(cg, this.grid)
+            var cols = [];
+            var hasColumnGroups = false;
+            var realChild = 0;
+
+            var items3 = cgNode.childNodes;
+            for (var k = 0; k < items3.length; k++) {
+                var colNode = items3[k];
+                if (!this.getLocalName(colNode)) continue;
+                if (this.getLocalName(colNode) == "flxs-tree-grid-column-group") {
+                    hasColumnGroups = true;
+                    cols.push(this.extractColGroup(colNode));
+                }
+                else if (this.getLocalName(colNode) == "flxs-tree-grid-column")
+                    cols.push(this.extractCol(colNode));
+            }
+            if (hasColumnGroups)
+                cg.columnGroups = (cols);
+            else
+                cg.setColumns(cols);
+            return cg;
+        },
+        getLocalName: function (node) {
+            return node.localName || node.baseName;
+        },
         /**
          * Try to destroy instance if hadn't been destroyed
          */
@@ -1768,7 +1748,7 @@
             //TODO - dynamic updates
         },
         _onDataProviderChanged: function (value) {
-            if (this.grid && this.grid.initComplete) {
+            if (this.grid) {
                 this.grid.setDataProvider(value);
             }
         },
@@ -1801,4 +1781,4 @@
             return null;
         }
     });
-} ());
+}());

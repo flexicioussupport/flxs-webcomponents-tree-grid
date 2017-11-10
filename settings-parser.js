@@ -195,7 +195,7 @@
 
     checkIconClass: '/checkGreen.png',
     crossIconClass: '/notAvailable.png',
-    enableActiveCellHighlight:false
+    enableActiveCellHighlight: false
   };
 
   flexiciousNmsp.Constants.IMAGE_PATH = "./images";
@@ -227,14 +227,12 @@
       }
       targetEvents = flexiciousNmsp[template.typeName].ALL_EVENTS;
     }
-
-
-
-
-
+ 
     var templateGrid = template;
-    templateGrid.sortIconPlacementFunction=null;//can be removed after upgradingto latest version.
+    templateGrid.sortIconPlacementFunction = null;//can be removed after upgradingto latest version.
     for (var key in templateGrid) {
+
+
       if (typeof templateGrid[key] === "function") {
         var thisKey = key;
         if (key == "addEventListener") {
@@ -247,8 +245,15 @@
             observer: '_onChanged',
             orig: key.substring(3)
           }
+        } else if(key.indexOf("Function", key.length - "Function".length) !== -1){
+          //This means this key endsWith "Function" - Bug fix for attributes like iconFunction 
+          //that have a default value of type function and the settings parser is confusing it
+          //with an actual method on the class.
+          properties[key.toLowerCase()] = {
+            observer: '_onChanged',
+            orig: key
+          }
         } else {
-
           behaviors[thisKey] = function () {
             if (!this.grid) {
               return;
@@ -257,7 +262,6 @@
           };
         }
       } else {
-
         if (key.indexOf("_") == 0) {
 
         } else {
@@ -270,5 +274,13 @@
     }
     return { behaviors: behaviors, properties: properties, targetEvents: targetEvents };
   };
+
+  SettingsParser.log = function(msg){
+    //console.log(msg);
+  }
+
+
+
+
   flexiciousNmsp.SettingsParser = SettingsParser;
-} (window));
+}(window));

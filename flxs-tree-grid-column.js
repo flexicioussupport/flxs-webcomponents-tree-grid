@@ -57,55 +57,20 @@
     behaviors: [
       behaviors
     ],
-    attached: function () {
-
-      this.gridColumn = this.getAttribute("type") == "checkbox" ? new flexiciousNmsp.FlexDataGridCheckBoxColumn() : new flexiciousNmsp.FlexDataGridColumn();
-      if (this.firstChild) {
-        var node = this.firstChild;
-        var realNode = null;
-        while (node) {
-          if (node.nodeName != "#text") {
-            realNode = node;
-          }
-          node = node.nextSibling;
-        }
-        if (realNode) {
-          this.gridColumn.itemRenderer = (new flexiciousNmsp.ClassFactory(SlotItemRenderer, realNode, true));
-        }
-      }
-      if (this.parentNode.gridColumnGroup) {
-        if (!this.parentNode.gridColumnGroup._tempCols) {
-          this.parentNode.gridColumnGroup._tempCols = [];
-        }
-        this.parentNode.gridColumnGroup._tempCols.push(this.gridColumn);
-        this.parentNode.gridColumnGroup.setGroupedColumns(this.parentNode.gridColumnGroup._tempCols);
-      } else {
-        var lvl = (this.parentNode.grid) ? (this.parentNode.grid.getColumnLevel()) : this.parentNode.gridColumnLevel;
-        if (!lvl._tempCols) {
-          lvl._tempCols = [];
-        }
-        lvl._tempCols.push(this.gridColumn);
-      }
-
-
-      this.async(function () {
-        var gridNode = this.parentNode;
-        var grid = null;
-        while (gridNode) {
-          if (gridNode.grid) {
-            grid = gridNode.grid;
-            break;
-          }
-          gridNode = gridNode.parentNode;
-        }
-        for (var key in properties) {
-          if (this[key.toLowerCase()]) {
-            grid.applyAttribute(this.gridColumn, properties[key].orig, this[key.toLowerCase()], true);
-          }
-        }
-      }, 1);
+    created: function () {
+      flexiciousNmsp.SettingsParser.log("col created")
     },
+    ready: function () {
+      flexiciousNmsp.SettingsParser.log("col ready")
 
+    },
+    parseColumn: function (gridColumn, grid) {
+      for (var key in properties) {
+        if (this[key.toLowerCase()]) {
+          grid.applyAttribute(gridColumn, properties[key].orig, this[key.toLowerCase()], true);
+        }
+      }
+    },
     attributeChanged: function () {
       this._onChanged();
     },

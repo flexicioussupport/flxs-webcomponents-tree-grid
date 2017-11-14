@@ -40,13 +40,36 @@
       <div class="card">
         <h1>Basic grid demo</h1>
         <paper-button raised class='green' onclick="[[_focusToTextInput]]">FocusTo</paper-button>
-        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" editable="true" 
-          forcePagerRow="false" enableFilters="true" enableExport="false" enableFooters="false" style="width:800px;height:400px">
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" editable="true" horizontalScrollPolicy="on"
+          forcePagerRow="false" enableFilters="true" enableExport="false" enableFooters="false" style="width:400px;height:300px">
           <!--<flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>-->
-          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name" editable="true">
+          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 1" editable="true">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
           </flxs-tree-grid-column>
+
+          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 2" editable="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 3" editable="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 4" editable="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 5" editable="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 6" editable="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
+          </flxs-tree-grid-column>
+
+
           </flxs-tree-grid>
       </div>
     </template>
@@ -57,23 +80,31 @@
         Polymer({
           is: 'basic-grid-demo',
           _focusToTextInput: function(e) {
-            var rowIndex = 1;
-            var columnIndex = 1;
+            var rowIndex = 20;
+            var columnIndex = 6;
             var grid = e.target.nextElementSibling.grid;
             var rowPos = grid.getBodyContainer().itemVerticalPositions[rowIndex];
             var level = rowPos.getLevel(grid);
             var cols = level.getVisibleColumns();
-
-            var cell = grid.getBodyContainer().getCellForRowColumn(rowPos.rowData, cols[columnIndex]);
-            if (!cell) {
-                throw new Error("Cell at Column index " + columnIndex + ", RowIndex " + rowIndex + " not found");
-            }
-            grid.getBodyContainer().emulateClick(cell);
+            grid.gotoItem(rowPos.rowData);
+            grid.setHorizontalScrollPosition(cols[columnIndex].getX());
+            grid.validateNow();
             
-            var textInput = grid.getCurrentEditor();
-            if( textInput ) {
-              textInput.focus();
-            }
+            setTimeout(function(){
+              //setTimeout is necessary here, because the click down outside is causing the edit to automatically end in 
+              //the previous event loop. This cannot be avoided , since that event loop is at the document level. 
+              grid.recycleH();
+              var cell = grid.getBodyContainer().getCellForRowColumn(rowPos.rowData, cols[columnIndex]);
+              if (!cell) {
+                  throw new Error("Cell at Column index " + columnIndex + ", RowIndex " + rowIndex + " not found");
+              }
+              grid.getBodyContainer().emulateClick(cell);
+              
+              var textInput = grid.getCurrentEditor();
+              if( textInput ) {
+                textInput.focus();
+              }
+            },100)
           }
         });
       })

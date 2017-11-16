@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../../flxs-tree-grid.html">
+  <link rel="import" href="../../flxs-tree-grid-column.html">
+</head>
+
+<body class="fullbleed" unresolved>
+
+      <dom-module id="basic-grid-demo">
+        <template>
+
+          <iron-ajax auto url="../data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+          <div class="card">
+            <h1>Basic grid demo</h1>
+            <flxs-tree-grid dataProvider="{{ ajaxResponse }}" editable="true" enableFilters="true" rollOverColor="[[_rollOverColor]]" cellTextColorFunction="[[_cellTextColorFunction]]" style="width:800px;height:400px">
+              <flxs-tree-grid-column itemEditor="[[_itemEditor]]" dataField="first_name" headerText="First Name">
+              </flxs-tree-grid-column>
+              <flxs-tree-grid-column dataField="last_name" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
+              </flxs-tree-grid-column>
+              <flxs-tree-grid-column dataField="dob" headerText="Date of Birth">
+              </flxs-tree-grid-column>
+            </flxs-tree-grid>
+          </div>
+        </template>
+
+        <script>
+          window.addEventListener('WebComponentsReady', function () {
+
+            var CustomTextEditor, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
+            /**
+            * A CustomTextEditor is a custom item renderer, that defines how to use custom cells with logic that you can control
+            * @constructor
+            * @namespace com.flexicious.controls
+            * @extends UIComponent
+            */
+            CustomTextEditor = function () {
+              //make sure to call constructor
+              flexiciousNmsp.TextInput.apply(this);//we extend from the built in flexicious combobox, which gives us a bunch of properties (like selected value etc)
+              /**
+              * This is a getter/setter for the data property. When the cell is created, it belongs to a row
+              * The data property points to the item in the grids dataprovider that is being rendered by this cell.
+              * @type {*}
+              */
+              this.data = null;
+            };
+            flexiciousNmsp.CustomTextEditor = CustomTextEditor; //add to name space
+            CustomTextEditor.prototype = new flexiciousNmsp.TextInput(); //setup hierarchy
+            CustomTextEditor.prototype.typeName = CustomTextEditor.typeName = 'CustomTextEditor';//for quick inspection
+            CustomTextEditor.prototype.getClassNames = function () {
+              return ["CustomTextEditor", "TextInput", "UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
+            };
+
+            CustomTextEditor.prototype.initialize = function () {
+              flexiciousNmsp.UIComponent.prototype.initialize.apply(this);
+              this.grid.addEventListener(this, flexiciousNmsp.FlexDataGridEvent.ITEM_EDIT_END, this.onEditEnd);
+            };
+
+            CustomTextEditor.prototype.onEditEnd = function (evt) {
+
+              //in the editor you have a handle to the grid iteself.
+              var grid = evt.grid;
+              var cell = evt.cell;
+
+              [].forEach.call(grid.getDataProvider(), function(item) {
+                item[cell.getColumn().dataField] = cell.rowInfo.getData()[cell.getColumn().dataField];
+                item["editedDataField"] = cell.getColumn().dataField;
+              });
+
+              grid.refreshCells();
+              grid.trackChange(grid._dataProvider, flexiciousNmsp.ChangeInfo.CHANGE_TYPE_UPDATE);
+              
+            }
+
+            CustomTextEditor.prototype.setText = function(v) {
+
+            }
+
+            Polymer({
+              is: 'basic-grid-demo',
+              _rollOverColors: 0x222222,
+              _cellTextColorFunction: function (cell) {
+                if (cell.rowInfo.getIsDataRow()) {
+                  if(cell.rowInfo.getData().hasOwnProperty('editedDataField') && cell.rowInfo.getData()["editedDataField"] == cell.getColumn().dataField) {
+                    return 0xffff00;
+                  }
+                }
+                return 0xffffff;
+              },
+              _itemEditor: new flexiciousNmsp.ClassFactory(flexiciousNmsp.CustomTextEditor)
+            });
+          })
+        </script>
+      </dom-module>
+
+    <basic-grid-demo></basic-grid-demo>
+</body>
+
+</html>

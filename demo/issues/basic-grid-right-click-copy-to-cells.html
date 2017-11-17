@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../../iron-ajax/iron-ajax.html">
+
+  <link rel="import" href="../../bower_components/vaadin-context-menu/vaadin-context-menu.html">
+  <link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+  <link rel="import" href="../../bower_components/paper-item/paper-item.html">
+
+  <link rel="import" href="../../flxs-tree-grid.html">
+  <link rel="import" href="../../flxs-tree-grid-column.html">
+</head>
+
+<body class="fullbleed" unresolved>
+
+  <dom-module id="basic-grid-demo">
+    <template>
+
+      <iron-ajax auto url="../data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <vaadin-context-menu id="customMenu">
+          <template>
+            <paper-listbox>
+              <paper-item on-tap="_onContextMenuItemClick">Copy to cells</paper-item>
+              <paper-item></paper-item>
+            </paper-listbox>
+          </template>
+
+          <flxs-tree-grid id="mgrid" dataProvider="{{ ajaxResponse }}" editable="true" enableFilters="true"
+            itemeditbegin="[[_itemEditBegin]]" itemEditEnd="[[_itemEditEnd]]" oncontextmenu="[[_onContextMenu]]"
+            rollOverColor="[[_rollOverColor]]" cellTextColorFunction="[[_cellTextColorFunction]]"
+            style="width:800px;height:400px">
+            <flxs-tree-grid-column dataField="first_name" headerText="First Name">
+            </flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="last_name" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
+            </flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="dob" headerText="Date of Birth">
+            </flxs-tree-grid-column>
+          </flxs-tree-grid>
+
+        </vaadin-context-menu>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+
+        Polymer({
+          is: 'basic-grid-demo',
+          properties: {
+            previousData: {
+              type: Object,
+              value: null
+            },
+            currentCell: {
+              type: Object,
+              value: null
+            }
+          },
+          _rollOverColors: 0x222222,
+          _cellTextColorFunction: function (cell) {
+            if (cell.rowInfo.getIsDataRow()) {
+              if (cell.rowInfo.getData().hasOwnProperty('editedDataField') && cell.rowInfo.getData()["editedDataField"] == cell.getColumn().dataField) {
+                return 0xffff00;
+              }
+            }
+            return 0xffffff;
+          },
+          _onContextMenu: function (evt) {
+            document.querySelector('basic-grid-demo').currentCell = evt.target.grid.currentCell;
+            evt.preventDefault();
+          },
+          _onContextMenuItemClick: function(evt) {
+            var grid = this.$.mgrid.grid;
+            var cell = this.currentCell;
+
+            var newData = flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), cell.getColumn().getDataField());
+            var oldData = this.previousData;
+
+            [].forEach.call(grid.getDataProvider(), function (item) {
+              if (item[cell.getColumn().dataField] !== newData) {
+                item[cell.getColumn().dataField] = newData;
+                item["editedDataField"] = cell.getColumn().dataField;
+              }
+            });
+
+            grid.refreshCells();
+
+            grid.trackChange(cell.rowInfo.getData(), flexiciousNmsp.ChangeInfo.CHANGE_TYPE_UPDATE, cell.level,
+                             cell.getColumn().getDataField(), oldData, newData);
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+</body>
+
+</html>

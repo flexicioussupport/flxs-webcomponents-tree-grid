@@ -61,10 +61,6 @@
         Polymer({
           is: 'basic-grid-demo',
           properties: {
-            previousData: {
-              type: Object,
-              value: null
-            },
             currentCell: {
               type: Object,
               value: null
@@ -88,7 +84,6 @@
             var cell = this.currentCell;
 
             var newData = flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), cell.getColumn().getDataField());
-            var oldData = this.previousData;
 
             [].forEach.call(grid.getDataProvider(), function (item) {
               if (item[cell.getColumn().dataField] !== newData) {
@@ -98,9 +93,6 @@
             });
 
             grid.refreshCells();
-
-            grid.trackChange(cell.rowInfo.getData(), flexiciousNmsp.ChangeInfo.CHANGE_TYPE_UPDATE, cell.level,
-                             cell.getColumn().getDataField(), oldData, newData);
           }
         });
       })

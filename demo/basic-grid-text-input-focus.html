@@ -8,18 +8,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
   <title>flxs-tree-grid demo</title>
-  
-  <link href="http://htmltreegrid.com/demo/external/css/adapter/jquery/jquery-ui-1.9.1.custom.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="http://htmltreegrid.com/demo/flexicious/css/flexicious.css" type="text/css"/>
 
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-
-  <script
-    src="https://code.jquery.com/jquery-3.2.1.min.js"
-    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-    crossorigin="anonymous">
-  </script>
-  <script src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery-ui-1.9.1.custom.min.js"></script>
 
   <link rel="import" href="../../paper-styles/demo-pages.html">
   <link rel="import" href="../../iron-ajax/iron-ajax.html">
@@ -33,78 +23,103 @@
 <body class="fullbleed" unresolved>
   <dom-module id="basic-grid-demo">
     <template>
-      
-
-      <iron-ajax auto url="data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+      <iron-ajax auto url="data/names.json" handle-as="json" last-response="{{gridData}}" id="xhr"></iron-ajax>
 
       <div class="card">
         <h1>Basic grid demo</h1>
         <paper-button raised class='green' onclick="[[_focusToTextInput]]">FocusTo</paper-button>
-        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" editable="true" horizontalScrollPolicy="on"
-          forcePagerRow="false" enableFilters="true" enableExport="false" enableFooters="false" style="width:400px;height:300px">
+        <flxs-tree-grid dataProvider="{{ gridData }}" editable="true" horizontalScrollPolicy="on" forcePagerRow="false"
+          enableFilters="true" enableExport="false" enableFooters="false" style="width:400px;height:300px">
           <!--<flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>-->
           <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 1" editable="true">
           </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith"
+            editable="true">
           </flxs-tree-grid-column>
 
           <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 2" editable="true">
           </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith"
+            editable="true">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 3" editable="true">
           </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith"
+            editable="true">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 4" editable="true">
           </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith"
+            editable="true">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 5" editable="true">
           </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith"
+            editable="true">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 6" editable="true">
           </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="last_name"  headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith" editable="true">
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith"
+            editable="true">
           </flxs-tree-grid-column>
 
 
-          </flxs-tree-grid>
+        </flxs-tree-grid>
       </div>
     </template>
-    
+
     <script>
       window.addEventListener('WebComponentsReady', function () {
 
         Polymer({
           is: 'basic-grid-demo',
-          _focusToTextInput: function(e) {
-            var rowIndex = 20;
-            var columnIndex = 6;
+          properties: {
+            gridData: {
+              type: Array
+            }
+          },
+          _focusToTextInput: function (e) {
             var grid = e.target.nextElementSibling.grid;
+
+            var elem = document.querySelector('basic-grid-demo');
+            var gridData = elem.gridData.slice(0);
+            gridData.push({
+              "first_name": "",
+              "last_name": ""
+            });
+            grid.rebuildGridOnDataProviderChange = false;
+            elem.set('gridData', gridData);
+
+            grid.rebuildBody();
+
+            var rowIndex = grid.getBodyContainer().itemVerticalPositions.length - 1;
+            var columnIndex = 0;
             var rowPos = grid.getBodyContainer().itemVerticalPositions[rowIndex];
             var level = rowPos.getLevel(grid);
             var cols = level.getVisibleColumns();
+
+            grid.gotoItem(rowPos.rowData);
+            grid.getBodyContainer().validateNow();
+            grid.validateNow();
             grid.gotoItem(rowPos.rowData);
             grid.setHorizontalScrollPosition(cols[columnIndex].getX());
+            grid.recycleH();
+            grid.getBodyContainer().validateNow();
             grid.validateNow();
-            
-            setTimeout(function(){
-              //setTimeout is necessary here, because the click down outside is causing the edit to automatically end in 
-              //the previous event loop. This cannot be avoided , since that event loop is at the document level. 
-              grid.recycleH();
+
+
+            setTimeout(function () {
               var cell = grid.getBodyContainer().getCellForRowColumn(rowPos.rowData, cols[columnIndex]);
               if (!cell) {
-                  throw new Error("Cell at Column index " + columnIndex + ", RowIndex " + rowIndex + " not found");
+                throw new Error("Cell at Column index " + columnIndex + ", RowIndex " + rowIndex + " not found");
               }
               grid.getBodyContainer().emulateClick(cell);
-              
+
               var textInput = grid.getCurrentEditor();
-              if( textInput ) {
+              if (textInput) {
                 textInput.focus();
               }
-            },100)
+            }, 100)
           }
         });
       })

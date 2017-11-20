@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../../flxs-tree-grid.html">
+  <link rel="import" href="../../flxs-tree-grid-column.html">
+  <link rel="import" href="../../flxs-tree-grid-column-level.html">
+
+  <custom-style>
+    <style is="custom-style">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      flxs-tree-grid {
+        --flxs-alternating-item-colors: [0xd9d9d9, 0xffffff];
+        --flxs-alternating-text-colors: [0x1F1F1F, 0x0028a0];
+        --flxs-vertical-grid-lines: false;
+        --flxs-header-vertical-grid-lines: false;
+        --flxs-filter-vertical-grid-lines: false;
+        --flxs-border-sides: "none";
+      }
+    </style>
+  </custom-style>
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="hierarchical-grid-demo">
+    <template>
+      <iron-ajax auto url="../data/hierarchy.1.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+      <div class="card">
+        <h1>Hierarchical grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableFilters="true" selectionMode="none"
+          cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" style="width: 600px; height: 400px">
+          <flxs-tree-grid-column-level childrenField="sub"  selectedKeyField="id">
+            <flxs-tree-grid-column dataField="id" headerText="ID" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="type" headerText="Type" filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="price" headerText="Price"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="qty" headerText="Quantity" itemRenderer="{{itemRenderer}}"></flxs-tree-grid-column>
+
+            <flxs-tree-grid-column-level reusePreviousLevelColumns="true" selectedKeyField="id">
+            </flxs-tree-grid-column-level>
+            </flxs-tree-grid-column-level>
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+
+
+        flexiciousNmsp.Constants.IMAGE_PATH = "../assets";
+        flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+        flexiciousNmsp.StyleDefaults.defaults.toolbarImagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+
+        var TextRenderer, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
+        /**
+         * A TextRenderer is a custom item renderer, that defines how to use custom cells with logic that you can control
+         * @constructor
+         * @namespace com.flexicious.controls
+         * @extends UIComponent
+         */
+        TextRenderer = function () {
+          //make sure to call constructor
+          flexiciousNmsp.UIComponent.apply(this, ["div"]);//second parameter is the tag name for the dom element.
+          /**
+           * This is a getter/setter for the data property. When the cell is created, it belongs to a row
+           * The data property points to the item in the grids dataprovider that is being rendered by this cell.
+           * @type {*}
+           */
+          this.data = null;
+          //the add event listener will basically proxy all DomEvents to your code to handle.
+          this.addEventListener(this, flxConstants.EVENT_CLICK, this.onClick.bind(this));
+          //we can use innerHTML in the constructor - this makes subsequent setData calls not recreate the dom tree.
+          this.domElement.innerHTML = '<input style="width: 99%; height: 100%; background-color: #222222; border: none; outline: none">';
+        
+          var input = this.domElement.firstChild;
+          input.addEventListener("change", this.onChange.bind(this));
+          input.addEventListener("blur", this.onFocusOut.bind(this));
+          input.addEventListener("keypress", this.onKeyTyped.bind(this));
+        };
+        flexiciousNmsp.CustomTextRenderer = TextRenderer; //add to name space
+        TextRenderer.prototype = new flexiciousNmsp.UIComponent(); //setup hierarchy
+        TextRenderer.prototype.typeName = TextRenderer.typeName = 'TextRenderer';//for quick inspection
+        TextRenderer.prototype.getClassNames = function () {
+          return ["TextRenderer", "UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
+        };
+        TextRenderer.prototype.setData = function (data) {
+
+          this.data = data;
+          var cell = this.parent; //this is an instance of FlexDataGridDataCell (For data rows)
+          var dataField = cell.getColumn().dataField;
+
+          var input = this.domElement.firstChild;
+          input.value = data[dataField];
+
+          if (data.hasOwnProperty('changedField') && data['changedField'] === dataField) {
+            input.style.color = "#ffff00";
+            input.style.background = "#441100";
+          } else {
+            input.style.color = "#ffffff";
+            input.style.background = "#222222";
+          }
+
+          input.readOnly = true;
+          // this.domElement.style.display = (cell.level.getNestDepth() == 2) ? "" : "none";
+        }
+        TextRenderer.prototype.onClick = function (evt) {
+          var input = this.domElement.firstChild;
+          input.readOnly = false;
+          input.focus();
+        }
+
+        TextRenderer.prototype.onChange = function (e) {
+          var cell = this.parent;
+          var column = cell.getColumn();
+          var grid = cell.grid;
+
+          var data = this.data //cell.rowInfo.getData();
+
+          if (data[column.dataField] !== e.target.value) {
+            data[column.dataField] = e.target.value;
+            var pData = grid.getParent(cell.rowInfo.getData(), column.level);
+            if (pData) {
+              if (pData.hasOwnProperty(column.level.childrenField))
+                  pData[column.dataField] = this.calTotal(grid.getChildren(pData, column.level), column.dataField);
+              pData.changedField = column.dataField;
+            }
+          }
+
+        }
+
+        TextRenderer.prototype.onFocusOut = function(e) {
+          this.parent.grid.refreshCells();
+          this.parent.grid.getBodyContainer().validateNow();
+          this.parent.grid.validateNow();
+        }
+
+        TextRenderer.prototype.onKeyTyped = function(e) {
+          if(e.keyCode < 48 || e.keyCode > 57 && e.keyCode !== 8 && e.keyCode !== 13) {
+            e.preventDefault();
+          }
+        }
+
+        TextRenderer.prototype.calTotal = function (child, dataField) {
+          var sum = 0;
+          [].forEach.call(child, function (c) {
+            sum += !isNaN(c[dataField]) ? Number(c[dataField]) : 0;
+          })
+          return sum.toString();
+        }
+
+        //This sets  the inner html, and grid will try to set it. Since we are an input field, IE 8 will complain. So we ignore it since we dont need it anyway.
+        TextRenderer.prototype.setText = function (val) {
+
+        };
+
+        Polymer({
+          is: 'hierarchical-grid-demo',
+          _cellBackgroundColorFunction: function (cell) {
+            return 0x222222;
+          },
+          itemRenderer: new flexiciousNmsp.ClassFactory(flexiciousNmsp.CustomTextRenderer)
+
+        });
+      })
+    </script>
+  </dom-module>
+
+  <hierarchical-grid-demo></hierarchical-grid-demo>
+
+</body>
+
+</html>

@@ -28,8 +28,8 @@
       <div class="card">
         <h1>Basic grid demo</h1>
         <paper-button raised class='green' onclick="[[_focusToTextInput]]">FocusTo</paper-button>
-        <flxs-tree-grid dataProvider="{{ gridData }}" editable="true" horizontalScrollPolicy="on" forcePagerRow="false"
-          enableFilters="true" enableExport="false" enableFooters="false" style="width:400px;height:300px">
+        <flxs-tree-grid dataProvider="{{ gridData }}" editable="true" horizontalScrollPolicy="on" forcePagerRow="false" enableFilters="true"
+          enableExport="false" enableFooters="false" style="width:400px;height:300px">
           <!--<flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>-->
           <flxs-tree-grid-column dataField="first_name" headerText="Fist Name 1" editable="true">
           </flxs-tree-grid-column>
@@ -108,7 +108,7 @@
             grid.validateNow();
 
 
-            setTimeout(function () {
+            window.requestAnimationFrame(function () {
               var cell = grid.getBodyContainer().getCellForRowColumn(rowPos.rowData, cols[columnIndex]);
               if (!cell) {
                 throw new Error("Cell at Column index " + columnIndex + ", RowIndex " + rowIndex + " not found");
@@ -119,7 +119,7 @@
               if (textInput) {
                 textInput.focus();
               }
-            }, 100)
+            });
           }
         });
       })

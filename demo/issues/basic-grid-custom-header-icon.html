@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../../iron-ajax/iron-ajax.html">
+
+  <link rel="import" href="../../flxs-tree-grid.html">
+  <link rel="import" href="../../flxs-tree-grid-column.html">
+
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+
+
+      <iron-ajax auto url="data/dobs3.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid id="simpleGrid" dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true"
+          itemClick="[[_itemClick]]" rollOverColor="[[_rollOverColors]]" style="width:800px;height:400px" headerRowHeight="41">
+          <flxs-tree-grid-column dataField="serial" headerText="ID" sortNumeric="true"  hideHeaderText="true" textAlign="right"
+            enableIcon="true" iconFunction="[[_iconFunction]]" iconPlacementFunction="[[_iconPlacementFunction]]"></flxs-tree-grid-column>
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="fname" headerText="First Name" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="lname" headerText="Sure Name" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="country" headerText="Country" filterControl="MultiSelectComboBox" filterComboBoxBuildFromGrid="true"
+            cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="dob" headerText="Date of Birth"></flxs-tree-grid-column>
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          _itemClick: function (evt) {
+            alert("Clicked On " + evt.item.fname + " " + evt.item.lname);
+          },
+          _returnRed: function (cell) {
+            return 0xFF0000;
+          },
+          _rollOverColors: 0xFF4500,
+          _iconFunction: function (cell, state) {
+            if (typeof state == "undefined") state = "";
+
+            if (cell.rowInfo.getIsHeaderRow()) {
+              return "http://dummyimage.com/32x32.png/00aa00/ffffff";
+            }
+            return null;
+          },
+          _iconPlacementFunction: function(cell, imageIcon) {
+            var iconWidth = 32;
+            var paddingRight = 4;
+            imageIcon.domElement.style.top = '4.5px';
+            imageIcon.domElement.style.left = (cell.width - iconWidth - paddingRight) + "px";
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

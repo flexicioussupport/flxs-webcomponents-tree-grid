@@ -81,10 +81,12 @@
           //keep track of old value in initialize. This way when we detect click outside, or up or down, 
           //we can dispatch value commit ONLY if the value changed.
           this.oldValue = flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), cell.getColumn().getDataField());
+          this.grid.suspendEditorOutsideClickTracking=true;
         }
         
         kill(){
           document.removeEventListener('mousedown', this._onDocumentClick);
+          this.grid.suspendEditorOutsideClickTracking=false;
           super.kill();
         } 
         focus() {
@@ -115,12 +117,10 @@
         }
 
         _onDocumentClick(e) {
-          
           if (false/*//TODO - IF click happened on me, cancel [use element.getBoundingClientRect]*/){
             return;//clicked on me.
           }
           this.dispatchValueCommitAndEndEdit();
-
         }
         dispatchValueCommitAndEndEdit(){
           //here we ensure that the value actually changed. We are using old and new value here, but we could
@@ -130,11 +130,9 @@
           var newValue=this.grid.checkGetterAndRetrieve(this.grid.getBodyContainer().getEditor(), cell.getColumn().editorDataField);
           if(this.oldValue != newValue){
             this.dispatchEvent(new flexiciousNmsp.FlexDataGridEvent(flexiciousNmsp.Constants.EVENT_VALUE_COMMIT));
-            this.grid.getBodyContainer().endEdit(this.grid.getBodyContainer().getEditor());
-            this.grid.refreshCells();
-          } else{
-
-          }
+          } 
+          this.grid.getBodyContainer().endEdit(this.grid.getBodyContainer().getEditor());
+          this.grid.refreshCells();
         }
         //This sets  the inner html, and grid will try to set it. Since we are an input field, IE 8 will complain. So we ignore it since we dont need it anyway.
         setText(val) {

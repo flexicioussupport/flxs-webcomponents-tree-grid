@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../../iron-ajax/iron-ajax.html">
+
+  <link rel="import" href="../../../polymer/polymer-element.html">
+
+  <link rel="import" href="../../flxs-tree-grid.html">
+  <link rel="import" href="../../flxs-tree-grid-column.html">
+  <link rel="import" href="../../flxs-tree-grid-column-group.html">
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      <iron-ajax auto url="../replica/data/investors.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+      <div class="card">
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableTrackChanges="true" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px"
+          itemClick="[[itemClick]]" rollOverColor="[[_rollOverColors]]" enableActiveCellHighlight="false" horizontalScrollPolicy="auto"
+          editable="true" cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]"  cellTextColorFunction="[[_cellTextColorFunction]]">
+
+          <flxs-tree-grid-column dataField="investors" headerText="Investors" columnWidthMode="fitToContent"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="investorType" headerText="Investor Type" filterControl="ComboBox" filterComboBoxBuildFromGrid="true"
+            width="150"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="ctry" filterControl="ComboBox" filterComboBoxBuildFromGrid="true" width="150"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="effDemand" editorDataField="effDemand" itemEditor="[[_numericEditor]]" itemEditorManagesPersistence="false" itemEditorApplyOnValueCommit="true" enableCellClickRowSelect="false" headerText="Eff Demand"
+            columnWidthMode="fixed" width="150" enableEditCancelOnClickOutsideEditor="true"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="owner" headerText="Owner" columnWidthMode="fitToContent"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="dealers" headerText="Dealers" columnWidthMode="fitToContent"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="effDemandUsd" headerText="Eff Demand (USD)" columnWidthMode="fitToContent"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="effDetail" headerText="Demand Detail" columnWidthMode="fitToContent" textAlign="right"></flxs-tree-grid-column>
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column columnWidthMode="fixed" width="30"></flxs-tree-grid-column>
+
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+    ((window) => {
+    flexiciousNmsp.NumericEditor = class NumericEditor extends flexiciousNmsp.UIComponent {
+        constructor() {
+          super("div");
+          this.domElement.innerHTML = `<input style="width: 99%; height: 100%; background-color: #222222; border: none; outline: none">`;
+          this.input = this.domElement.firstChild;
+          this.input.addEventListener("change", this._onChange.bind(this));
+          this.input.addEventListener("blur", this._onFocusOut.bind(this));
+          this.input.addEventListener("keypress", this._onKeyPressed.bind(this));
+          this.input.addEventListener('keyup', this._upDownArrowKeyHandler.bind(this));
+          document.addEventListener('click', this._onDocumentClick.bind(this));
+        }
+
+        getClassNames() {
+          return ["NumericEditor", "UIComponent"];
+        }
+
+        getValue() {
+          return !isNaN(this.input.value) ? Number(this.input.value) : this.input.value;
+        }
+
+        initialize() {
+          super.initialize();
+          this.dataField = 'id';
+          let cell = this.grid.getCurrentEditCell();
+          const datafield = cell.getColumn().dataField;
+          this.input.value = cell.rowInfo.getData()[datafield];
+
+          this.input.style.height = 20;
+          this.input.style.background = "#ffffff";
+          this.input.style.outline = "none";
+
+          this.grid.suspendEditorOutsideClickTracking = true;
+        }
+
+        focus() {
+          this.input.focus();
+        }
+
+        destroy() {
+          super.destroy();
+          this.grid.suspendEditorOutsideClickTracking = false;
+        }
+        _upDownArrowKeyHandler(event) {
+          let nextCell;
+          if (event.keyCode == flexiciousNmsp.Constants.KEYBOARD_DOWN) {
+            nextCell = this.grid.getBodyContainer().getCellInDirection(this.grid.getCurrentEditCell(), flexiciousNmsp.Constants.CELL_POSITION_BELOW, true, true, true);
+          } else if (event.keyCode == flexiciousNmsp.Constants.KEYBOARD_UP) {
+            nextCell = this.grid.getBodyContainer().getCellInDirection(this.grid.getCurrentEditCell(), flexiciousNmsp.Constants.CELL_POSITION_ABOVE, true, true, true);
+          }
+          if (nextCell) {
+            var grid = this.grid;
+            window.requestAnimationFrame( function() {
+              grid.getBodyContainer().beginEdit(nextCell);
+            })
+          }
+        }
+
+        _onChange(e) {
+          const cell = this.grid.getCurrentEditCell() ? this.grid.getCurrentEditCell() : this.grid.currentCell;
+          const datafield = cell.getColumn().dataField;
+          let displayValue = flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), datafield);
+          let inputVal;
+          if (this.input.value != null && this.input.value != "") {
+            inputVal = this.input.value;
+          } else { inputVal = undefined; }
+
+          if (displayValue !== this.getValue()) {
+            this.grid.trackChange(cell.rowInfo.getData(), flexiciousNmsp.ChangeInfo.CHANGE_TYPE_UPDATE, cell.level,
+              datafield, flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), datafield), inputVal);
+
+            cell.rowInfo.getData()[datafield] = inputVal;
+            cell.rowInfo.getData()["editedField"] = datafield;
+          }
+        }
+
+        _onFocusOut(e) {
+          
+          this.grid.refreshCells();
+          this.grid.getBodyContainer().endEdit(this.grid.getBodyContainer().getEditor());
+        }
+
+        _onKeyPressed(e) {
+          // only digits
+          if(e.keyCode < 48 || e.keyCode > 57 && e.keyCode !== 8 && e.keyCode !== 13 && e.keyCode != 38 && e.keyCode != 40) {
+            e.preventDefault();
+          }
+        }
+
+        _onDocumentClick(e) {
+          this.grid.dispatchEvent(new flexiciousNmsp.FlexDataGridEvent(flexiciousNmsp.FlexDataGridEvent.VALUE_COMMIT));
+        }
+
+        //This sets  the inner html, and grid will try to set it. Since we are an input field, IE 8 will complain. So we ignore it since we dont need it anyway.
+        setText(val) {
+
+        };
+      };
+    })(window);
+    </script>
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+
+        flexiciousNmsp.Constants.IMAGE_PATH = "../../images";
+        flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+        flexiciousNmsp.StyleDefaults.defaults.toolbarImagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+
+        Polymer({
+          is: 'basic-grid-demo',
+          _rollOverColors: 0x222222,
+          _cellBackgroundColorFunction: function (cell) {
+            return 0x222222;
+          },
+          _cellTextColorFunction: function (cell) {
+            if (cell.rowInfo.getIsDataRow()) {
+              if (cell.rowInfo.getData().hasOwnProperty('editedField') && cell.rowInfo.getData()["editedField"] == cell.getColumn().dataField) {
+                return 0xffff00;
+              }
+            }
+            return null;
+          },
+          _numericEditor: new flexiciousNmsp.ClassFactory(flexiciousNmsp.NumericEditor)
+        });
+      });
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+</body>
+
+</html>

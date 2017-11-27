@@ -24,7 +24,7 @@
 <body class="fullbleed" unresolved>
   <dom-module id="basic-grid-demo">
     <template>
-      <iron-ajax auto url="../replica/data/investors.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+      <iron-ajax auto url="./data/investors.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
       <div class="card">
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableTrackChanges="true" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px"
           itemClick="[[itemClick]]" rollOverColor="[[_rollOverColors]]" enableActiveCellHighlight="false" horizontalScrollPolicy="auto"
@@ -34,8 +34,9 @@
           <flxs-tree-grid-column dataField="investorType" headerText="Investor Type" filterControl="ComboBox" filterComboBoxBuildFromGrid="true"
             width="150"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="ctry" filterControl="ComboBox" filterComboBoxBuildFromGrid="true" width="150"></flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="effDemand" editorDataField="effDemand" itemEditor="[[_numericEditor]]" itemEditorManagesPersistence="false" itemEditorApplyOnValueCommit="true" enableCellClickRowSelect="false" headerText="Eff Demand"
-            columnWidthMode="fixed" width="150" enableEditCancelOnClickOutsideEditor="true"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="effDemand" editorDataField="value" itemEditor="[[_numericEditor]]" 
+          itemEditorApplyOnValueCommit="true" enableCellClickRowSelect="false" headerText="Eff Demand"
+            columnWidthMode="fixed" width="150" ></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="owner" headerText="Owner" columnWidthMode="fitToContent"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="dealers" headerText="Dealers" columnWidthMode="fitToContent"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="effDemandUsd" headerText="Eff Demand (USD)" columnWidthMode="fitToContent"></flxs-tree-grid-column>
@@ -54,13 +55,11 @@
           super("div");
           this.domElement.innerHTML = `<input style="width: 99%; height: 100%; background-color: #222222; border: none; outline: none">`;
           this.input = this.domElement.firstChild;
-          this.input.addEventListener("change", this._onChange.bind(this));
-          this.input.addEventListener("blur", this._onFocusOut.bind(this));
           this.input.addEventListener("keypress", this._onKeyPressed.bind(this));
           this.input.addEventListener('keyup', this._upDownArrowKeyHandler.bind(this));
-          document.addEventListener('click', this._onDocumentClick.bind(this));
+          this._onDocumentClick =  this._onDocumentClick.bind(this);
+          document.addEventListener('mousedown', this._onDocumentClick);
         }
-
         getClassNames() {
           return ["NumericEditor", "UIComponent"];
         }
@@ -79,18 +78,19 @@
           this.input.style.height = 20;
           this.input.style.background = "#ffffff";
           this.input.style.outline = "none";
-
-          this.grid.suspendEditorOutsideClickTracking = true;
+          //keep track of old value in initialize. This way when we detect click outside, or up or down, 
+          //we can dispatch value commit ONLY if the value changed.
+          this.oldValue = flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), cell.getColumn().getDataField());
         }
-
+        
+        kill(){
+          document.removeEventListener('mousedown', this._onDocumentClick);
+          super.kill();
+        } 
         focus() {
           this.input.focus();
         }
 
-        destroy() {
-          super.destroy();
-          this.grid.suspendEditorOutsideClickTracking = false;
-        }
         _upDownArrowKeyHandler(event) {
           let nextCell;
           if (event.keyCode == flexiciousNmsp.Constants.KEYBOARD_DOWN) {
@@ -100,34 +100,11 @@
           }
           if (nextCell) {
             var grid = this.grid;
+            this.dispatchValueCommitAndEndEdit();            
             window.requestAnimationFrame( function() {
               grid.getBodyContainer().beginEdit(nextCell);
             })
           }
-        }
-
-        _onChange(e) {
-          const cell = this.grid.getCurrentEditCell() ? this.grid.getCurrentEditCell() : this.grid.currentCell;
-          const datafield = cell.getColumn().dataField;
-          let displayValue = flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), datafield);
-          let inputVal;
-          if (this.input.value != null && this.input.value != "") {
-            inputVal = this.input.value;
-          } else { inputVal = undefined; }
-
-          if (displayValue !== this.getValue()) {
-            this.grid.trackChange(cell.rowInfo.getData(), flexiciousNmsp.ChangeInfo.CHANGE_TYPE_UPDATE, cell.level,
-              datafield, flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), datafield), inputVal);
-
-            cell.rowInfo.getData()[datafield] = inputVal;
-            cell.rowInfo.getData()["editedField"] = datafield;
-          }
-        }
-
-        _onFocusOut(e) {
-          
-          this.grid.refreshCells();
-          this.grid.getBodyContainer().endEdit(this.grid.getBodyContainer().getEditor());
         }
 
         _onKeyPressed(e) {
@@ -138,9 +115,27 @@
         }
 
         _onDocumentClick(e) {
-          this.grid.dispatchEvent(new flexiciousNmsp.FlexDataGridEvent(flexiciousNmsp.FlexDataGridEvent.VALUE_COMMIT));
-        }
+          
+          if (false/*//TODO - IF click happened on me, cancel [use element.getBoundingClientRect]*/){
+            return;//clicked on me.
+          }
+          this.dispatchValueCommitAndEndEdit();
 
+        }
+        dispatchValueCommitAndEndEdit(){
+          //here we ensure that the value actually changed. We are using old and new value here, but we could
+          //also set a flag in onChange. This works for this class, but may need different implementations for
+          //different types of editors.
+          let cell = this.grid.getCurrentEditCell();
+          var newValue=this.grid.checkGetterAndRetrieve(this.grid.getBodyContainer().getEditor(), cell.getColumn().editorDataField);
+          if(this.oldValue != newValue){
+            this.dispatchEvent(new flexiciousNmsp.FlexDataGridEvent(flexiciousNmsp.Constants.EVENT_VALUE_COMMIT));
+            this.grid.getBodyContainer().endEdit(this.grid.getBodyContainer().getEditor());
+            this.grid.refreshCells();
+          } else{
+
+          }
+        }
         //This sets  the inner html, and grid will try to set it. Since we are an input field, IE 8 will complain. So we ignore it since we dont need it anyway.
         setText(val) {
 
@@ -162,9 +157,14 @@
             return 0x222222;
           },
           _cellTextColorFunction: function (cell) {
-            if (cell.rowInfo.getIsDataRow()) {
-              if (cell.rowInfo.getData().hasOwnProperty('editedField') && cell.rowInfo.getData()["editedField"] == cell.getColumn().dataField) {
-                return 0xffff00;
+            if (cell.rowInfo.getIsDataRow() && cell.getColumn()) {
+              var items = this.getChanges();
+              for (var i = 0; i < items.length; i++) {
+                  var ci = items[i];
+                  if ((ci.changedItem == cell.rowInfo.getData()) && 
+                     (ci.changedProperty == cell._column.getDataField())) {
+                      return 0xffff00;
+                  }
               }
             }
             return null;

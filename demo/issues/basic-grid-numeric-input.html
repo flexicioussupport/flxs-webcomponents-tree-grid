@@ -116,10 +116,14 @@
           }
         }
 
-        _onDocumentClick(e) {
-          if (false/*//TODO - IF click happened on me, cancel [use element.getBoundingClientRect]*/){
-            return;//clicked on me.
-          }
+        _onDocumentClick(me) {
+          var cell = this.grid.getCurrentEditCell();
+          var rect = cell.domElement.getBoundingClientRect();
+          if(rect.left <= me.clientX && rect.right >= me.clientX && rect.top <= me.clientY && rect.bottom >= me.clientY) {
+              // clicked inside cell
+              return;
+          }          
+          
           this.dispatchValueCommitAndEndEdit();
         }
         dispatchValueCommitAndEndEdit(){

@@ -35,13 +35,15 @@
       <div class="card">
         <h1>Basic grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableFilters="true" enableTrackChanges="true" editable="true" 
-          editItemColors="[0x806000, 0x997300]" rollOverColor="[[_rollOverColors]]" style="width:800px;height:620px">
+          editItemColors="[0x806000, 0x997300]" rollOverColor="[[_rollOverColors]]" 
+          style="width:800px;height:620px" itemEditCanceling="[[_itemEditCanceling]]"
+          >
           <!-- <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column> -->
           <flxs-tree-grid-column dataField="fname" headerText="Fist Name">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="lname" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
           </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="country" headerText="Location" editable="true" itemEditor="[[_itemEditor]]">
+          <flxs-tree-grid-column dataField="country" headerText="Location" editable="true" itemEditor="[[_itemEditor]]" enableEditCancelOnClickOutsideEditor="true">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth">
           </flxs-tree-grid-column>
@@ -81,14 +83,20 @@
           return ["VaadinComboBoxEditor", "UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
         };
 
+        VaadinComboBoxEditor.prototype.focus = function () {
+          this.input.focus();
+        }
+
         VaadinComboBoxEditor.prototype.initialize = function () {
           flexiciousNmsp.UIComponent.prototype.initialize.apply(this);
 
           this.combobox = this.domElement.firstChild.$.combo;
           this.combobox.items = this.getItems();
-          this.combobox.opened = true;
           this.combobox.overlayVerticalOffset = 5;
           this.combobox.addEventListener('value-changed', this.onChange.bind(this));
+
+          this.combobox.addEventListener('opened-changed', this.onOpenedChanged.bind(this));
+          this.combobox.opened = true;
 
           this.overlay = this.combobox.$.overlay.$.dropdown.$.overlay
           this.overlay.modeless = true;
@@ -99,10 +107,11 @@
           this.input.style.fontSize = '16px';
           this.input.style.fontWeight = 'bold';
           this.input.style.lineHeight = '130%';
-          this.input.focus();
-
-          
         };
+
+        VaadinComboBoxEditor.prototype.onOpenedChanged = function(evt) {
+            this.grid.suspendEditorOutsideClickTracking=evt.target.opened;
+        }
 
         /**
         * This event is dispatched when the user clicks on the icon. The event is actually a flexicious event, and has a trigger event
@@ -134,6 +143,9 @@
         Polymer({
           is: 'basic-grid-demo',
           _rollOverColors: 0x404040,
+          _itemEditCanceling: function(e) {
+            console.log("itemEditCanceling");
+          },
           _itemEditor: new flexiciousNmsp.ClassFactory(flexiciousNmsp.VaadinComboBoxEditor)
         });
       })

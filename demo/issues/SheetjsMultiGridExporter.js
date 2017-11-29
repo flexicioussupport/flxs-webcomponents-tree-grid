@@ -118,7 +118,7 @@
             var col = grid.getExportableColumns()[i];
             if (!exporter.isIncludedInExport(col))
                 continue;
-            var value = col.itemToLabel(record);
+            var value = flexiciousNmsp.UIUtils.resolveExpression(record, col.dataField);
             item.push(isNaN(value) ? value : Number(value));
         }
         this.data.push(item);
@@ -132,7 +132,7 @@
         var footerColumns = [];
         var exporter = grid.excelOptions.exporter;
 
-        if (exporter.includeFooters) {
+        if (grid.excelOptions.includeFooters) {
             var i = 0;
             if (!exporter.reusePreviousLevelColumns) {
                 while (i++ < exporter.getNestDepth()) {
@@ -142,9 +142,9 @@
 
             for (var i = 0; i < grid.getExportableColumns().length; i++) {
                 var col = grid.getExportableColumns()[i];
-                if (!grid.isIncludedInExport(col))
+                if (!exporter.isIncludedInExport(col))
                     continue;
-                var spaces = grid.getSpaces(col);
+                var spaces = exporter.getSpaces(col);
                 var value = col.calculateFooterValue(dataProvider);
                 footerColumns.push(spaces ? spaces + value : (value ? isNaN(value) ? value : Number(value) : ""));
                 colIndex++;

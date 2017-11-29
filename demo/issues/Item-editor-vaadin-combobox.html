@@ -34,16 +34,16 @@
 
       <div class="card">
         <h1>Basic grid demo</h1>
-        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableFilters="true" enableTrackChanges="true" editable="true" 
-          editItemColors="[0x806000, 0x997300]" rollOverColor="[[_rollOverColors]]" 
-          style="width:800px;height:620px" itemEditCanceling="[[_itemEditCanceling]]"
-          >
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableTrackChanges="true" enableFilters="true" enableTrackChanges="true"
+          editable="true" editItemColors="[0x806000, 0x997300]" rollOverColor="[[_rollOverColors]]" cellTextColorFunction="[[_cellTextColorFunction]]"
+          style="width:800px;height:620px" itemEditCanceling="[[_itemEditCanceling]]">
           <!-- <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column> -->
           <flxs-tree-grid-column dataField="fname" headerText="Fist Name">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="lname" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
           </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="country" headerText="Location" editable="true" itemEditor="[[_itemEditor]]" enableEditCancelOnClickOutsideEditor="true">
+          <flxs-tree-grid-column dataField="country" editorDataField="value" itemEditorApplyOnValueCommit="true" itemEditorManagesPersistence="false" enableEditCancelOnClickOutsideEditor="true" 
+            headerText="Location" itemEditor="[[_itemEditor]]">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth">
           </flxs-tree-grid-column>
@@ -72,7 +72,7 @@
           * @type {*}
           */
           this.data = null;
-
+          this.isEscapePressed = false;
           this.domElement.innerHTML = '<p-type-ahead></p-type-ahead>';
         };
 
@@ -87,13 +87,17 @@
           this.input.focus();
         }
 
+        VaadinComboBoxEditor.prototype.getValue = function () {
+          return this.combobox.value;
+        }
+
         VaadinComboBoxEditor.prototype.initialize = function () {
           flexiciousNmsp.UIComponent.prototype.initialize.apply(this);
 
           this.combobox = this.domElement.firstChild.$.combo;
           this.combobox.items = this.getItems();
           this.combobox.overlayVerticalOffset = 5;
-          this.combobox.addEventListener('value-changed', this.onChange.bind(this));
+          // this.combobox.addEventListener('value-changed', this.onChange.bind(this));
 
           this.combobox.addEventListener('opened-changed', this.onOpenedChanged.bind(this));
           this.combobox.opened = true;
@@ -107,43 +111,79 @@
           this.input.style.fontSize = '16px';
           this.input.style.fontWeight = 'bold';
           this.input.style.lineHeight = '130%';
+          
+          this.input.addEventListener("keyup", this.onKeyPressed.bind(this));
+          this.input.addEventListener("blur", this.onFocusOut.bind(this));
+
+          var cell = this.grid.getCurrentEditCell();
+          this.oldValue = flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), cell.getColumn().getDataField());
+          this.combobox.value = this.oldValue;
+          this.grid.suspendEditorOutsideClickTracking = true;
         };
 
-        VaadinComboBoxEditor.prototype.onOpenedChanged = function(evt) {
-            this.grid.suspendEditorOutsideClickTracking=evt.target.opened;
+        VaadinComboBoxEditor.prototype.onOpenedChanged = function (evt) {
+          // this.grid.suspendEditorOutsideClickTracking = evt.target.opened;
         }
 
-        /**
-        * This event is dispatched when the user clicks on the icon. The event is actually a flexicious event, and has a trigger event
-        * property that points back to the original domEvent.
-        * @param event
-        */
-        VaadinComboBoxEditor.prototype.onChange = function (evt) {
-          var cell = this.grid.getCurrentEditCell();
-          var data = cell.rowInfo.getData();
-          var dataField = cell.getColumn().dataField;
-
-          data[dataField] = evt.target.value;
-          data["editedDataField"] = dataField;
+        VaadinComboBoxEditor.prototype.onKeyPressed = function(evt) {
+          if(evt.keyCode == 27) this.isEscapePressed = true;
         }
 
-        VaadinComboBoxEditor.prototype.getItems = function() {
+        VaadinComboBoxEditor.prototype.onFocusOut = function (evt) {
+          if (this.grid.getCurrentEditCell() && !this.isEscapePressed) {
+            this.dispatchValueCommitAndEndEdit();
+          }
+        }
+
+        VaadinComboBoxEditor.prototype.dispatchValueCommitAndEndEdit = function () {
+          //here we ensure that the value actually changed. We are using old and new value here, but we could
+          //also set a flag in onChange. This works for this class, but may need different implementations for
+          //different types of editors.
+          let cell = this.grid.getCurrentEditCell();
+          var newValue = this.grid.checkGetterAndRetrieve(this.grid.getBodyContainer().getEditor(), cell.getColumn().editorDataField);
+          if (this.oldValue != newValue) {
+            this.dispatchEvent(new flexiciousNmsp.FlexDataGridEvent(flexiciousNmsp.Constants.EVENT_VALUE_COMMIT));
+          }
+          
+          this.grid.getBodyContainer().endEdit(this.grid.getBodyContainer().getEditor());
+          this.grid.refreshCells();
+        }
+
+        VaadinComboBoxEditor.prototype.getItems = function () {
 
           var dataProvider = this.grid._dataProvider,
-              col = this.grid.getCurrentEditCell().getColumn(),
-              items = [];
+            col = this.grid.getCurrentEditCell().getColumn(),
+            items = [];
 
-          [].forEach.call(col.getDistinctValues(dataProvider), function(data) {
+          [].forEach.call(col.getDistinctValues(dataProvider), function (data) {
             items.push(data.data);
           });
 
           return items;
         }
 
+        VaadinComboBoxEditor.prototype.kill = function () {
+          this.grid.suspendEditorOutsideClickTracking=false;
+          flexiciousNmsp.UIComponent.prototype.kill.apply(this);
+        }
+
         Polymer({
           is: 'basic-grid-demo',
           _rollOverColors: 0x404040,
-          _itemEditCanceling: function(e) {
+          _cellTextColorFunction: function (cell) {
+            if (cell.rowInfo.getIsDataRow() && cell.getColumn()) {
+              var items = this.getChanges();
+              for (var i = 0; i < items.length; i++) {
+                var ci = items[i];
+                if ((ci.changedItem == cell.rowInfo.getData()) &&
+                  (ci.changedProperty == cell._column.getDataField())) {
+                  return 0xffff00;
+                }
+              }
+            }
+            return null;
+          },
+          _itemEditCanceling: function (e) {
             console.log("itemEditCanceling");
           },
           _itemEditor: new flexiciousNmsp.ClassFactory(flexiciousNmsp.VaadinComboBoxEditor)

@@ -34,9 +34,8 @@
           <flxs-tree-grid-column dataField="investorType" headerText="Investor Type" filterControl="ComboBox" filterComboBoxBuildFromGrid="true"
             width="150"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="ctry" filterControl="ComboBox" filterComboBoxBuildFromGrid="true" width="150"></flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="effDemand" editorDataField="value" itemEditor="[[_numericEditor]]" 
-          itemEditorApplyOnValueCommit="true" enableCellClickRowSelect="false" headerText="Eff Demand"
-            columnWidthMode="fixed" width="150" ></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="effDemand" itemEditor="[[_numericEditor]]" headerText="Eff Demand" columnWidthMode="fixed" width="150" 
+            editorDataField="value" itemEditorApplyOnValueCommit="true" itemEditorManagesPersistence="false" enableEditCancelOnClickOutsideEditor="true"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="owner" headerText="Owner" columnWidthMode="fitToContent"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="dealers" headerText="Dealers" columnWidthMode="fitToContent"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="effDemandUsd" headerText="Eff Demand (USD)" columnWidthMode="fitToContent"></flxs-tree-grid-column>
@@ -55,10 +54,10 @@
           super("div");
           this.domElement.innerHTML = `<input style="width: 99%; height: 100%; background-color: #222222; border: none; outline: none">`;
           this.input = this.domElement.firstChild;
-          this.input.addEventListener("keypress", this._onKeyPressed.bind(this));
+          this.isEscapePressed = false;
+          this.input.addEventListener("keydown", this._onKeyPressed.bind(this));
           this.input.addEventListener('keyup', this._upDownArrowKeyHandler.bind(this));
-          this._onDocumentClick =  this._onDocumentClick.bind(this);
-          document.addEventListener('mousedown', this._onDocumentClick);
+          this.input.addEventListener('blur', this._onFocusOut.bind(this));
         }
         getClassNames() {
           return ["NumericEditor", "UIComponent"];
@@ -70,7 +69,7 @@
 
         initialize() {
           super.initialize();
-          this.dataField = 'id';
+
           let cell = this.grid.getCurrentEditCell();
           const datafield = cell.getColumn().dataField;
           this.input.value = cell.rowInfo.getData()[datafield];
@@ -78,22 +77,20 @@
           this.input.style.height = 20;
           this.input.style.background = "#ffffff";
           this.input.style.outline = "none";
+
           //keep track of old value in initialize. This way when we detect click outside, or up or down, 
           //we can dispatch value commit ONLY if the value changed.
           this.oldValue = flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), cell.getColumn().getDataField());
           this.grid.suspendEditorOutsideClickTracking=true;
         }
-        
-        kill(){
-          document.removeEventListener('mousedown', this._onDocumentClick);
-          this.grid.suspendEditorOutsideClickTracking=false;
-          super.kill();
-        } 
+
         focus() {
           this.input.focus();
         }
 
         _upDownArrowKeyHandler(event) {
+          if(event.keyCode == 27)  this.isEscapePressed = true;
+
           let nextCell;
           if (event.keyCode == flexiciousNmsp.Constants.KEYBOARD_DOWN) {
             nextCell = this.grid.getBodyContainer().getCellInDirection(this.grid.getCurrentEditCell(), flexiciousNmsp.Constants.CELL_POSITION_BELOW, true, true, true);
@@ -111,21 +108,17 @@
 
         _onKeyPressed(e) {
           // only digits
-          if(e.keyCode < 48 || e.keyCode > 57 && e.keyCode !== 8 && e.keyCode !== 13 && e.keyCode != 38 && e.keyCode != 40) {
+          if(e.keyCode !== 8 && e.keyCode !== 13 && e.keyCode !== 27 && e.keyCode != 38 && e.keyCode != 40 && e.keyCode < 48 || e.keyCode > 57) {
             e.preventDefault();
           }
         }
 
-        _onDocumentClick(me) {
-          var cell = this.grid.getCurrentEditCell();
-          var rect = cell.domElement.getBoundingClientRect();
-          if(rect.left <= me.clientX && rect.right >= me.clientX && rect.top <= me.clientY && rect.bottom >= me.clientY) {
-              // clicked inside cell
-              return;
-          }          
-          
-          this.dispatchValueCommitAndEndEdit();
+        _onFocusOut(me) {
+          if (this.grid.getCurrentEditCell() && !this.isEscapePressed) {
+            this.dispatchValueCommitAndEndEdit();
+          }
         }
+
         dispatchValueCommitAndEndEdit(){
           //here we ensure that the value actually changed. We are using old and new value here, but we could
           //also set a flag in onChange. This works for this class, but may need different implementations for
@@ -138,10 +131,16 @@
           this.grid.getBodyContainer().endEdit(this.grid.getBodyContainer().getEditor());
           this.grid.refreshCells();
         }
+
         //This sets  the inner html, and grid will try to set it. Since we are an input field, IE 8 will complain. So we ignore it since we dont need it anyway.
         setText(val) {
 
-        };
+        }
+        
+        kill(){
+          this.grid.suspendEditorOutsideClickTracking=false;
+          super.kill();
+        } 
       };
     })(window);
     </script>

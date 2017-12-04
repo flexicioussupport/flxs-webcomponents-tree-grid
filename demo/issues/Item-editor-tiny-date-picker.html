@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../../iron-demo-helpers/demo-pages-shared-styles.html">
+
+  <link rel="import" href="../../../iron-input/iron-input.html">
+  <link rel="import" href="../../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../../flxs-tree-grid.html">
+  <link rel="import" href="../../flxs-tree-grid-column.html">
+  
+  <link rel="stylesheet" href="https://rawgit.com/chrisdavies/tiny-date-picker/master/tiny-date-picker.min.css">
+  
+  <script src="https://rawgit.com/chrisdavies/tiny-date-picker/master/dist/tiny-date-picker.min.js"></script>
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      <style is="custom-style">
+        :host {
+          /* --primary-text-color: #cccccc; */
+        }
+
+        .date {
+          padding: .5em;
+          margin-right: .4em;
+          margin-bottom: .8em;
+          border: 1px solid #aaa;
+          border-radius: 3px;
+          width: 140px;
+        }
+      </style>
+
+      <iron-ajax auto url="../data/dobs2.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableTrackChanges="true" enableFilters="true" enableTrackChanges="true"
+          editable="true" editItemColors="[0x806000, 0x997300]" rollOverColor="[[_rollOverColors]]" cellTextColorFunction="[[_cellTextColorFunction]]"
+          style="width:800px;height:620px" itemEditCanceling="[[_itemEditCanceling]]"> 
+          <!-- <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column> -->
+          <flxs-tree-grid-column dataField="fname" headerText="Fist Name">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="lname" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="dob" headerWordWrap="true" editorDataField="value" itemEditorApplyOnValueCommit="true" itemEditorManagesPersistence="false" enableEditCancelOnClickOutsideEditor="true" itemEditor="[[_itemEditor]]" headerText="Date of Birth">
+          </flxs-tree-grid-column>
+        </flxs-tree-grid>
+      </div>
+    </template>
+    <script>
+
+      window.addEventListener('WebComponentsReady', function () {
+
+        var TinyDatePickerEditor, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
+        /**
+        * A TinyDatePickerEditor is a custom item renderer, that defines how to use custom cells with logic that you can control
+        * @constructor
+        * @namespace com.flexicious.controls
+        * @extends UIComponent
+        */
+        TinyDatePickerEditor = function () {
+
+          //make sure to call constructor
+          flexiciousNmsp.UIComponent.apply(this);//we extend from the built in flexicious combobox, which gives us a bunch of properties (like selected value etc)
+          /**
+          * This is a getter/setter for the data property. When the cell is created, it belongs to a row
+          * The data property points to the item in the grids dataprovider that is being rendered by this cell.
+          * @type {*}
+          */
+          this.data = null;
+          this.isDatePickerOpened = null;
+          this.isEscapePressed = false;
+          this.domElement.innerHTML = '<input class="date">';
+        };
+
+        flexiciousNmsp.TinyDatePickerEditor = TinyDatePickerEditor; //add to name space
+        TinyDatePickerEditor.prototype = new flexiciousNmsp.UIComponent(); //setup hierarchy
+        TinyDatePickerEditor.prototype.typeName = TinyDatePickerEditor.typeName = 'TinyDatePickerEditor';//for quick inspection
+        TinyDatePickerEditor.prototype.getClassNames = function () {
+          return ["TinyDatePickerEditor", "UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
+        };
+
+        TinyDatePickerEditor.prototype.focus = function () {
+          this.input.focus();
+        }
+
+        TinyDatePickerEditor.prototype.getValue = function () {
+          var val = this.input.value.replace(/(\d{1,2})\/(\d{1,2})\/(\d{4})/,'$3/$1/$2');
+
+          if( val === "") return val;
+
+          val = val.split(/\//);
+          val[1] = val[1].length == 1 ? "0" + val[1] : val[1];
+          val[2] = val[2].length == 1 ? "0" + val[2] : val[2];
+          return val.join("\/");
+        }
+
+        TinyDatePickerEditor.prototype.initialize = function () {
+          flexiciousNmsp.UIComponent.prototype.initialize.apply(this);
+          var cell = this.grid.getCurrentEditCell();
+          this.oldValue = flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), cell.getColumn().getDataField());
+
+          var datePickerOptions = {
+            mode: 'dp-below'
+          }
+
+          this.datePicker = TinyDatePicker(flexiciousNmsp.UIUtils.adapter.getElementByClassName(this.domElement, "date"), datePickerOptions)
+          this.datePicker.on({
+            open: this.onDatePickerOpenHandler.bind(this),
+            close: this.onDatePickerCloseHandler.bind(this),
+            statechange: this.onDatePickerStateChangeHandler.bind(this)
+          });
+
+          this.input = this.domElement.firstChild;
+          this.input.value = this.oldValue;
+          this.input.style.fontSize = '16px';
+          this.input.style.fontWeight = 'bold';
+          this.input.style.lineHeight = '130%';
+          this.input.addEventListener("keyup", this.onKeyPressed.bind(this));
+
+          this.grid.suspendEditorOutsideClickTracking=true;
+        };
+        
+        TinyDatePickerEditor.prototype.onDatePickerOpenHandler = function (e) {
+          this.isDatePickerOpened = true;
+          this.input.addEventListener("blur", this.onFocusOut.bind(this));
+        }
+
+        TinyDatePickerEditor.prototype.onDatePickerCloseHandler = function (e) {
+          this.isDatePickerOpened = false;
+          this.blur();
+          console.log(1)
+        }
+
+        TinyDatePickerEditor.prototype.onDatePickerStateChangeHandler = function(e) {
+          console.log(2);
+        }
+
+        TinyDatePickerEditor.prototype.onKeyPressed = function(ke) {
+          if( ke.keyCode == 27 ) {
+              this.isEscapePressed = true;
+          }
+        }
+
+        TinyDatePickerEditor.prototype.onFocusOut = function(me) {
+          this.input.addEventListener("blur", this.onFocusOut.bind(this));
+
+          var cell = this.grid.getCurrentEditCell();
+          if ( cell && !this.isEscapePressed ) {
+            this.dispatchValueCommitAndEndEdit();
+          }
+        }
+
+        TinyDatePickerEditor.prototype.blur = function() {
+          this.focus();
+          this.input.blur();
+        }
+
+        TinyDatePickerEditor.prototype.dispatchValueCommitAndEndEdit = function () {
+          //here we ensure that the value actually changed. We are using old and new value here, but we could
+          //also set a flag in onChange. This works for this class, but may need different implementations for
+          //different types of editors.
+          let cell = this.grid.getCurrentEditCell();
+          var newValue = this.grid.checkGetterAndRetrieve(this.grid.getBodyContainer().getEditor(), cell.getColumn().editorDataField);
+          if (this.oldValue != newValue) {
+            this.dispatchEvent(new flexiciousNmsp.FlexDataGridEvent(flexiciousNmsp.Constants.EVENT_VALUE_COMMIT)); 
+          }
+          
+          this.grid.getBodyContainer().endEdit(this.grid.getBodyContainer().getEditor());
+          this.grid.refreshCells();
+          
+        }
+
+        TinyDatePickerEditor.prototype.kill = function () {
+          this.grid.suspendEditorOutsideClickTracking=false;
+          flexiciousNmsp.UIComponent.prototype.kill.apply(this);
+        }
+
+        Polymer({
+          is: 'basic-grid-demo',
+          _rollOverColors: 0x404040,
+          _cellTextColorFunction: function (cell) {
+            if (cell.rowInfo.getIsDataRow() && cell.getColumn()) {
+              var items = this.getChanges();
+              for (var i = 0; i < items.length; i++) {
+                var ci = items[i];
+                if ((ci.changedItem == cell.rowInfo.getData()) &&
+                  (ci.changedProperty == cell._column.getDataField())) {
+                  return 0xffff00;
+                }
+              }
+            }
+            return null;
+          },
+          _itemEditCanceling: function (e) {
+            console.log("itemEditCanceling");
+          },
+          _itemEditor: new flexiciousNmsp.ClassFactory(flexiciousNmsp.TinyDatePickerEditor)
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

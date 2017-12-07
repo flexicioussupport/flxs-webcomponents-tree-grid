@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  
+  <link rel="import" href="../bower_components/iron-icons/av-icons.html">
+  <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../flxs-tree-grid-column-group.html">
+  <link rel="import" href="../flxs-tree-grid-column-level.html">
+  <link rel="import" href="../bower_components/paper-button/paper-button.html">
+</head>
+
+<body class="fullbleed" unresolved>
+  
+  <dom-module id="basic-grid-demo">
+    <template>
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <paper-button raised></paper-button>
+        
+        <flxs-tree-grid id="flxs-grid" enableFooters="true" dynamicLevelCreated="[[_dynamicLevelCreated]]"
+          rollOverColor="[[_rollOverColors]]" enableTriStateCheckbox expandCollapseIconDrawFunction="[[_expandCollapseIconDrawFunction]]" style="width:99%;height:680px">
+          <flxs-tree-grid-column-level  enableFooters="true" childrenField="children" nestIndent="30" cellTextColorFunction="[[_cellTextColorFunction]]" >
+            <flxs-tree-grid-column dataField="Region" enableHierarchicalNestIndent="true"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="RegionCode"></flxs-tree-grid-column>
+            <flxs-tree-grid-column-level  enableFooters="true" childrenField="children" enableFooters="false"  cellTextColorFunction="[[_cellTextColorFunction]]" nestIndent="30">
+                <flxs-tree-grid-column dataField="Territory" enableHierarchicalNestIndent="true"></flxs-tree-grid-column>
+                <flxs-tree-grid-column dataField="TerritoryCode"></flxs-tree-grid-column>
+                <flxs-tree-grid-column-level enableFooters="true" childrenCountField="numChildren"  cellTextColorFunction="[[_cellTextColorFunction]]" nestIndent="30">
+                    <flxs-tree-grid-column dataField="Territory_Rep" headerText="Territory Rep"></flxs-tree-grid-column>
+                    <!-- <flxs-tree-grid-column-group headerText="Total"> -->
+                        <flxs-tree-grid-column dataField="Actual"></flxs-tree-grid-column>
+                        <flxs-tree-grid-column dataField="Estimate"></flxs-tree-grid-column>
+                    <!-- </flxs-tree-grid-column-group> -->
+                </flxs-tree-grid-column-level>
+            </flxs-tree-grid-column-level>
+          </flxs-tree-grid-column-level>
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+
+      var multipleGrouping_Manual_dpFlat = [
+        {Region:"Southwest", RegionCode:"SW", Territory:"Arizona",TerritoryCode:"AZ",
+            Territory_Rep:"Barbara Jennings", Actual:38865, Estimate:40000},
+        {Region:"Southwest", RegionCode:"SW", Territory:"Arizona",TerritoryCode:"AZ",
+            Territory_Rep:"Dana Binn", Actual:29885, Estimate:30000},
+        {Region:"Southwest", RegionCode:"SW", Territory:"Central California",TerritoryCode:"CA",
+            Territory_Rep:"Joe Smith", Actual:29134, Estimate:30000},
+        {Region:"Southwest",RegionCode:"SW",  Territory:"Nevada",TerritoryCode:"NV",
+            Territory_Rep:"Bethany Pittman", Actual:52888, Estimate:45000},
+        {Region:"Southwest",RegionCode:"SW",  Territory:"Northern California",TerritoryCode:"NC",
+            Territory_Rep:"Lauren Ipsum", Actual:38805, Estimate:40000},
+        {Region:"Southwest", RegionCode:"SW", Territory:"Northern California",TerritoryCode:"NC",
+            Territory_Rep:"T.R. Smith", Actual:55498, Estimate:40000},
+        {Region:"Southwest", RegionCode:"SW",Territory:"Southern California",TerritoryCode:"SC",
+            Territory_Rep:"Alice Treu", Actual:44985, Estimate:45000},
+        {Region:"Southwest", RegionCode:"SW" ,Territory:"Southern California",TerritoryCode:"SC",
+            Territory_Rep:"Jane Grove", Actual:44913, Estimate:45000},
+        {Region:"NorthEast",RegionCode:"NE" , Territory:"New York",TerritoryCode:"NY",
+            Territory_Rep:"Jose Rodriguez", Actual:26992, Estimate:30000},
+        {Region:"NorthEast", RegionCode:"NE",Territory:"New York",TerritoryCode:"NY",
+            Territory_Rep:"lisa Sims", Actual:47885, Estimate:50000},
+        {Region:"NorthEast", RegionCode:"NE", Territory:"Massachusetts",TerritoryCode:"MA",
+            Territory_Rep:"kelly o'connell", Actual:172911, Estimate:20000},
+        {Region:"NorthEast", RegionCode:"NE", Territory:"Pennsylvania",TerritoryCode:"PA",
+            Territory_Rep:"John Barnes", Actual:32105, Estimate:30000},
+        {Region:"MidWest",  RegionCode:"NE", Territory:"Illinois",TerritoryCode:"IL",
+            Territory_Rep:"Seth Brown", Actual:42511, Estimate:40000}
+      ];
+
+      const multipleGrouping_Manual_CreationComplete = function () {
+        var regions = multipleGrouping_Manual_groupBy(multipleGrouping_Manual_dpFlat, "Region", "(None)", null, ['RegionCode']);
+        for (var i = 0; i < regions.length; i++) {
+          var region = regions[i];
+          region.children = multipleGrouping_Manual_groupBy(region.children, "Territory", "(None)", null, ['TerritoryCode']);
+        }
+        // this.shadowRoot.getElementById('flxs-grid') eqv this.$["flxs-grid"] 
+        this.$["flxs-grid"].grid.setDataProvider(regions);
+        this.$["flxs-grid"].grid.domElement.style.fontFamily = "Perpetua Titling MT";
+        this.$["flxs-grid"].grid.domElement.style.background = "#222222";
+      };
+
+      const multipleGrouping_Manual_groupBy = function (dp, prop, nullValue, filterfunction, additionalProperties,
+        useOtherBucket) {
+
+        if (!additionalProperties) additionalProperties = [];
+        var buckets = {};
+        var key;
+        var result = [];
+        //iterate through the flat list and create a hierarchy
+        if (useOtherBucket) {
+          buckets["other"] = [];
+        }
+        for (var i = 0; i < dp.length; i++) {
+          var item = dp[i];
+          key = flexiciousNmsp.UIUtils.resolveExpression(item, prop); //the parent
+          if (!buckets[key]) {
+            buckets[key] = [];//the children
+          }
+          if (filterfunction == null || filterfunction(item))
+            buckets[key].push(item); //add to the parents child list
+          else if (useOtherBucket) {
+            buckets["other"].push(item);
+          }
+        }
+        for (key in buckets) {
+          var obj = {};
+          obj[prop] = key == "null" ? nullValue : key;
+          obj['children'] = buckets[key];
+          if (buckets[key].length > 0) {
+            for (var j = 0; j < additionalProperties.length; j++) {
+              var addProp = additionalProperties[j];
+              obj[addProp] = buckets[key][0][addProp];
+            }
+          }
+          result.push(obj); //create the final structure
+        }
+        return result; //this will refresh the grid...
+
+      };
+
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          _rollOverColors: 0x222222,
+          _cellTextColorFunction: function(cell) {
+            return 0xffffff;
+          },
+          _expandCollapseIconDrawFunction: function(iexp, targetCell){
+            if(!iexp.rowInfo.getIsDataRow()) return;
+            if(iexp.domElement.innerHTML.indexOf("iron-icon") == -1)
+              iexp.domElement.innerHTML = '<iron-icon icon="av:play-arrow" style="fill: white"></iron-icon>' 
+
+            var ironIcon = iexp.domElement.firstChild;
+            var svgStyle = ironIcon.shadowRoot.querySelector("svg").style;
+            svgStyle.transformOrigin = "50% 50%";
+            svgStyle.transitionDuration = "0s";
+            svgStyle.transitionDelay = "0s";
+            var needAnimation=false;
+            if(iexp.getCell().rowInfo.getData() == iexp.getCell().level.grid.expandingItem){
+              needAnimation = true;
+            }
+
+            if (iexp.open){
+              //the issue here is that the cells are recycled.
+              //so the cell you clicked on, may not be the cell used 
+              //to render the icon after the expand is complete. 
+              //so we addded this needanimation flag to identify which cell needs 
+              //the animation.
+              if(needAnimation){
+                if(svgStyle.transform=="rotateZ(90deg)"){
+                  svgStyle.transform = "rotateZ(0deg)";
+                }
+                  svgStyle.transitionDuration = "0.5s"; 
+              }
+              svgStyle.transform = "rotateZ(90deg)";
+            }
+            else{ 
+              if(needAnimation){
+                if(svgStyle.transform=="rotateZ(0deg)"){
+                  svgStyle.transform = "rotateZ(90deg)";
+                  ironIcon.offsetWidth;//force draw
+                }
+                  svgStyle.transitionDuration = "0.5s"; 
+              }
+              svgStyle.transform = "rotateZ(0deg)";
+            }
+          },
+          ready: multipleGrouping_Manual_CreationComplete,
+          _dynamicLevelCreated: function(e) {
+           e.level.enableFooters=false
+          }
+        });
+      })
+    </script>
+  </dom-module>
+  
+  <basic-grid-demo></basic-grid-demo>
+</body>
+
+</html>

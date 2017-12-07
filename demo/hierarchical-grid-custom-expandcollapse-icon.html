@@ -162,6 +162,7 @@
               if(needAnimation){
                 if(svgStyle.transform=="rotateZ(90deg)"){
                   svgStyle.transform = "rotateZ(0deg)";
+                  ironIcon.offsetWidth;//force draw
                 }
                   svgStyle.transitionDuration = "0.5s"; 
               }

@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../flxs-tree-grid-column-group.html">
+  
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      
+
+      <iron-ajax auto url="data/englishmonarchs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid dataProvider="{{ ajaxResponse }}" enableMultiColumnSort="true" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px"
+          rollOverColor="[[_rollOverColors]]" filterPageSortChange="[[_onFilterPageSortChange]]" creationComplete="[[_onCreationComplete]]">
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization"
+            filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+          <flxs-tree-grid-column-group dataField="hse" headerText="House">
+            <flxs-tree-grid-column dataField="hse" headerText="House"  cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right" headerAlign="right"></flxs-tree-grid-column>
+          </flxs-tree-grid-column-group>
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          _returnRed: function(cell){
+            return 0xFF0000;
+          },
+          _rollOverColors : 0xFF4500,
+          _onFilterPageSortChange: function(e) {
+            if(e.cause === "sortChange") {
+              var grid = e.target;
+              var sorts = e.filter.sorts;
+              var str = "";
+
+              for(var k=0;k<sorts.length; k++) {
+                  str += sorts[k].sortColumn + "#" + (sorts[k].isAscending ? "y" : "n") + "||";
+              }
+
+              localStorage.setItem('sortpreferences', str);
+              flexiciousNmsp.UIUtils.showMessage("Sort preferences saved!");
+            }
+          },
+          _onCreationComplete: function(e) {
+            var grid = e.target;
+            var localStorageSavedItem = localStorage.getItem('sortpreferences');
+            if (localStorageSavedItem) {
+                var currentPreferences = localStorageSavedItem;
+                var sorts = currentPreferences.split("||");
+                grid.getColumnLevel().removeAllSorts();
+
+                var columns = grid.getColumns();
+                for(var i=0;i<columns.length;i++) {
+                  var fld = columns[i];
+                  for(var k=0;k<sorts.length; k++) {
+                    var sortProps = sorts[k].split("#");
+                    if(fld.dataField === sortProps[0]) {
+                      var fs = new flexiciousNmsp.FilterSort();
+                      fs.sortCaseInsensitive=fld.sortCaseInsensitive;
+                      fs.sortNumeric=fld.sortNumeric;
+                      fs.sortColumn=fld.getSortFieldName();
+                      fs.sortCompareFunction=fld.sortCompareFunction;
+                      fs.isAscending = (sortProps[1] === "y" ? true : false);
+                      grid.getColumnLevel().addSort(fs);
+                      break;
+                    }
+                  }
+                }
+                
+                grid.validateNow();
+                flexiciousNmsp.UIUtils.showMessage("Preferences Loaded!");
+            }
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

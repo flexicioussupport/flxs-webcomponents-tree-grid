@@ -256,20 +256,21 @@
               let children = cell.level.grid.getChildren(cell.rowInfo.getData(), cell.level);
               let column = cell.getColumn();
               let nextRowPositionInfo = rowPositionIndex < verticalPositions.length - 1 ? verticalPositions[rowPositionIndex + 1] : currentRowPositionInfo;
-
+              let prevRowPositionInfo = rowPositionIndex > 0 ? verticalPositions[rowPositionIndex - 1] : currentRowPositionInfo;
+              
               if (nextRowPositionInfo) {
-                if (nextRowPositionInfo.levelNestDepth > currentRowPositionInfo.levelNestDepth) {
+                if (prevRowPositionInfo.levelNestDepth == currentRowPositionInfo.levelNestDepth && nextRowPositionInfo.levelNestDepth > currentRowPositionInfo.levelNestDepth) {
                   cell.domElement.style.border = "none";
                   cell.domElement.style.borderleft = "0.5px solid #888888";
                   cell.domElement.style.borderRight = "0.5px solid #888888";
-                  cell.domElement.style.borderTop = "1.5px solid #888888";
+                  cell.domElement.style.borderTop = "4px solid #888888";
                   return false;
                 }
                 if (currentRowPositionInfo.levelNestDepth > 1 && rowPositionIndex == verticalPositions.length - 1 || nextRowPositionInfo.levelNestDepth < currentRowPositionInfo.levelNestDepth) {
                   cell.domElement.style.border = "none";
                   cell.domElement.style.borderleft = "0.5px solid #888888";
                   cell.domElement.style.borderRight = "0.5px solid #888888";
-                  cell.domElement.style.borderBottom = "1.5px solid #888888";
+                  cell.domElement.style.borderBottom = "4px solid #888888";
                   return false;
                 }
               }

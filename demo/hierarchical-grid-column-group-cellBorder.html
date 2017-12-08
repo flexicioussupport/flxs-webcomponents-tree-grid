@@ -1,0 +1,288 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../flxs-tree-grid-column-group.html">
+  <link rel="import" href="../flxs-tree-grid-column-level.html">
+
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid id="grid0" dataProvider="{{ data0 }}" enableDynamicLevels="true" childrenField="sub" enableHideIfNoChildren="true"
+          enableDrillDown="true" forcePagerRow="false" enableFilters="true" enableExport="true" style="width:600px;height:140px"
+          componentsCreated="[[_onComponentCreated]]" rollOverColor="[[_rollOverColors]]" cellBorderFunction="[[_cellBorderFunction]]">
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization" filterControl="ComboBox"
+            filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+          <flxs-tree-grid-column-group headerText="House">
+            <flxs-tree-grid-column dataField="hse" headerText="House" cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right" headerAlign="right"></flxs-tree-grid-column>
+          </flxs-tree-grid-column-group>
+          <flxs-tree-grid-column-level reusePreviousLevelColumns="true"></flxs-tree-grid-column-level>
+        </flxs-tree-grid>
+        <br>
+        <br>
+        <flxs-tree-grid id="grid1" dataProvider="{{ data1 }}" enableDynamicLevels="true" childrenField="sub" enableHideIfNoChildren="true"
+          enableDrillDown="true" forcePagerRow="false" enableFilters="true" enableExport="true" style="width:600px;height:200px"
+          componentsCreated="[[_onComponentCreated]]" rollOverColor="[[_rollOverColors]]" cellBorderFunction="[[_cellBorderFunction]]">
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization" filterControl="ComboBox"
+            filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+          <flxs-tree-grid-column-group headerText="House">
+            <flxs-tree-grid-column dataField="hse" headerText="House" cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right" headerAlign="right"></flxs-tree-grid-column>
+          </flxs-tree-grid-column-group>
+          <flxs-tree-grid-column-level reusePreviousLevelColumns="true"></flxs-tree-grid-column-level>
+        </flxs-tree-grid>
+        <br>
+        <br>
+        <flxs-tree-grid id="grid2" dataProvider="{{ data2 }}" enableDynamicLevels="true" childrenField="sub" enableHideIfNoChildren="true"
+          enableDrillDown="true" forcePagerRow="false" enableFilters="true" enableExport="true" style="width:600px;height:200px"
+          componentsCreated="[[_onComponentCreated]]" rollOverColor="[[_rollOverColors]]" cellBorderFunction="[[_cellBorderFunction]]">
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization" filterControl="ComboBox"
+            filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+          <flxs-tree-grid-column-group headerText="House">
+            <flxs-tree-grid-column dataField="hse" headerText="House" cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right" headerAlign="right"></flxs-tree-grid-column>
+          </flxs-tree-grid-column-group>
+          <flxs-tree-grid-column-level reusePreviousLevelColumns="true"></flxs-tree-grid-column-level>
+        </flxs-tree-grid>
+        <br>
+        <br>
+        <flxs-tree-grid id="grid3" dataProvider="{{ data3 }}" enableDynamicLevels="true" childrenField="sub" enableHideIfNoChildren="true"
+          enableDrillDown="true" forcePagerRow="false" enableFilters="true" enableExport="true" style="width:600px;height:200px"
+          componentsCreated="[[_onComponentCreated]]" rollOverColor="[[_rollOverColors]]" cellBorderFunction="[[_cellBorderFunction]]">
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization" filterControl="ComboBox"
+            filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+          <flxs-tree-grid-column-group headerText="House">
+            <flxs-tree-grid-column dataField="hse" headerText="House" cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right" headerAlign="right"></flxs-tree-grid-column>
+          </flxs-tree-grid-column-group>
+          <flxs-tree-grid-column-level reusePreviousLevelColumns="true"></flxs-tree-grid-column-level>
+        </flxs-tree-grid>
+        <br>
+        <br>
+        <flxs-tree-grid id="grid4" dataProvider="{{ data4}}" enableDynamicLevels="true" childrenField="sub" enableHideIfNoChildren="true"
+          enableDrillDown="true" forcePagerRow="false" enableFilters="true" enableExport="true" style="width:600px;height:200px"
+          componentsCreated="[[_onComponentCreated]]" rollOverColor="[[_rollOverColors]]" cellBorderFunction="[[_cellBorderFunction]]">
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization" filterControl="ComboBox"
+            filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+          <flxs-tree-grid-column-group headerText="House">
+            <flxs-tree-grid-column dataField="hse" headerText="House" cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right" headerAlign="right"></flxs-tree-grid-column>
+          </flxs-tree-grid-column-group>
+          <flxs-tree-grid-column-level reusePreviousLevelColumns="true"></flxs-tree-grid-column-level>
+        </flxs-tree-grid>
+      </div>
+    </template>
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          properties: {
+            data0: {
+              type: Array,
+              value: function () {
+                return [
+                  {
+                    "nm": "Ava Gross",
+                    "hse": "TELEPARK",
+                    "cty": "Dellview",
+                    "yrs": "1952-491"
+                  }
+                ]
+              }
+            },
+            data1: {
+              type: Array,
+              value: function () {
+                return [
+                  {
+                    "nm": "Ava Gross",
+                    "hse": "TELEPARK",
+                    "cty": "Dellview",
+                    "yrs": "1952-491",
+                    "sub": [
+                      {
+                        "nm": "Mosley Rhodes",
+                        "hse": "BIFLEX",
+                        "cty": "Chalfant",
+                        "yrs": "2014-1511"
+                      },
+                      {
+                        "nm": "Warren Grant",
+                        "hse": "PYRAMIS",
+                        "cty": "Blairstown",
+                        "yrs": "1948-1045"
+                      },
+                      {
+                        "nm": "Tania Parrish",
+                        "hse": "ISOSTREAM",
+                        "cty": "Bowmansville",
+                        "yrs": "1997-515"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            data2: {
+              type: Array,
+              value: function () {
+                return [
+                  {
+                    "nm": "Ava Gross",
+                    "hse": "TELEPARK",
+                    "cty": "Dellview",
+                    "yrs": "1952-491",
+                    "sub": [
+                      {
+                        "nm": "Mosley Rhodes",
+                        "hse": "BIFLEX",
+                        "cty": "Chalfant",
+                        "yrs": "2014-1511"
+                      }
+                    ]
+                  },
+                  {
+                    "nm": "Warren Grant",
+                    "hse": "PYRAMIS",
+                    "cty": "Blairstown",
+                    "yrs": "1948-1045",
+                    "sub": [
+                      {
+                        "nm": "Tania Parrish",
+                        "hse": "ISOSTREAM",
+                        "cty": "Bowmansville",
+                        "yrs": "1997-515"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            data3: {
+              type: Array,
+              value: function () {
+                return [
+                  {
+                    "nm": "Ava Gross",
+                    "hse": "TELEPARK",
+                    "cty": "Dellview",
+                    "yrs": "1952-491",
+                  },
+                  {
+                    "nm": "Warren Grant",
+                    "hse": "PYRAMIS",
+                    "cty": "Blairstown",
+                    "yrs": "1948-1045",
+                    "sub": [
+                      {
+                        "nm": "Tania Parrish",
+                        "hse": "ISOSTREAM",
+                        "cty": "Bowmansville",
+                        "yrs": "1997-515"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            data4: {
+              type: Array,
+              value: function () {
+                return [
+                  {
+                    "nm": "Ava Gross",
+                    "hse": "TELEPARK",
+                    "cty": "Dellview",
+                    "yrs": "1952-491",
+                    "sub": [
+                      {
+                        "nm": "Mosley Rhodes",
+                        "hse": "BIFLEX",
+                        "cty": "Chalfant",
+                        "yrs": "2014-1511"
+                      }
+                    ]
+                  },
+                  {
+                    "nm": "Warren Grant",
+                    "hse": "PYRAMIS",
+                    "cty": "Blairstown",
+                    "yrs": "1948-1045"
+                  }
+                ]
+              }
+            }
+          },
+          _returnRed: function (cell) {
+            return 0xFF0000;
+          },
+          _rollOverColors: 0xFF4500,
+          _onComponentCreated: function(e) {
+            this.expandAll();
+          },
+          _cellBorderFunction: function (cell) {
+            if (cell.rowInfo.getIsDataRow()) {
+              let verticalPositions = cell.level.grid.getBodyContainer().itemVerticalPositions;
+              let currentRowPositionInfo = cell.rowInfo.rowPositionInfo;
+              let rowPositionIndex = verticalPositions.indexOf(currentRowPositionInfo);
+              let children = cell.level.grid.getChildren(cell.rowInfo.getData(), cell.level);
+              let column = cell.getColumn();
+              let nextRowPositionInfo = rowPositionIndex < verticalPositions.length - 1 ? verticalPositions[rowPositionIndex + 1] : currentRowPositionInfo;
+
+              if (nextRowPositionInfo) {
+                if (nextRowPositionInfo.levelNestDepth > currentRowPositionInfo.levelNestDepth) {
+                  cell.domElement.style.border = "none";
+                  cell.domElement.style.borderleft = "0.5px solid #888888";
+                  cell.domElement.style.borderRight = "0.5px solid #888888";
+                  cell.domElement.style.borderTop = "1.5px solid #888888";
+                  return false;
+                }
+                if (currentRowPositionInfo.levelNestDepth > 1 && rowPositionIndex == verticalPositions.length - 1 || nextRowPositionInfo.levelNestDepth < currentRowPositionInfo.levelNestDepth) {
+                  cell.domElement.style.border = "none";
+                  cell.domElement.style.borderleft = "0.5px solid #888888";
+                  cell.domElement.style.borderRight = "0.5px solid #888888";
+                  cell.domElement.style.borderBottom = "1.5px solid #888888";
+                  return false;
+                }
+              }
+            }
+            return true;
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

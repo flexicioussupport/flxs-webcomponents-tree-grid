@@ -260,17 +260,17 @@
               
               if (nextRowPositionInfo) {
                 if (prevRowPositionInfo.levelNestDepth == currentRowPositionInfo.levelNestDepth && nextRowPositionInfo.levelNestDepth > currentRowPositionInfo.levelNestDepth) {
-                  cell.domElement.style.border = "none";
-                  cell.domElement.style.borderleft = "0.5px solid #888888";
-                  cell.domElement.style.borderRight = "0.5px solid #888888";
+                  cell.domElement.style.borderleft = "0.5px solid #666666";
+                  cell.domElement.style.borderRight = "0.5px solid #666666";
                   cell.domElement.style.borderTop = "4px solid #888888";
+                  cell.domElement.style.borderBottom = "0.25px solid #666666";
                   return false;
                 }
                 if (currentRowPositionInfo.levelNestDepth > 1 && rowPositionIndex == verticalPositions.length - 1 || nextRowPositionInfo.levelNestDepth < currentRowPositionInfo.levelNestDepth) {
-                  cell.domElement.style.border = "none";
-                  cell.domElement.style.borderleft = "0.5px solid #888888";
-                  cell.domElement.style.borderRight = "0.5px solid #888888";
+                  cell.domElement.style.borderleft = "0.5px solid #666666";
+                  cell.domElement.style.borderRight = "0.5px solid #666666";
                   cell.domElement.style.borderBottom = "4px solid #888888";
+                  cell.domElement.style.borderTop = "0.25px solid #666666";
                   return false;
                 }
               }

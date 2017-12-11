@@ -259,7 +259,10 @@
               let prevRowPositionInfo = rowPositionIndex > 0 ? verticalPositions[rowPositionIndex - 1] : currentRowPositionInfo;
               
               if (nextRowPositionInfo) {
-                if (prevRowPositionInfo.levelNestDepth == currentRowPositionInfo.levelNestDepth && nextRowPositionInfo.levelNestDepth > currentRowPositionInfo.levelNestDepth) {
+                //if there is a next row [i am not the last row]
+                if (prevRowPositionInfo.levelNestDepth == currentRowPositionInfo.levelNestDepth 
+                    && nextRowPositionInfo.levelNestDepth > currentRowPositionInfo.levelNestDepth) {
+                  //if row before me is at the same level as me, and row after me is a child - that is i am a parent.
                   cell.domElement.style.borderleft = "0.5px solid #666666";
                   cell.domElement.style.borderRight = "0.5px solid #666666";
                   cell.domElement.style.borderTop = "4px solid #888888";
@@ -267,6 +270,7 @@
                   return false;
                 }
                 if (currentRowPositionInfo.levelNestDepth > 1 && rowPositionIndex == verticalPositions.length - 1 || nextRowPositionInfo.levelNestDepth < currentRowPositionInfo.levelNestDepth) {
+                  //If i am a child, and i am the last row, OR the next row is a parent [which means i am the last child of the current parent]
                   cell.domElement.style.borderleft = "0.5px solid #666666";
                   cell.domElement.style.borderRight = "0.5px solid #666666";
                   cell.domElement.style.borderBottom = "4px solid #888888";

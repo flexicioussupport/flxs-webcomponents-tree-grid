@@ -71,8 +71,9 @@
             var col = grid.getExportableColumns()[i];
             if (!exporter.isIncludedInExport(col))
                 continue;
-            var value = this.getText(flexiciousNmsp.UIUtils.resolveExpression(record, col.dataField));
-            item.push(isNaN(value) ? value : Number(value));
+            var value = flexiciousNmsp.UIUtils.resolveExpression(record, col.dataField);
+            value = value ? this.getText(value) : "";
+            item.push(value ? isNaN(value) ? value : Number(value) : "");
         }
         this.data.push(item);
         return "";

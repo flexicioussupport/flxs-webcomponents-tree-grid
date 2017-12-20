@@ -126,11 +126,11 @@
 
         for (i = 0; i < gridProps.length; i++) {
             this.writeHeader(gridProps[i].grid);
-            [].forEach.call(gridProps[i].grid.getDataProvider(), function (data) {
+            [].forEach.call(gridProps[i].grid.getDataProviderNoPaging(), function (data) {
                 this.writeRecord(gridProps[i].grid, data);
             }, this);
 
-            this.writeFooter(gridProps[i].grid, gridProps[i].grid.getDataProvider());
+            this.writeFooter(gridProps[i].grid, gridProps[i].grid.getDataProviderNoPaging());
 
             if (multiTab) {
                 XLSX.utils.book_append_sheet(new_wb, XLSX.utils.aoa_to_sheet(this.data), this.getValidSheetName(gridProps[i]));

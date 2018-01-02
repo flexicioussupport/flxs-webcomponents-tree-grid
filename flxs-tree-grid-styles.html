@@ -15,8 +15,8 @@
                 position: relative;
             }
             /*.flexiciousGridPager .pagerDiv  {
-    vertical-align: top;
-}*/
+                vertical-align: top;
+            }*/
             
             .flexiciousGridPager .toolbarButtonIconCell {
                 cursor: pointer;
@@ -2425,7 +2425,7 @@ body > #ui-toaster-br {
 .ui-toaster .ui-toaster-border-bc,
 .ui-toaster .ui-toaster-border-br { display:none; }
 
-/*custom styles*/
+/* ================================ custom styles =======================================*/
             
             .flexiciousGrid .settingsPopup .customOptions {
                 right: 10px;
@@ -2464,9 +2464,49 @@ body > #ui-toaster-br {
                 max-height: 100px;
                 background: #333333;
             }
+
 	    .flexiciousGrid .flexDataGridVirtualBodyContainer .flexDataGridDataCell label {
                 margin-top:4px;
             }
+
+            .flexiciousGrid .sort-label::before {
+                font-size: 0.8em;
+                position: absolute;
+                left: 2px;
+                top: 0;
+                content: attr(data-index) " ";
+            }
+
+            .flexiciousGrid .sort-label::after {
+                font-family: 'Material Icons';
+                text-rendering: optimizeLegibility;
+                font-feature-settings: "liga" 1;
+                font-style: normal;
+                text-transform: none;
+                line-height: 1;
+                display: inline-block;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                color: #fff;
+                font-weight: normal;
+                letter-spacing: normal;
+                word-wrap: normal;
+                white-space: nowrap;
+                direction: ltr;
+                position: absolute;
+                top: 50%;
+                margin-top: -0.5em;
+                right: 2px;
+            }
+
+            .flexiciousGrid .sort-label.desc::after {
+                content: 'arrow_drop_down';
+            }
+
+            .flexiciousGrid .sort-label.asc::after {
+                content: 'arrow_drop_up';
+            }
+    
         </style>
     </template>
 </dom-module>

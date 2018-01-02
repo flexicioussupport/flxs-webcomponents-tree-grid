@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../flxs-tree-grid-column-group.html">
+  <link rel="import" href="../flxs-tree-grid-column-level.html">
+
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+
+      <iron-ajax auto url="data/englishmonarchs.1.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <flxs-tree-grid enableDynamicLevels="true" childrenField="sub" enableHideIfNoChildren="true" enableDrillDown="true" dataProvider="{{ ajaxResponse }}"
+          forcePagerRow="false" enableFilters="true" enableExport="true" style="width:600px;height:400px; background-color: #222222"
+          rollOverColor="[[_rollOverColors]]" cellBorderFunction="[[cellBorderFunctionWithCss]]" scroll="[[_onScroll]]" horizontalScrollPolicy="auto"
+          componentsCreated="[[_onComponentCreated]]" creationComplete="[[_creationComplete]]">
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="TextInput" filterOperation="BeginsWith" columnWidthMode="fixed"
+            width="200"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization" filterControl="ComboBox"
+            filterComboBoxBuildFromGrid="true" columnWidthMode="fixed" width="200"></flxs-tree-grid-column>
+          <flxs-tree-grid-column-group headerText="House">
+            <flxs-tree-grid-column dataField="hse" headerText="House" cellTextColorFunction="[[_returnRed]]" columnWidthMode="fixed"
+              width="200"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right" headerAlign="right" columnWidthMode="fixed" width="200"></flxs-tree-grid-column>
+          </flxs-tree-grid-column-group>
+          <flxs-tree-grid-column-level reusePreviousLevelColumns="true"></flxs-tree-grid-column-level>
+        </flxs-tree-grid>
+      </div>
+    </template>
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          properties: {
+            cssClss: {
+              type: Array,
+              value: function() { return [ 'rowgroup-firstChild', 'rowgroup-rightmost-firstChild', 'rowgroup-lastChild', 'rowgroup-rightmost-lastChild' ] }
+            }
+          },
+          _returnRed: function (cell) {
+            return 0xFF0000;
+          },
+          _rollOverColors: 0xFF4500,
+          _onComponentCreated: function (e) {
+            this.expandAll();
+          },
+          cellBorderFunctionInline: function (cell) {
+            if (cell.rowInfo.getIsDataRow()) {
+              let verticalPositions = cell.level.grid.getBodyContainer().itemVerticalPositions;
+              let currentRowPositionInfo = cell.rowInfo.rowPositionInfo;
+              let rowPositionIndex = verticalPositions.indexOf(currentRowPositionInfo);
+              let children = cell.level.grid.getChildren(cell.rowInfo.getData(), cell.level);
+              let column = cell.getColumn();
+              let nextRowPositionInfo = rowPositionIndex < verticalPositions.length - 1 ? verticalPositions[rowPositionIndex + 1] : currentRowPositionInfo;
+              let prevRowPositionInfo = rowPositionIndex > 0 ? verticalPositions[rowPositionIndex - 1] : currentRowPositionInfo;
+
+              if (nextRowPositionInfo) {
+                //if there is a next row [i am not the last row]
+                if (prevRowPositionInfo.levelNestDepth == currentRowPositionInfo.levelNestDepth
+                  && nextRowPositionInfo.levelNestDepth > currentRowPositionInfo.levelNestDepth) {
+                  //if row before me is at the same level as me, and row after me is a child - that is i am a parent.
+                  if (column && column.getColIndex() == cell.level.grid.getColumns().length - 1) {
+                    cell.domElement.style.borderRight = "0px solid #666666";
+                  } else {
+                    cell.domElement.style.borderRight = "0.5px solid #666666";
+                  }
+
+                  cell.domElement.style.borderLeft = "0px solid #666666";
+                  cell.domElement.style.borderTop = "2px solid #666666"; // 3px top border => 2px + previous cell 1px bottom border
+                  cell.domElement.style.borderBottom = "0.25px solid #666666";
+                  return false;
+                }
+                if (currentRowPositionInfo.levelNestDepth > 1 && rowPositionIndex == verticalPositions.length - 1 || nextRowPositionInfo.levelNestDepth < currentRowPositionInfo.levelNestDepth) {
+                  //If i am a child, and i am the last row, OR the next row is a parent [which means i am the last child of the current parent]
+                  if (column && column.getColIndex() == cell.level.grid.getColumns().length - 1) {
+                    cell.domElement.style.borderRight = "0px solid #666666";
+                  } else {
+                    cell.domElement.style.borderRight = "0.5px solid #666666";
+                  }
+
+                  cell.domElement.style.borderLeft = "0px solid #666666";
+                  cell.domElement.style.borderBottom = "3px solid #666666"; // 3px bottom border
+                  cell.domElement.style.borderTop = "0px solid #666666";
+                  return false;
+                }
+              }
+            }
+            return true;
+          },
+          cellBorderFunctionWithCss: function (cell) {
+            let jdomElem = (cell.domElement);
+            let self = document.querySelector('basic-grid-demo');
+            if (cell.rowInfo.getIsDataRow()) {
+              let verticalPositions = cell.level.grid.getBodyContainer().itemVerticalPositions;
+              let currentRowPositionInfo = cell.rowInfo.rowPositionInfo;
+              let rowPositionIndex = verticalPositions.indexOf(currentRowPositionInfo);
+              let children = cell.level.grid.getChildren(cell.rowInfo.getData(), cell.level);
+              let column = cell.getColumn();
+              let nextRowPositionInfo = rowPositionIndex < verticalPositions.length - 1 ? verticalPositions[rowPositionIndex + 1] : currentRowPositionInfo;
+              let prevRowPositionInfo = rowPositionIndex > 0 ? verticalPositions[rowPositionIndex - 1] : currentRowPositionInfo;
+
+              if (nextRowPositionInfo) {
+                //if there is a next row [i am not the last row]
+                if (prevRowPositionInfo.levelNestDepth == currentRowPositionInfo.levelNestDepth
+                  && nextRowPositionInfo.levelNestDepth > currentRowPositionInfo.levelNestDepth) {
+                  //if row before me is at the same level as me, and row after me is a child - that is i am a parent.
+                  if (column && column.getColIndex() == cell.level.grid.getColumns().length - 1) {
+                    self.addCssClass(jdomElem, 'rowgroup-rightmost-firstChild');
+                  } else {
+                    self.addCssClass(jdomElem, 'rowgroup-firstChild');
+                  }
+                  return false;
+                }
+                if (currentRowPositionInfo.levelNestDepth > 1 && rowPositionIndex == verticalPositions.length - 1 || nextRowPositionInfo.levelNestDepth < currentRowPositionInfo.levelNestDepth) {
+                  //If i am a child, and i am the last row, OR the next row is a parent [which means i am the last child of the current parent]
+                  if (column && column.getColIndex() == cell.level.grid.getColumns().length - 1) {
+                    self.addCssClass(jdomElem, 'rowgroup-rightmost-lastChild');
+                  } else {
+                    self.addCssClass(jdomElem, 'rowgroup-lastChild');
+                  }
+                  return false;
+                }
+              }
+            }
+
+            self.removeCssClass(jdomElem);
+            return true;
+          },
+          addCssClass: function (jdomElem, clsName) {
+            if(!this.hasCssClass(jdomElem, clsName)) {
+                this.removeCssClass(jdomElem);
+                jdomElem.classList.add(clsName);
+            }
+          },
+          removeCssClass: function (jdomElem) {
+            for(let i=0;i<this.cssClss.length;i++) {
+              if(this.hasCssClass(jdomElem, this.cssClss[i])) {
+                jdomElem.classList.remove(this.cssClss[i]);
+                break;
+              }
+            }
+          },
+          hasCssClass: function(domElem, clsName) {
+            if(domElem) { return domElem.classList.contains(clsName); } return false;
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

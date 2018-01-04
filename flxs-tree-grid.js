@@ -45,7 +45,7 @@
         this.popup.move(pt.x - pt1.x, pt.y - pt1.y + this.getHeight());
     };
     flexiciousNmsp.MultiSelectComboBox.prototype.onDocumentMouseUp = function (e) {
-        if (e.triggerEvent.path && (e.triggerEvent.path.indexOf(this.popup.domElement) >= 0)) {
+        if (e.triggerEvent.path && this.popup && (e.triggerEvent.path.indexOf(this.popup.domElement) >= 0)) {
 
         }
         else if (this.owns(e.triggerEvent.target)) {

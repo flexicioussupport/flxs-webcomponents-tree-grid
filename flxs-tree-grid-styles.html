@@ -2465,7 +2465,7 @@ body > #ui-toaster-br {
                 background: #333333;
             }
 
-	    .flexiciousGrid .flexDataGridVirtualBodyContainer .flexDataGridDataCell label {
+			.flexiciousGrid .flexDataGridVirtualBodyContainer .flexDataGridDataCell label {
                 margin-top:4px;
             }
 
@@ -2506,6 +2506,56 @@ body > #ui-toaster-br {
             .flexiciousGrid .sort-label.asc::after {
                 content: 'arrow_drop_up';
             }
+			
+			
+            .hierarchy-view .is-grp.is-head-grp {border-top: solid 3px #69696c;}
+            .hierarchy-view .is-child-grp-border {border-bottom: solid 4px #69696c;}
+
+            .hierarchy-view .is-child-grp {border-left: solid 3px yellow;}
+            .multi-sort-addon .sortIcon {display: none;}
+
+/* ========================================= Testing purpose ===================================== */
+
+            .flxs-even-row {
+                color: white;
+                background-color: #404040;
+                border-bottom: solid 1px #69696c;
+                border-right: solid 1px #69696c;
+            }
+
+            .flxs-odd-row {
+                color: white;
+                background-color: #262626;
+                border-bottom: solid 1px #69696c;
+                border-right: solid 1px #69696c;
+            }
+
+            .flexDataGridCell.flxs-has-children {
+                border-top: 3px solid #69696c;
+            }
+
+            .flexDataGridCell.flxs-has-children:not([class*='flxs-has-next-grp']) {
+                border-bottom: 4px solid #69696c;
+            }
+
+            .flexDataGridCell.flxs-selected-cell ,
+            .flexDataGridCell.flxs-selected-row {
+                background-color: #0f4ea0;
+                color: #ffffff;
+            }
+
+            .flexDataGridPaddingCell.flexDataGridCell {
+                border-right: none;
+            }
+
+            .flexDataGridPaddingCell.flexDataGridCell.flxs-level3 {
+                border-right: 1px solid #69696c;
+            }
+            
+            .flexDataGridPaddingCell.flexDataGridCell.flxs-has-children:not([class*='flxs-level1']) {
+                border-left: 3px solid #ffff00;
+            }
+
     
         </style>
     </template>

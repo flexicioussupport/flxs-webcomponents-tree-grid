@@ -64,8 +64,8 @@
       <div class="card">
         <h1>Hierarchical grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" editable="true" enableFooters="true" enableFilters="true"
-          itemClick="[[_itemClick]]" rowHeight="40" sortArrowSkin="/sortArrowOrange.png"
-          enableCssBasedCellStyling="true"
+          itemClick="[[_itemClick]]" rowHeight="35"
+          enableCssBasedCellStylingExclusively="true" 
           style="font-family: 'Roboto', sans-serif;height: 600px; background-color: #222">
           <flxs-tree-grid-column-level childrenField="sub" selectedKeyField="id">
             <flxs-tree-grid-column type="checkbox" ></flxs-tree-grid-column>
@@ -79,7 +79,6 @@
         </flxs-tree-grid>
       </div>
     </template>
-
     <script>
       window.addEventListener('WebComponentsReady', function() {
         Polymer({

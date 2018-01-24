@@ -15,6 +15,7 @@
   <link rel="import" href="../../iron-ajax/iron-ajax.html">
   <link rel="import" href="../flxs-tree-grid.html">
   <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
   
 </head>
 
@@ -27,6 +28,7 @@
 
       <div class="card">
         <h1>Basic grid demo</h1>
+        <paper-button onclick="[[_refrsehGrid]]">Refresh</paper-button>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true" style="width:800px;height:400px"
           itemClick="[[itemClick]]" rollOverColor="[[_rollOverColors]]">
           <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
@@ -34,16 +36,66 @@
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization"
             filterControl="MultiSelectComboBox" useLabelFunctionForFilterCompare="true" blankValuesLabel="[NONE]" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="hse" headerText="House"  cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="hse" headerText="House" filterRenderer="[[_customMatchFilter]]" cellTextColorFunction="[[_returnRed]]"></flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right" headerAlign="right"></flxs-tree-grid-column>
         </flxs-tree-grid>
       </div>
     </template>
+    <script>
+    (function(window) {
+        "use strict";
+        var CustomMatchTextBoxRenderer, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
+        /**
+        * A TextInputRenderer is a custom item renderer, that defines how to use custom cells with logic that you can control
+        * @constructor
+        * @namespace flexiciousNmsp
+        * @extends TextInput
+        */
+        CustomMatchTextBoxRenderer=function(){
+            //make sure to call constructor
+            flexiciousNmsp.TextInput.apply(this,["input"]);//second parameter is the tag name for the dom element.
+        };
 
+        flexiciousNmsp.CustomMatchFilterControl_CustomMatchTextBoxRenderer= CustomMatchTextBoxRenderer; //add to name space
+        CustomMatchTextBoxRenderer.prototype = new flexiciousNmsp.TextInput(); //setup hierarchy
+        CustomMatchTextBoxRenderer.prototype.typeName = CustomMatchTextBoxRenderer.typeName = 'CustomMatchTextBoxRenderer';//for quick inspection
+        CustomMatchTextBoxRenderer.prototype.getClassNames=function(){
+            //we need to implement ICustomMatchFilterControl because we want to tell the grid to call our isMatch method to do the filter
+            //we need to implement IFilterControl to tell the grid that we are actually a filter control, and not a placeholder for non-filterable columns
+            //we need to implement iDelayedChange so that the grid listens to our "delayedChange" event, and not the regular change method.
+            //if we had set filterTriggerEvent on the column to "enterKeyUp", we would not have had to implement IDelayedChange, but then the
+            //user would have had to hit the enter key to run the filter.
+            return ["CustomMatchTextBoxRenderer","UIComponent","ICustomMatchFilterControl","IFilterControl","IDelayedChange"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages. We need to
+
+        };
+        CustomMatchTextBoxRenderer.prototype.isMatch=function(emp){
+            var text=this.getText();
+            if(emp && text.length>0){
+                return emp[this.parent.getColumn().dataField].toLowerCase().indexOf(text.toLowerCase())>=0;
+            }
+            return true;
+        };
+
+    }(window));
+    </script>
     <script>
       window.addEventListener('WebComponentsReady', function () {
         Polymer({
           is: 'basic-grid-demo',
+          properties: {
+            ajaxResponse: {
+              type: Array,
+              value: function() { return []}
+            }
+          },
+          _refrsehGrid: function(e) {
+            var grid = this.nextElementSibling.grid;
+            var data = document.querySelector('basic-grid-demo').ajaxResponse.slice(0);
+            grid.rebuildGridOnDataProviderChange = false;
+            document.querySelector('basic-grid-demo').set('ajaxResponse', data);
+
+            grid.rebuild();
+          },
           _itemClick: function (evt) {
             console.log("Clicked On " + evt.item.nm);
             alert("Clicked On " + evt.item.nm);
@@ -51,7 +103,8 @@
           _returnRed: function(cell){
             return 0xFF0000;
           },
-          _rollOverColors : 0xFF4500
+          _rollOverColors : 0xFF4500,
+          _customMatchFilter: new flexiciousNmsp.ClassFactory(flexiciousNmsp.CustomMatchFilterControl_CustomMatchTextBoxRenderer)
         });
       })
     </script>

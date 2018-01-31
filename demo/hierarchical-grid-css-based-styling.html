@@ -59,13 +59,14 @@
 
       </style>
 
-      <iron-ajax auto url="data/hierarchy.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+      <iron-ajax auto url="data/hierarchy.3.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
 
       <div class="card">
         <h1>Hierarchical grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" editable="true" enableFooters="true" enableFilters="true"
           itemClick="[[_itemClick]]" rowHeight="35"
           enableCssBasedCellStylingExclusively="true" 
+          componentsCreated="[[_onComplete]]"
           style="font-family: 'Roboto', sans-serif;height: 600px; background-color: #222">
           <flxs-tree-grid-column-level childrenField="sub" selectedKeyField="id">
             <flxs-tree-grid-column type="checkbox" ></flxs-tree-grid-column>
@@ -92,6 +93,9 @@
               return  item[column.dataField] + " (" + _totalChildren + ") ";
             }
             return item[column.dataField];
+          },
+          _onComplete: function(e) {
+            this.expandAll();
           }
         });
       })

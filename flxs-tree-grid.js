@@ -1565,6 +1565,8 @@
          * On create element but not attached to DOM
          */
         created: function () {
+            if(!this.style)
+            this.style = {};
             flexiciousNmsp.SettingsParser.log("grid created")
         },
         ready: function () {
@@ -1606,7 +1608,10 @@
             }
             var pendingDataProvider = null;
             for (var key in properties) {
-                if (this[key.toLowerCase()]) {
+                if (this[key.toLowerCase()] || (
+                    this[key.toLowerCase()]=="" && key.toLowerCase() =="nodatamessage"
+                )) 
+                {
                     if (key === "style") {
                         //this is thehtmlstyle
                     }

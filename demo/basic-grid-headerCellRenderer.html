@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      
+
+      <iron-ajax auto url="data/englishmonarchs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <paper-button onclick="[[_refrsehGrid]]">Refresh</paper-button>
+        <flxs-tree-grid id="gridelem" dataProvider="{{ ajaxResponse }}" forcePagerRow="true" enableFilters="true" enableExport="true"
+          horizontalScrollPolicy="auto" headerRowHeight="80" style="width:200px;height:400px">
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="nm" headerText="ID " filterControl="MultiSelectComboBox" filterComboBoxBuildFromGrid="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="City"
+            filterControl="MultiSelectComboBox" filterComboBoxBuildFromGrid="true" ></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="hse" headerText="House" filterControl="TextInput"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right"></flxs-tree-grid-column>
+          
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+      (function() {
+
+        var FlxsHeaderRenderer, uiUtil = flexiciousNmsp.UIUtils, flxsConst = flexiciousNmsp.Constants;
+
+        FlxsHeaderRenderer = function() {
+          flexiciousNmsp.UIComponent.apply(this, ['div']);
+          this.domElement.innerHTML = '<div style="text-align: left"><div></div><br><input type="checkbox"></div>';
+        } 
+
+        flexiciousNmsp.FlxsHeaderRenderer = FlxsHeaderRenderer;
+        FlxsHeaderRenderer.prototype = new flexiciousNmsp.UIComponent();
+        FlxsHeaderRenderer.prototype.typeName = FlxsHeaderRenderer.typeName = 'FlxsHeaderRenderer';
+
+        FlxsHeaderRenderer.prototype.getClassNames = function(){
+          return ['FlxsHeaderRenderer', 'UIComponent'];
+        };
+
+        FlxsHeaderRenderer.prototype.initialize = function(e) {
+          var cell = this.parent;
+          var col = cell.getColumn();
+          this.domElement.firstChild.firstChild.innerText = col.getHeaderText();
+          this.checkbox = this.domElement.firstChild.lastChild;
+          this.checkbox.checked = true;
+          this.checkbox.onchange = this.onchange.bind(this);
+        };
+
+        FlxsHeaderRenderer.prototype.onchange = function(e) {
+          this.parent.getColumn().excludeFromExport = !e.target.checked;
+        }
+
+        //This sets  the inner html, and grid will try to set it. Since we are an input field, IE 8 will complain. So we ignore it since we dont need it anyway.
+        FlxsHeaderRenderer.prototype.setText=function(val){
+
+        };
+
+      })();
+    </script>
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          ready: function() {
+            [].forEach.call(this.$.gridelem.grid.getColumns(), function(col) {
+
+              if(!col.implementsOrExtends('FlexDataGridCheckBoxColumn'))
+                  col.headerRenderer = new flexiciousNmsp.ClassFactory(flexiciousNmsp.FlxsHeaderRenderer)
+            });
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

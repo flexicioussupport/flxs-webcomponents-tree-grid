@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+  
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      
+
+      <iron-ajax auto url="data/users.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <paper-button onclick="[[_refrsehGrid]]">Refresh</paper-button>
+        <flxs-tree-grid id="gridelem" dataProvider="{{ ajaxResponse }}" editable="true" forcePagerRow="true" enableFilters="true" enableExport="true"
+          horizontalScrollPolicy="auto" headerRowHeight="80" editItemColors="[0x222222, 0x222222]" style="width:600px;height:400px">
+          <flxs-tree-grid-column dataField="id" headerText="ID " filterControl="MultiSelectComboBox" filterComboBoxBuildFromGrid="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="fname" headerText="First Name"
+            filterControl="MultiSelectComboBox" filterComboBoxBuildFromGrid="true" ></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="lname" headerText="Last Name" filterControl="TextInput"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="email" headerText="Email" textAlign="right"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="valid" headerText="Valid User" itemEditor="[[_checkboxEditor]]"></flxs-tree-grid-column>
+          
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+    (function (window) {
+        var CheckboxEditor, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants;
+        /**
+        * A CheckboxEditor is a custom item renderer, that defines how to use custom cells with logic that you can control
+        * @constructor
+        * @namespace com.flexicious.controls
+        * @extends UIComponent
+        */
+        CheckboxEditor = function () {
+
+            //make sure to call constructor
+            flexiciousNmsp.UIComponent.apply(this);//we extend from the built in flexicious combobox, which gives us a bunch of properties (like selected value etc)
+            /**
+            * This is a getter/setter for the data property. When the cell is created, it belongs to a row
+            * The data property points to the item in the grids dataprovider that is being rendered by this cell.
+            * @type {*}
+            */
+            this.data = null;
+            this.isEscapePressed = false;
+            this.domElement.innerHTML = '<div><input type="checkbox"></div>';
+        };
+
+        flexiciousNmsp.CheckboxEditor = CheckboxEditor; //add to name space
+        CheckboxEditor.prototype = new flexiciousNmsp.UIComponent(); //setup hierarchy
+        CheckboxEditor.prototype.typeName = CheckboxEditor.typeName = 'CheckboxEditor';//for quick inspection
+        CheckboxEditor.prototype.getClassNames = function () {
+            return ["CheckboxEditor", "UIComponent"]; //this is a mechanism to replicate the "is" and "as" keywords of most other OO programming languages
+        };
+
+        CheckboxEditor.prototype.initialize = function () {
+            flexiciousNmsp.UIComponent.prototype.initialize.apply(this);
+            var cell = this.grid.getCurrentEditCell();//each editor gets a grid parameter. Also parent object of this cell is either the leftLocked or the rightLocked, or the unlocked containers, all of which have a grid property.
+            var val = flexiciousNmsp.UIUtils.resolveExpression(cell.rowInfo.getData(), cell.getColumn().getDataField());
+            this.checkbox = this.domElement.firstChild.firstChild;
+            this.checkbox.checked = val;
+            this.checkbox.onchange = this.onChange.bind(this);
+            
+            this.grid.suspendEditorOutsideClickTracking=true;
+        };
+
+        
+        CheckboxEditor.prototype.onChange=function(evt){
+            //in the editor you have a handle to the grid iteself.
+            var cell = this.grid.getCurrentEditCell();
+            cell.getRowInfo().getData()[cell.getColumn().dataField]=evt.target.checked;
+            this.grid.dispatchEvent(new flexiciousNmsp.WrapperEvent("editCheckBoxChanged"));
+        }
+
+        CheckboxEditor.prototype.kill = function () {
+          
+            this.grid.suspendEditorOutsideClickTracking=false;
+            flexiciousNmsp.UIComponent.prototype.kill.apply(this);
+        }
+      })(window);
+      (function() {
+
+        var FlxsHeaderRenderer, uiUtil = flexiciousNmsp.UIUtils, flxsConst = flexiciousNmsp.Constants;
+
+        FlxsHeaderRenderer = function() {
+          flexiciousNmsp.UIComponent.apply(this, ['div']);
+          this.domElement.innerHTML = '<div style="text-align: left"><div></div><br><input type="checkbox"><label></label></div>';
+        } 
+
+        flexiciousNmsp.FlxsHeaderRenderer = FlxsHeaderRenderer;
+        FlxsHeaderRenderer.prototype = new flexiciousNmsp.UIComponent();
+        FlxsHeaderRenderer.prototype.typeName = FlxsHeaderRenderer.typeName = 'FlxsHeaderRenderer';
+
+        FlxsHeaderRenderer.prototype.getClassNames = function(){
+          return ['FlxsHeaderRenderer', 'UIComponent'];
+        };
+
+        FlxsHeaderRenderer.prototype.initialize = function(e) {
+          var cell = this.parent;
+          var col = cell.getColumn();
+          this.domElement.firstChild.firstChild.innerText = col.getHeaderText();
+          this.counter = this.domElement.firstChild.lastChild;
+          this.checkbox = this.domElement.firstChild.lastChild.previousSibling;
+          this.checkbox.checked = true;
+          cell.level.grid.addEventListener(this, "editCheckBoxChanged", this.onEditCheckboxChanged);
+        };
+
+        FlxsHeaderRenderer.prototype.onEditCheckboxChanged = function(e) {
+          var cell = this.parent;
+          var col = cell.getColumn();
+          var count = 0;
+
+          for(var i=0;i<cell.level.grid._dataProvider.length;i++) {
+            var item = cell.level.grid._dataProvider[i];
+            if(item[col.dataField]) {
+               count++;
+            }
+          }
+
+          this.checkbox.checked = count === cell.level.grid._dataProvider.length;
+          this.counter.textContent = this.checkbox.checked?'  All':'  '+count+' user(s)';
+        }
+
+        //This sets  the inner html, and grid will try to set it. Since we are an input field, IE 8 will complain. So we ignore it since we dont need it anyway.
+        FlxsHeaderRenderer.prototype.setText=function(val){
+
+        };
+
+      })();
+    </script>
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          ready: function() {
+            var dgCol = this.$.gridelem.grid.getColumnByDataField('valid');
+            dgCol.headerRenderer = new flexiciousNmsp.ClassFactory(flexiciousNmsp.FlxsHeaderRenderer);
+          },
+          _checkboxEditor: new flexiciousNmsp.ClassFactory(flexiciousNmsp.CheckboxEditor)
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

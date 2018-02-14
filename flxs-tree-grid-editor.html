@@ -1,0 +1,259 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../polymer/lib/utils/render-status.html">
+<script src="flxs-tree-grid-editor.js"></script>
+<dom-module id="flxs-tree-grid-editor">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+      }
+    </style>
+    <slot></slot>
+  </template>
+<script>
+  class FlxsTreeGridEditor extends Polymer.Element {
+    static get is() {
+      return 'flxs-tree-grid-editor';
+    }
+
+    constructor() {
+      super();
+    }
+
+    static get properties() {
+      return {
+        data: {type: Object,value: null},
+        domElement: {type:Object, value: {}},
+        domListeners: {type: Array,value: []},
+        eventListeners: {type: Array,value: []},
+        enabled: {type: Boolean,value: true},
+        height: {type: Number,value: 0},
+        includeInLayout: {type:Boolean, value: true},
+        invalid: {type:Boolean, value: false},
+        isEscapePressed: {type:Boolean, value: false},
+        typeCache: {type:Object, value: {}},
+        visible: {type:Boolean, value: true},
+        width: {type:Number, value: 0},
+        _innerHTML: {type:String, value: ""},
+        _text: {type:String, value: ""},
+        grid: Object,
+        cell: Object,
+        datafield: String,
+        uniqueIdentifier: String,
+        /**
+         * The attribute to listen for value changes on.
+         */
+        attrForValue: {
+          type: String,
+          value: 'bind-value'
+        },
+        _boundOnFocus: {
+          type: Function,
+          value() {
+            return this._onFocus.bind(this);
+          }
+        },
+        _boundOnBlur: {
+          type: Function,
+          value() {
+            return this._onBlur.bind(this);
+          }
+        },
+        _boundOnKeyup: {
+          type: Function,
+          value() {
+            return this._onKeyup.bind(this);
+          }
+        },
+        _boundOnKeydown: {
+          type: Function,
+          value() {
+            return this._onKeydown.bind(this);
+          }
+        },
+        _boundValueChanged: {
+          type: Function,
+          value() {
+            return this._onValueChanged.bind(this);
+          }
+        },
+        _boundEditCanceling: {
+          type: Function,
+          value() {
+            return this._onEditCanceling.bind(this);
+          }
+        },
+        _boundValueCommit: {
+          type: Function,
+          value() {
+            return this._onValueCommit.bind(this);
+          }
+        },
+        value: Object,
+        oldValue: Object,
+        opened: {type:Boolean, value:false, notify: true},
+        itemEditor: {type:Object,
+          notify: true
+        },
+        flxsTreeGridEditor: Object,
+        focused: {
+          readOnly: true,
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+      }
+    }
+
+    static get observers() {
+      return [
+        '_gridChanged(grid)',
+      ]
+    }
+    ready() {
+      super.ready();
+      Polymer.RenderStatus.afterNextRender(this, () => {
+        this.set('itemEditor', new flexiciousNmsp.ClassFactory(flexiciousNmsp.FlxsTreeGridEditor, this, true));
+      });
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      this.addEventListener('focus', this._boundOnFocus, true);
+      this.addEventListener('blur', this._boundOnBlur, true);
+      this.addEventListener('keyup', this._boundOnKeyup, true);
+      this.addEventListener('keydown', this._boundOnKeydown, true);
+      if (this.attrForValue) {
+        this._inputElement.addEventListener(this._valueChangedEvent, this._boundValueChanged);
+      }
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this.removeEventListener('focus', this._onFocus);
+      this.removeEventListener('blur', this._onBlur);
+      this.removeEventListener('keyup', this._onKeyup);
+      this.removeEventListener('keydown', this._onKeydown);
+      if(this.grid) {
+        this.grid.suspendEditorOutsideClickTracking=false;
+        this.grid.removeEventListener(flexiciousNmsp.FlexDataGridEvent.ITEM_EDIT_VALUE_COMMIT,this._onValueCommit);
+        this.grid.removeEventListener(flexiciousNmsp.FlexDataGridEvent.ITEM_EDIT_CANCELING, this._onEditCanceling);
+      }
+    }
+
+    _initialize(){
+      this.grid.addEventListener(this, flexiciousNmsp.FlexDataGridEvent.ITEM_EDIT_VALUE_COMMIT,this._boundValueCommit);
+      this.grid.addEventListener(this, flexiciousNmsp.FlexDataGridEvent.ITEM_EDIT_CANCELING, this._boundEditCanceling);
+      this.grid.suspendEditorOutsideClickTracking = true;
+    }
+
+    get _inputElement() {
+      return this.firstElementChild;
+    }
+
+    get _propertyForValue() {
+      return Polymer.CaseMap.dashToCamelCase(this.attrForValue);
+    }
+
+    get _inputElementValue() {
+      return this._inputElement[this._propertyForValue] || this._inputElement.value;
+    }
+
+    set _inputElementValue(value) {
+      if(this._inputElement.hasOwnProperty(this._propertyForValue)) this._inputElement[this._propertyForValue] = value;
+      else this._inputElement.value = value;
+    }
+
+    get _valueChangedEvent() {
+      return this.attrForValue + '-changed';
+    }
+
+    _gridChanged(grid){
+      this._setCell(grid.getCurrentEditCell());
+    }
+
+    _setCell(cell) {
+      this.setProperties({
+        cell,
+        rowInfoData: cell.getRowInfo().getData(),
+      });
+      this._setColumn(cell._column);
+    }
+
+    _setColumn(column) {
+      this.set('column', column);
+      this._setDataField(column.dataField);
+      this._setUniqueIdentifier(column.getUniqueIdentifier());
+    }
+
+    _setDataField(datafield){
+      this.setProperties({
+        datafield,
+        oldValue: flexiciousNmsp.UIUtils.resolveExpression(this.rowInfoData, datafield)
+      });
+    }
+
+    _setUniqueIdentifier(uniqueIdentifier){
+      this.set('uniqueIdentifier', uniqueIdentifier);
+    }
+
+    _setValue(value){
+      this.setProperties({
+        value,
+        oldValue: value
+      });
+      this._inputElementValue = value;
+    }
+
+    _getValue(e){
+      return this._inputElementValue;
+    }
+
+    _onValueCommit(evt) {
+      this.get('rowInfoData').datafield = this._inputElementValue;
+    }
+
+    _onEditCanceling(evt){
+      this._inputElementValue = this.get('oldValue');
+      evt.preventDefault();
+    }
+
+    _onFocus() {
+      this._setFocused(true);
+      this._inputElement.focus();
+    }
+
+    _onBlur() {
+      this._setFocused(false);
+      if (this.cell && !this.isEscapePressed) {
+        this._dispatchValueCommitAndEndEdit();
+      }
+    }
+
+    _onKeydown(event) {
+      if (event.keyCode == flexiciousNmsp.Constants.KEYBOARD_TAB) this._setFocused(false);
+    }
+
+    _onKeyup(event) {
+      if (event.keyCode == flexiciousNmsp.Constants.KEYBOARD_ESCAPE) this.set('isEscapePressed', true);
+    }
+
+    _onValueChanged(event) {
+      var input = event.target;
+      if (input.value === undefined) {
+        return;
+      }
+    }
+
+    _dispatchValueCommitAndEndEdit() {
+      if(this.oldValue !== this._inputElementValue){
+        this.flxsTreeGridEditor.dispatchEvent(new flexiciousNmsp.FlexDataGridEvent(flexiciousNmsp.Constants.EVENT_VALUE_COMMIT));
+      }
+      this.grid.getBodyContainer().endEdit(this.flxsTreeGridEditor);
+      this.grid.refreshCells();
+    }
+  }
+
+  window.customElements.define(FlxsTreeGridEditor.is, FlxsTreeGridEditor);
+</script>
+</dom-module>

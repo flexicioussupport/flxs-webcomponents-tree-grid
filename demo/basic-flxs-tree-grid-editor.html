@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid-editor demo</title>
+
+  <link href="http://htmltreegrid.com/demo/external/css/adapter/jquery/jquery-ui-1.9.1.custom.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="http://htmltreegrid.com/demo/flexicious/css/flexicious.css" type="text/css"/>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+
+  <script src="http://htmltreegrid.com/demo/external/js/adapters/jquery/jquery-ui-1.9.1.custom.min.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../paper-input/paper-input.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../flxs-tree-grid-editor.html">
+  <link rel="import" href="../../paper-dropdown-menu/paper-dropdown-menu.html">
+  <link rel="import" href="../../paper-item/paper-item.html">
+  <link rel="import" href="../../paper-listbox/paper-listbox.html">
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      <style>.hidden{
+        display:none
+      }</style>
+
+      <iron-ajax auto url="data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic flxs-tree-grid-editor demo</h1>
+        <flxs-tree-grid id="gridInfo" dataProvider="{{ ajaxResponse }}" editable="true" forcePagerRow="false" enableFilters="true" enableExport="false" enableFooters="false" style="width:800px;height:400px"
+                        enableDoubleClickEdit="true" editItemColors="[0xff4000, 0xff4000]" cellTextColorFunction="[[_cellTextColorFunction]]" cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" rollOverColor="[[_rollOverColors]]"
+                        enableTrackChanges="true">
+          <flxs-tree-grid-column dataField="location" headerText="Country Location" columnWidthMode="fitToContent" headerWordWrap="false" headerAlign="center" filterControl="TextInput" filterOperation="Contains"
+                                 editable="true" itemEditor="[[dropdownItemEditor]]" uniqueIdentifier="locationList">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth">
+          </flxs-tree-grid-column>
+        </flxs-tree-grid>
+
+        <flxs-tree-grid-editor id="dropdownItemEditor" class="" item-editor="{{dropdownItemEditor}}" attr-for-value="value" >
+          <paper-dropdown-menu style="margin-top: -25px">
+            <paper-listbox  slot="dropdown-content" selected="1">
+              <template is="dom-repeat" items="[[locationList]]">
+                <paper-item>[[item.name]]</paper-item></template>
+            </paper-listbox>
+          </paper-dropdown-menu>
+        </flxs-tree-grid-editor>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          properties: {
+            locationList: {
+              type: Array,
+              value: [
+                {name: 'Africa'},
+                {name: 'America'},
+                {name: 'Asia'},
+                {name: 'Korea'}
+              ]
+            },
+            dropdownItemEditor: Function,
+          },
+          observers: [
+            '_dropdownItemEditorChanged(dropdownItemEditor)'
+          ],
+          _dropdownItemEditorChanged: function (dropdownItemEditor){
+            this.$.gridInfo.grid._columnLevel._columns[0].itemEditor = dropdownItemEditor;
+          },
+          _rollOverColors : 0x707070,
+          _cellTextColorFunction: function (cell) {
+            if (cell.rowInfo.getIsDataRow()) {
+              if(cell.rowInfo.getData().hasOwnProperty('editedDataField') && cell.rowInfo.getData()["editedDataField"] == cell.getColumn().dataField) {
+                return 0xdd0000;
+              }
+            }
+            return null;
+          },
+          _cellBackgroundColorFunction: function(cell) {
+            if (cell.rowInfo.getIsDataRow()) {
+              if(cell.rowInfo.getData().hasOwnProperty('editedDataField') && cell.rowInfo.getData()["editedDataField"] == cell.getColumn().dataField) {
+                return 0xffff00;
+              }
+            }
+            return null;
+          },
+          _itemEditor: new flexiciousNmsp.ClassFactory(flexiciousNmsp.EditableCells_TextEditor2)
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

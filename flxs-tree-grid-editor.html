@@ -5,10 +5,10 @@
   <template>
     <style>
       :host {
-        display: inline-block;
+        display: none;
       }
     </style>
-    <slot></slot>
+      <slot></slot>
   </template>
 <script>
   class FlxsTreeGridEditor extends Polymer.Element {
@@ -18,14 +18,12 @@
 
     constructor() {
       super();
+      this.isEscapePressed = false;
     }
 
     static get properties() {
       return {
         data: {type: Object,value: null},
-        domElement: {type:Object, value: {}},
-        domListeners: {type: Array,value: []},
-        eventListeners: {type: Array,value: []},
         enabled: {type: Boolean,value: true},
         height: {type: Number,value: 0},
         includeInLayout: {type:Boolean, value: true},
@@ -34,8 +32,6 @@
         typeCache: {type:Object, value: {}},
         visible: {type:Boolean, value: true},
         width: {type:Number, value: 0},
-        _innerHTML: {type:String, value: ""},
-        _text: {type:String, value: ""},
         grid: Object,
         cell: Object,
         datafield: String,
@@ -218,12 +214,13 @@
       evt.preventDefault();
     }
 
-    _onFocus() {
+    _onFocus(e) {
       this._setFocused(true);
       this._inputElement.focus();
     }
 
-    _onBlur() {
+    _onBlur(e) {
+      if(e.relatedTarget !== null) return;
       this._setFocused(false);
       if (this.cell && !this.isEscapePressed) {
         this._dispatchValueCommitAndEndEdit();

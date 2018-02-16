@@ -1,6 +1,4 @@
 <!doctype html>
-<html>
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
@@ -28,6 +26,8 @@
   <link rel="import" href="../flxs-tree-grid-column.html">
   <link rel="import" href="../flxs-tree-grid-editor.html">
   <link rel="import" href="../../paper-dropdown-menu/paper-dropdown-menu.html">
+  <link rel="import" href="../../paper-input/paper-input.html">
+  <link rel="import" href="../../paper-checkbox/paper-checkbox.html">
   <link rel="import" href="../../paper-item/paper-item.html">
   <link rel="import" href="../../paper-listbox/paper-listbox.html">
 </head>
@@ -43,19 +43,7 @@
 
       <div class="card">
         <h1>Basic flxs-tree-grid-editor demo</h1>
-        <flxs-tree-grid id="gridInfo" dataProvider="{{ ajaxResponse }}" editable="true" forcePagerRow="false" enableFilters="true" enableExport="false" enableFooters="false" style="width:800px;height:400px"
-                        enableDoubleClickEdit="true" editItemColors="[0xff4000, 0xff4000]" cellTextColorFunction="[[_cellTextColorFunction]]" cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" rollOverColor="[[_rollOverColors]]"
-                        enableTrackChanges="true">
-          <flxs-tree-grid-column dataField="location" headerText="Country Location" columnWidthMode="fitToContent" headerWordWrap="false" headerAlign="center" filterControl="TextInput" filterOperation="Contains"
-                                 editable="true" itemEditor="[[dropdownItemEditor]]" uniqueIdentifier="locationList">
-          </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="first_name" headerText="Fist Name">
-          </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
-          </flxs-tree-grid-column>
-          <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth">
-          </flxs-tree-grid-column>
-        </flxs-tree-grid>
+
 
         <flxs-tree-grid-editor id="dropdownItemEditor" class="" item-editor="{{dropdownItemEditor}}" attr-for-value="value" >
           <paper-dropdown-menu style="margin-top: -25px">
@@ -65,7 +53,31 @@
             </paper-listbox>
           </paper-dropdown-menu>
         </flxs-tree-grid-editor>
+
+        <flxs-tree-grid-editor id="inputItemEditor" class="" item-editor="{{inputItemEditor}}" attr-for-value="value" >
+          <paper-input error-message="Invalid input!" label="Input label"></paper-input>
+        </flxs-tree-grid-editor>
+
+        <flxs-tree-grid-editor id="checkboxItemEditor" class="" item-editor="{{checkboxItemEditor}}" attr-for-value="value" >
+          <paper-checkbox></paper-checkbox>
+        </flxs-tree-grid-editor>
+
+        <flxs-tree-grid id="gridInfo" dataProvider="{{ ajaxResponse }}" editable="true" forcePagerRow="false" enableFilters="true" enableExport="false" enableFooters="false" style="width:800px;height:400px"
+                        enableDoubleClickEdit="true" editItemColors="[0xff4000, 0xff4000]" cellTextColorFunction="[[_cellTextColorFunction]]" cellBackgroundColorFunction="[[_cellBackgroundColorFunction]]" rollOverColor="[[_rollOverColors]]"
+                        enableTrackChanges="true">
+          <flxs-tree-grid-column dataField="location" headerText=paper-dropdown"
+                                 editable="true" itemEditor="[[dropdownItemEditor]]" uniqueIdentifier="locationList">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="first_name" headerText="paper-input" editable="true" itemEditor="[[inputItemEditor]]" >
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="last_name" headerWordWrap="true" headerText="paper-checkbox" filterControl="TextInput" filterOperation="BeginsWith"
+                                 editable="true" itemEditor="[[checkboxItemEditor]]" >
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth">
+          </flxs-tree-grid-column>
+        </flxs-tree-grid>
       </div>
+      <button on-click="_handleClick"></button>
     </template>
 
     <script>
@@ -85,10 +97,21 @@
             dropdownItemEditor: Function,
           },
           observers: [
-            '_dropdownItemEditorChanged(dropdownItemEditor)'
+            '_dropdownItemEditorChanged(dropdownItemEditor)',
+            '_inputItemEditorChanged(inputItemEditor)',
+            '_checkboxItemEditorChanged(checkboxItemEditor)',
           ],
           _dropdownItemEditorChanged: function (dropdownItemEditor){
             this.$.gridInfo.grid._columnLevel._columns[0].itemEditor = dropdownItemEditor;
+          },
+          _inputItemEditorChanged: function (inputItemEditor){
+            this.$.gridInfo.grid._columnLevel._columns[1].itemEditor = inputItemEditor;
+          },
+          _checkboxItemEditorChanged: function (checkboxItemEditor){
+            this.$.gridInfo.grid._columnLevel._columns[2].itemEditor = checkboxItemEditor;
+          },
+          _handleClick: function(e) {
+            console.log('_handleClick');
           },
           _rollOverColors : 0x707070,
           _cellTextColorFunction: function (cell) {

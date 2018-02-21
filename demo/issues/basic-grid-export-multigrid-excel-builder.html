@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <title>flxs-tree-grid demo</title>
+
+    <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+
+    <link rel="import" href="../../../paper-styles/demo-pages.html">
+    <link rel="import" href="../../../iron-ajax/iron-ajax.html">
+    <link rel="import" href="../../flxs-tree-grid.html">
+    <link rel="import" href="../../flxs-tree-grid-column.html">
+
+    <link rel="import" href="../../../paper-button/paper-button.html">
+    
+    <script src="libs/excel-builder.compiled.js"></script>
+    <script src="libs/ExcelBuilderMultiGridExporter.js"></script>
+
+</head>
+
+<body class="fullbleed" unresolved>
+<dom-module id="basic-grid-demo">
+    <template>
+
+
+        <iron-ajax auto url="../data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+        <iron-ajax auto url="../data/dobs.json" handle-as="json" last-response="{{ajaxResponse1}}" id="xhr"></iron-ajax>
+
+        <div class="card">
+            <h1>Basic grid demo</h1>
+            <paper-button on-click="exportGridsMerged">Export excel merged</paper-button>
+            <paper-button on-click="exportGridsTabbed">Export excel tabbed</paper-button>
+            <flxs-tree-grid id="grid1" editable="true" enableFilters="true" dataProvider="{{ ajaxResponse }}"
+                            style="width:800px;height:400px">
+                <flxs-tree-grid-column dataField="id" headerText="Sl. No"  filterControl="TextInput" filterOperation="Contains"></flxs-tree-grid-column>
+                <flxs-tree-grid-column editable="true" dataField="first_name" headerText="First Name">
+                </flxs-tree-grid-column>
+                <flxs-tree-grid-column editable="true" dataField="last_name" headerWordWrap="true"
+                                       headerText="Last Name" filterControl="TextInput" filterOperation="Contains">
+                </flxs-tree-grid-column>
+                <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth">
+                </flxs-tree-grid-column>
+            </flxs-tree-grid>
+            <br>
+            <br>
+            <flxs-tree-grid id="grid2" editable="true" dataProvider="{{ ajaxResponse1 }}"
+                            rollOverColor="[[_rollOverColors]]" style="width:800px;height:400px">
+                <flxs-tree-grid-column editable="true" dataField="first_name" headerText="First Name">
+                </flxs-tree-grid-column>
+                <flxs-tree-grid-column editable="true" dataField="last_name" headerWordWrap="true"
+                                       headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">
+                </flxs-tree-grid-column>
+                <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth">
+                </flxs-tree-grid-column>
+            </flxs-tree-grid>
+        </div>
+    </template>
+
+    <script>
+        window.addEventListener('WebComponentsReady', function () {
+            Polymer({
+                is: 'basic-grid-demo',
+                // _rollOverColors: 0xFF4500
+                exportGridsMerged: function () {
+                    this.exportGrids(false);
+                },
+                exportGridsTabbed: function () {
+                    this.exportGrids(true);
+                },
+                exportGrids: function (tabbed) {
+                    var grids = [{grid: this.$.grid1.grid, sheet: "dobs"}, {grid: this.$.grid2.grid, sheet: "dobs2"}];
+                    var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
+                    multigridExporter.generate(grids, tabbed);
+                }
+            });
+        })
+    </script>
+</dom-module>
+
+<basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

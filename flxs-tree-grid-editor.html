@@ -18,7 +18,6 @@
 
     constructor() {
       super();
-      this.isEscapePressed = false;
     }
 
     static get properties() {
@@ -101,11 +100,6 @@
       }
     }
 
-    static get observers() {
-      return [
-        '_gridChanged(grid)',
-      ]
-    }
     ready() {
       super.ready();
       Polymer.RenderStatus.afterNextRender(this, () => {
@@ -137,7 +131,7 @@
       }
     }
 
-    _initialize(){
+    _initialize() {
       this.grid.addEventListener(this, flexiciousNmsp.FlexDataGridEvent.ITEM_EDIT_VALUE_COMMIT,this._boundValueCommit);
       this.grid.addEventListener(this, flexiciousNmsp.FlexDataGridEvent.ITEM_EDIT_CANCELING, this._boundEditCanceling);
       this.grid.suspendEditorOutsideClickTracking = true;
@@ -164,7 +158,7 @@
       return this.attrForValue + '-changed';
     }
 
-    _gridChanged(grid){
+    _gridChanged(grid) {
       this._setCell(grid.getCurrentEditCell());
     }
 
@@ -172,6 +166,7 @@
       this.setProperties({
         cell,
         rowInfoData: cell.getRowInfo().getData(),
+        isEscapePressed: false
       });
       this._setColumn(cell._column);
     }
@@ -182,18 +177,18 @@
       this._setUniqueIdentifier(column.getUniqueIdentifier());
     }
 
-    _setDataField(datafield){
+    _setDataField(datafield) {
       this.setProperties({
         datafield,
         oldValue: flexiciousNmsp.UIUtils.resolveExpression(this.rowInfoData, datafield)
       });
     }
 
-    _setUniqueIdentifier(uniqueIdentifier){
+    _setUniqueIdentifier(uniqueIdentifier) {
       this.set('uniqueIdentifier', uniqueIdentifier);
     }
 
-    _setValue(value){
+    _setValue(value) {
       this.setProperties({
         value,
         oldValue: value
@@ -201,7 +196,7 @@
       this._inputElementValue = value;
     }
 
-    _getValue(e){
+    _getValue(e) {
       return this._inputElementValue;
     }
 
@@ -209,7 +204,7 @@
       this.get('rowInfoData').datafield = this._inputElementValue;
     }
 
-    _onEditCanceling(evt){
+    _onEditCanceling(evt) {
       this._inputElementValue = this.get('oldValue');
       evt.preventDefault();
     }

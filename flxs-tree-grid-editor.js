@@ -1,38 +1,37 @@
 (window => {
 if (!flexiciousNmsp) flexiciousNmsp = {};
 flexiciousNmsp.FlxsTreeGridEditor = class FlxsTreeGridEditor extends flexiciousNmsp.UIComponent {
-  constructor(element){
+  constructor(element) {
     super("div");
-    this._cln = element.cloneNode(true);
+    this._cln = element;
     this._cln.flxsTreeGridEditor = this;
     this._cln.style.display = 'inline-block';
     this.domElement.appendChild(this._cln);
     this.data = null;
-    this._grid = undefined;
   }
   getClassNames() {
     return ['FlxsTreeGridEditor', 'UIComponent'];
   }
-  destroy(){
+  destroy() {
     super.destroy();
   }
-  getSelect(){
+  getSelect() {
     return this._cln;
   }
   setValue(e) {
     this._cln._setValue(e);
   }
-  getValue(){
+  getValue() {
     return this._cln._getValue();
   }
 
-  set grid(grid){
-    this._grid = grid;
+  set grid(grid) {
     this._cln.grid = grid;
+    this._cln._setCell(grid.getCurrentEditCell());
   }
 
-  get grid(){
-    return this._grid;
+  get grid() {
+    return this._cln.grid;
   }
   initialize() {
     super.initialize();
@@ -41,16 +40,16 @@ flexiciousNmsp.FlxsTreeGridEditor = class FlxsTreeGridEditor extends flexiciousN
   setText(val) {
     super.setText(val);
   }
-  setWidth(w){
+  setWidth(w) {
     super.setWidth(w);
   }
-  setData(val){
+  setData(val) {
     super.setData(val);
   }
-  focus(){
+  focus() {
     this._cln._onFocus();
   }
-  kill(){
+  kill() {
     super.kill();
   }
 };

@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../flxs-tree-grid.html">
+  <link rel="import" href="../../flxs-tree-grid-column.html">
+  <link rel="import" href="../../flxs-tree-grid-column-level.html">
+  <link rel="import" href="../../../paper-button/paper-button.html">
+
+  <script src="main.js"></script>
+
+  <custom-style>
+    <style is="custom-style">
+      :host {
+        display: block;
+        padding: 10px;
+      }
+      
+      flxs-tree-grid {
+        --flxs-alternating-item-colors: [0xd9d9d9, 0xffffff];
+        --flxs-alternating-text-colors: [0x1F1F1F, 0x0028a0];
+        --flxs-vertical-grid-lines: false;
+        --flxs-header-vertical-grid-lines: false;
+        --flxs-filter-vertical-grid-lines: false;
+        --flxs-border-sides : "none";
+      }
+    </style>
+  </custom-style>
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="hierarchical-grid-demo">
+    <template>
+      <style>
+        iron-image {
+          background-color: lightgray;
+          margin: 1em;
+        }
+        
+        .horizontal-section-container {
+          display: flex;
+          display: -ms-flexbox;
+          display: -webkit-flex;
+          -ms-flex-pack: center;
+          -webkit-justify-content: center;
+          justify-content: center;
+          -ms-flex-wrap: wrap;
+          -webkit-flex-wrap: wrap;
+          flex-wrap: wrap;
+        }
+        
+        .horizontal-section {
+          background-color: white;
+          padding: 24px;
+          margin-right: 24px;
+          min-width: 200px;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          max-width: 300px;
+          margin-bottom: 24px;
+        }
+
+        .control-bar {
+            width: 100%;
+            padding-bottom: 10px;
+        }
+
+        #loggerArea {
+            outline: none;
+            width: 640px;
+            height: 620px;
+            resize: none;
+            padding: 8px;
+            background: #efefef;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 16px;
+            border: 1.5px inset #222;
+            overflow: auto;
+            cursor: text;
+        }
+
+        span.field {
+            color: #000022;
+            font-size: 17px;
+            font-weight: bold;
+        }
+      </style>
+
+      <div class="card">
+        <h1>Hierarchical grid demo</h1>
+        <div class="control-bar">
+          <label><input type="checkbox" id="cbUpdateDataProvider" value="value" checked>Update DataProvider</label>
+          <label><input type="checkbox" id="cbFilterRows" value="value">Filter Rows</label>
+          <label><input type="checkbox" id="cbSortRows" value="value">Sort Rows</label>
+          <div>
+              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="add">Add</label>
+              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="upd">Update</label>
+              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="del">Remove</label>
+              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="chld">Modified Children</label>
+              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="grouping">Grouping</label>
+              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="un-grouping">Ungrouping</label>
+          </div>
+          <paper-button onclick="processDeltaArray()">Process Delta</paper-button>
+        </div><br/>
+        <flxs-tree-grid editable="true" id="hgrid" creationComplete="[[onLoad]]" selectedKeyField="id" enableFooters="false" enableFilters="false" enableDynamicLevels="true" horizontalScrollPolicy="auto"  enableExport="true" preferencePersistenceKey="programaticCellFormatting" forcePagerRow="false" style="width: 800px;height: 400px">
+          <flxs-tree-grid-column-level childrenField="children" >
+            <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+            <flxs-tree-grid-column enableHierarchicalNestIndent="true" dataField="id" headerText="ID"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="version" headerText="Version"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="investor.id" headerText="Investor ID"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="investor.investorNm" headerText="Investor Name"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="investor.country" headerText="Country"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="ownerName" headerText="Owner"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="investor.type.name" headerText="Investor Type"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="effectiveDemand"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="effectiveDemandCash"></flxs-tree-grid-column>
+            <flxs-tree-grid-column-level reusePreviousLevelColumns="true">
+            </flxs-tree-grid-column-level>
+          </flxs-tree-grid-column-level>
+        </flxs-tree-grid>
+      </div><br />
+      <div class="container">
+        <div id="loggerArea"></textarea>
+    </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function() {
+
+        flexiciousNmsp.Constants.IMAGE_PATH = "../../images";
+        flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+        flexiciousNmsp.StyleDefaults.defaults.toolbarImagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+
+        Polymer({
+          is: 'hierarchical-grid-demo',
+          onLoad: function(e) {
+            grid = this;
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <hierarchical-grid-demo></hierarchical-grid-demo>
+
+</body>
+
+</html>

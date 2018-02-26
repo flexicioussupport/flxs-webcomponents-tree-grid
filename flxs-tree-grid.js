@@ -1683,6 +1683,7 @@
                 col = new flexiciousNmsp.FlexDataGridCheckBoxColumn();
 
             colNode.parseColumn(col, this.grid);
+            colNode.col = col;
             return col;
         },
         extractLevel: function (levelNode, level) {

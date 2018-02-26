@@ -96,20 +96,6 @@
             },
             dropdownItemEditor: Function,
           },
-          observers: [
-            '_dropdownItemEditorChanged(dropdownItemEditor)',
-            '_inputItemEditorChanged(inputItemEditor)',
-            '_checkboxItemEditorChanged(checkboxItemEditor)',
-          ],
-          _dropdownItemEditorChanged: function (dropdownItemEditor){
-            this.$.gridInfo.grid._columnLevel._columns[0].itemEditor = dropdownItemEditor;
-          },
-          _inputItemEditorChanged: function (inputItemEditor){
-            this.$.gridInfo.grid._columnLevel._columns[1].itemEditor = inputItemEditor;
-          },
-          _checkboxItemEditorChanged: function (checkboxItemEditor){
-            this.$.gridInfo.grid._columnLevel._columns[2].itemEditor = checkboxItemEditor;
-          },
           _handleClick: function(e) {
             console.log('_handleClick');
           },

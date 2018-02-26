@@ -50,7 +50,7 @@
   var template = new flexiciousNmsp.FlexDataGridColumn();
   var gridPropsAndBehaviors = flexiciousNmsp.SettingsParser.getPropertiesAndBehaviors(template);
   var behaviors = gridPropsAndBehaviors.behaviors, properties = gridPropsAndBehaviors.properties;
-
+  properties["itemeditor"].observer = "_onItemEditorChanged";
   Polymer({
     is: 'flxs-tree-grid-column',
     properties: properties,
@@ -76,6 +76,9 @@
     },
 
     _onChanged: function () {
+    },
+    _onItemEditorChanged: function(itemEditor) {
+      this.col.itemEditor = itemEditor;
     }
   });
 }());

@@ -37,7 +37,7 @@
      * @return
      *
      */
-    SheetJs_Multigrid_Exporter.prototype.getHeaderColumns = function (grid) {
+    SheetJs_Multigrid_Exporter.prototype.writeHeader = function (grid) {
 
         var colIndex = 0;
         var columns = [];
@@ -46,59 +46,12 @@
             var col = grid.getExportableColumns()[i];
             if (!grid.excelOptions.exporter.isIncludedInExport(col))
                 continue;
-            columns.push(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex));
+            columns.push(this.getText(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex)));
             colIndex++;
         }
 
         this.data.push(columns);
-
-    };
-
-    /**
-     *
-     * @param gridProps each property should have {grid: <grid>, sheet: <sheet-name>} such structure
-     * @param multiTab default set to false
-     */
-    SheetJs_Multigrid_Exporter.prototype.generate = function (gridProps, multiTab) {
-
-        if (typeof multiTab === 'undefined') multiTab = false;
-
-        var i;
-
-        /* build workbook */
-        var new_wb = XLSX.utils.book_new();
-
-        for (i = 0; i < gridProps.length; i++) {
-            this.getHeaderColumns(gridProps[i].grid);
-            [].forEach.call(gridProps[i].grid.getDataProvider(), function (data) {
-                this.writeRecord(gridProps[i].grid, data);
-            }, this);
-             
-            this.writeFooter(gridProps[i].grid, gridProps[i].grid.getDataProvider());
-
-            if (multiTab) {
-                XLSX.utils.book_append_sheet(new_wb, XLSX.utils.aoa_to_sheet(this.data), this.getValidSheetName(gridProps[i]));
-                this.data = [];
-            } else {
-                this.data.push([]);
-            }
-        }
-
-        if (!multiTab) {
-            /* build excel-sheet */
-            var new_ws = XLSX.utils.aoa_to_sheet(this.data);
-            XLSX.utils.book_append_sheet(new_wb, new_ws, this.getValidSheetName(gridProps[gridProps.length-1]));
-        }
-
-        /* write file and trigger a download */
-        var wbout = XLSX.write(new_wb, { bookType: 'xlsx', bookSST: true, type: 'binary' });
-        var fname = this._exportFileName + "." + this.getExtension();
-        try {
-            saveAs(new Blob([this.s2ab(wbout)], { type: "application/octet-stream" }), fname);
-        } catch (e) { if (typeof console != 'undefined') console.log(e, wbout); }
-
-        this.columns = [];
-        this.data = [];
+        return "";
     };
 
     /**
@@ -133,7 +86,7 @@
         var footerColumns = [];
         var exporter = grid.excelOptions.exporter;
 
-        if (exporter.includeFooters) {
+        if (grid.excelOptions.includeFooters) {
             var i = 0;
             if (!exporter.reusePreviousLevelColumns) {
                 while (i++ < exporter.getNestDepth()) {
@@ -143,15 +96,14 @@
 
             for (var i = 0; i < grid.getExportableColumns().length; i++) {
                 var col = grid.getExportableColumns()[i];
-                if (!grid.isIncludedInExport(col))
+                if (!exporter.isIncludedInExport(col))
                     continue;
-                var spaces = grid.getSpaces(col);
-                var value = col.calculateFooterValue(dataProvider);
+                var spaces = exporter.getSpaces(col);
+                var value = this.getText(col.calculateFooterValue(dataProvider));
                 footerColumns.push(spaces ? spaces + value : (value ? isNaN(value) ? value : Number(value) : ""));
                 colIndex++;
             }
 
-            
             this.data.push(footerColumns);
         }
 
@@ -242,7 +194,7 @@
         return "xlsx";
     };
 
-    SheetJs_Multigrid_Exporter.prototype.getValidSheetName = function(gridProps) {
+    SheetJs_Multigrid_Exporter.prototype.getValidSheetName = function (gridProps) {
         return gridProps.hasOwnProperty('sheet') && gridProps.sheet ? gridProps.sheet : undefined;
     };
 

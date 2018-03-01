@@ -25,12 +25,12 @@
     <template>
       
 
-      <iron-ajax auto url="../data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+      <iron-ajax auto url="../data/dobs123.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
 
       <div class="card">
         <h1>Basic grid demo</h1>
         <flxs-tree-grid dataProvider="{{ ajaxResponse }}" 
-          editable="true" enableDoubleClickEdit="true" enableFilters="true" style="width:800px;height:400px">
+          editable="true" enableHeightAutoAdjust="true" enableDoubleClickEdit="true" noDataMessage="" enableFilters="true" style="width:800px;height:400px">
           <flxs-tree-grid-column editable="true" itemEditor="[[_itemEditor]]" dataField="first_name" headerText="Fist Name">
           </flxs-tree-grid-column>
           <flxs-tree-grid-column dataField="last_name" headerText="Last Name" filterControl="TextInput" filterOperation="BeginsWith">

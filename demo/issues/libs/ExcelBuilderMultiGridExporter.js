@@ -7,7 +7,7 @@
     var ExcelBuilderMultiGridExporter, uiUtil = flexiciousNmsp.UIUtils, flxConstants = flexiciousNmsp.Constants,
                                        excelUtil = ExcelBuilder.util, excelPos = ExcelBuilder.Positioning;
     /**
-     * Exports the grid in CSV format
+     * Exports the grid in xlsx format
      * @constructor
      * @namespace
      * @extends Exporter
@@ -35,15 +35,23 @@
 
         this._exportFileName = "exported-grid";
 
-        this._headerIndex = -1;
+        this._headerIndices = [];
 
-        this._footerIndex = -1;
+        this._footerIndices = [];
 
         this._exportableColumns = [];
 
         this._customStyleFunction = null;
 
+        this._customBase64ImageFunction = null;
+
         this._drawings = null;
+
+        this._cellGroups = [];
+
+        this._map = {};
+
+        this._ws = null;
 
         this.defaultImages = [ 
             'iVBORw0KGgoAAAANSUhEUgAAACwAAAAgCAYAAABpRpp6AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTnU1rJkAAAD4UlEQVRYR82Y+0sUURTH7f34Iah+6A9ZhmGHZSlCWTFUlIpMMqUnm2VmSJlt1qbZ0sNFKCErKzOJHlT2fkv2IEGRHhpk1k9F/dQPQVTfzp257s7cubtuu2Psgc/dufecOfMZZh9XM1wu14QMHgDSHmPgISbTEWPgISbNdDYHUVWWC6/iAj2VJNCQXVyBuqYz1M7ae+DiQWzbutu2LsMYeIhJxqe79Vjqlgkkh1oQpLbR/r0tq+EdzSu5qL02bMmLGAMPMclYo7FmCnz+ME3t+VSp9imWG2LSO7tiSxsDDzH5LJSlN/H4O2lqzTnJ5ixROg97H32hlL3WGHiIyROFrJEX9d3faWrNpUJf6zrMV/Ow68YITY21ikyrtFZ9M5IzYww8xGR4PrvbXDq0rqdC//H1WEBvMU3TqHc+6m5+pGUjtzEi7YX//PvIuhlj4CEmnRbuP+nHAsWD0uZnGH4eRj77xlEKsOdWVLp8Icu/iMxF4v5wOCk80LYBCxUNK8NPMTJ4GdsXmd4CaiGCt6PS8fgvwgOnynXZknAPyV5BTa7wIdOll1Gp/Hwz4y786swmZJLsiqYnGBm6ilqZLP2orGjqoXJ5DzNMeCL3tSVTFX7dXkGybhQf6saHoS7sjCFbfPgJlct7iIyb8JuOzcgi2eUHSPbddQTyZLJ0Mwe7qVzeQwYTnsR9bclkhd+eqyRZF9xrz+HV0A3U5ctl2c2I544FE57MfW3JZIQHO6vgG90g0XtXk+5D3CgKPaZyeY94OCo8eL4K2QrtO7acxu0LAeN7ViK7LPSIyuU9xoIJT+G+tuS/CH++F0AOyWZVduDN9z/Anx/4cD2APIu0iqX7H1K5vEciOCY8dLoIqrsclz79pikPkh6+WoNFurSKJfsesNXIOW2N7ZZ5IjgrrORgdU0QDa09+MK8f33FyyNl8DDZhvu0EK1vK/PApVVZ1hLBWWH+6N3rLuDjz2/oPbqKNucqFtffpRJrfSXbZycpPJX72pLJCkdRURi8Q2l7/bgIt+gblEw6tK7HYn9jIxpNhI7H/oCtYl93nlo6lOdjwYSnc19b8n7AS8IKcnbZH2kq9LeU6E9DXXmWpvKaWDDhmdxXWrBcZY/WjYLqYzS15/+VjoZS2hNTT8WHwD35n0HxGFP4fVcABbq0gyiZ8J/oo/b2642FRZiFrIjRHt6DLaWp/F/CDV/RBuwItVI7+TUSgQnP5q6RkBWmC0x4DveMG7KTnSahIOFpCRenQ5DwRPFOR0nLIOFJTI6JE1M50/krW5sgwNZmEHOIuZxZxGRCrxFvPB6j55jh6/q1TTXU3zXvLyn68YefgryNAAAAAElFTkSuQmCC',
@@ -54,12 +62,8 @@
     flexiciousNmsp.ExcelBuilderMultiGridExporter = ExcelBuilderMultiGridExporter; //add to name space
     ExcelBuilderMultiGridExporter.prototype.typeName = ExcelBuilderMultiGridExporter.typeName = 'ExcelBuilderMultiGridExporter';//for quick inspection
 
-
     /**
      * @private
-     * @param grid
-     * @return
-     *
      */
     ExcelBuilderMultiGridExporter.prototype.writeHeader = function (grid) {
 
@@ -77,17 +81,13 @@
         }
 
         if (colIndex > 0) {
-            this._headerIndex = this.data.push(columns) - 1;
+            this._headerIndices.push(this.data.push(columns) - 1);
         }
         return "";
     };
 
     /**
-     * Writes an individual record in csv format
-     * @param grid
-     * @param record
-     * @return
-     *
+     * @private
      */
     ExcelBuilderMultiGridExporter.prototype.writeRecord = function (grid, record) {
 
@@ -109,6 +109,9 @@
 
     };
 
+    /**
+     * @private
+     */
     ExcelBuilderMultiGridExporter.prototype.writeFooter = function (grid, dataProvider) {
 
         var colIndex = 0;
@@ -134,7 +137,7 @@
             }
 
             if (colIndex > 0) {
-                this._footerIndex = this.data.push(footerColumns) - 1;
+                this._footerIndices.push(this.data.push(footerColumns) - 1);
             }
         }
 
@@ -142,8 +145,59 @@
     };
 
     /**
+     * 
+     * @param {Function} fn 
+     * @example 
+     *  customStyle(cellData, dgCol, existingStyle) {
+     *      return existingStyle;
+     *  }
+     */
+    ExcelBuilderMultiGridExporter.prototype.setCustomStyleFunction = function(fn) {
+        this._customStyleFunction = fn;
+    };
+
+    /**
+     * 
+     * @param {Function} fn 
+     * @example
+     *  getBase64ImageString(data, col) {
+     *      return <base64ImageString>
+     *  }
+     */
+    ExcelBuilderMultiGridExporter.prototype.setCustomBase64ImageFunction = function(fn) {
+        this._customBase64ImageFunction = fn;
+    };
+    
+    /**
+     * cellGroups should be array of cells each will have structure like,
+     * { 
+     *   r:[mergeCellRowStartIndex, mergeCellRowEndIndex], 
+     *   c:[mergeCellColStartIndex, mergeCellColEndIndex], 
+     *   ref: <gridProps ref> 
+     * }
+     * @param {Array} cellGroups 
+     */
+    ExcelBuilderMultiGridExporter.prototype.setMergeCells = function(cellGroups) {
+        this._cellGroups = cellGroups;
+    };
+
+    /**
+     * set name of the download file.
+     * @return
      *
-     * @param gridProps each property should have {grid: <grid>, sheet: <sheet-name>} such structure
+     */
+    ExcelBuilderMultiGridExporter.prototype.setFileName = function (filename) {
+        this._exportFileName = filename;
+    };
+
+    /**
+     *
+     * @param gridProps each property should have,
+     *  {
+     *    grid: <grid>, 
+     *    ref: <any string to map to merge cells>,
+     *    sheet: <sheet-name>
+     * }
      * @param {Boolean} multiTab default set to false
      */
     ExcelBuilderMultiGridExporter.prototype.generate = function (gridProps, multiTab) {
@@ -172,20 +226,12 @@
             if (multiTab) {
                 ws = new_wb.createWorksheet({ name: this.getValidSheetName(gridProps[i]) });
                 this.attachWorkSheet(new_wb, ws, [gridProps[i]]);
-                
                 this.multiGridData.pop();
+                this._headerIndices.pop();
+                this._footerIndices.pop();
             } else if ( i === gridProps.length - 1 ) {
                 ws = new_wb.createWorksheet({ name: this.getValidSheetName(gridProps[i]) });
                 this.attachWorkSheet(new_wb, ws, gridProps);
-                this.multiGridData[i].map(function(data, index) {
-                    this.mergeCells(ws, index, 2, index, 3);
-                }.bind(this))
-
-                this.mergeCells(ws, 4, 0, 4 + 5, 0);
-
-                var offsetRows = this.separatorCount + this.multiGridData[0].length;
-
-                this.mergeCells(ws, 4 + offsetRows, 0, 4 + 5 + offsetRows, 0);
             }
         }
 
@@ -236,14 +282,6 @@
       return ((pixels - 12) / 7.0  +  1);  
     };
 
-    ExcelBuilderMultiGridExporter.prototype.getText = function (htmlText) {
-        // parse html too and fetch textContent from that html
-        var parser = new DOMParser();
-        var doc = parser.parseFromString('<span>' + htmlText + '</span>', "text/xml");
-        htmlText = doc.firstChild.outerText || doc.firstChild.textContent;
-        return htmlText;
-    };
-
     ExcelBuilderMultiGridExporter.prototype.setColumnsWidth = function (ws, gridProps) {
         var wscols = [];
 
@@ -288,39 +326,81 @@
         return colTexts;
     };
 
-    ExcelBuilderMultiGridExporter.prototype.attachImages = function(wb, ws, r, c) {
-        
-        if( !this._drawings ) {
+    ExcelBuilderMultiGridExporter.prototype.mergeCellGroups = function(ws, gridRef) {
+        if( this._cellGroups.length > 0 ) {
+            [].forEach.call(this._cellGroups, function(rowcols){
+                if(this.isValidRowCols(rowcols)) {
+                    var offset = this._map[rowcols.ref] ? (this._map[rowcols.ref].offsetRows || 0) : -1;
+                    if(offset !== -1 && (!gridRef || (gridRef && rowcols.ref === gridRef)))
+                        this.mergeCells(ws, rowcols.r[0] + offset, rowcols.c[0], rowcols.r[1] + offset, rowcols.c[1]);
+                }
+            }.bind(this));
+        }
+    };
+
+    ExcelBuilderMultiGridExporter.prototype.isValidRowCols = function(rowcols) {
+        return rowcols.hasOwnProperty('r') && Array.isArray(rowcols.r) && rowcols.r.length === 2 &&
+               rowcols.hasOwnProperty('c') && Array.isArray(rowcols.c) && rowcols.c.length === 2;
+    };
+
+    ExcelBuilderMultiGridExporter.prototype.getImageMetadataFromMergedCell = function(row, col, gridRef) {
+        for(var i=0;i<this._cellGroups.length;i++) {
+            var grp = this._cellGroups[i];
+
+            if( grp.included && grp.ref === gridRef && grp.r[0]<=row && grp.r[1]>=row && grp.c[0]<=col && grp.c[1]>=col ) {
+                return { prevFetch: (!!grp.icon) };
+            }
+
+            if(this.isValidRowCols(grp) && !grp.included && grp.hasOwnProperty('ref') && grp.ref === gridRef && grp.r.indexOf(row) === 0 && grp.c.indexOf(col) === 0) {
+                grp.included = true;
+                return { prevFetch: false, imageInfo: grp.icon, ref: grp.ref };
+            }
+        }
+        return null;
+    };
+
+    ExcelBuilderMultiGridExporter.prototype.attachImages = function(wb, ws, data, rowIndex, col, gridRef) {
+        var offsetRows = this._map[gridRef].offsetRows;
+        var base64ImageInfo;
+        var imageInfoInMergedCell = this.getImageMetadataFromMergedCell(rowIndex, col.getColIndex(), gridRef);
+
+        if(!this._customBase64ImageFunction || !(base64ImageInfo = this._customBase64ImageFunction(data, col))) {
+            if(!imageInfoInMergedCell || (imageInfoInMergedCell && imageInfoInMergedCell.prevFetch || !imageInfoInMergedCell.imageInfo)) {
+                return;
+            }
+        }
+
+        if(imageInfoInMergedCell && imageInfoInMergedCell.prevFetch)
+            return;
+
+        if(imageInfoInMergedCell && imageInfoInMergedCell.imageInfo) {
+            base64ImageInfo = imageInfoInMergedCell.imageInfo;
+        }
+
+        if( !this._drawings || this._ws != ws ) {
             this._drawings = new ExcelBuilder.Drawings();
             ws.addDrawings(this._drawings);
             wb.addDrawings(this._drawings);
+
+            this._ws = ws;
         }
+
+        var imageWidth = base64ImageInfo.imageWidth || 16;
+        var imageHeight = base64ImageInfo.imageHeight || 16;
         
-        var picRef = wb.addMedia('image', 'logo_' + r + '.png', this.defaultImages[r%2]);
+        var picRef = wb.addMedia('image', base64ImageInfo.imageName, base64ImageInfo.dataURL);
         var picture = new ExcelBuilder.Drawing.Picture();
         picture.createAnchor('oneCellAnchor', {
-            x: c,
-            y: r,
-            xOff: excelPos.pixelsToEMUs(24)/4, 
-            yOff: excelPos.pixelsToEMUs(12)/4,
-            width: excelPos.pixelsToEMUs(24),
-            height: excelPos.pixelsToEMUs(12)
+            x: col.getColIndex() || 0,
+            y: rowIndex + offsetRows,
+            xOff: excelPos.pixelsToEMUs(imageWidth)/4, 
+            yOff: excelPos.pixelsToEMUs(imageHeight)/4,
+            width: excelPos.pixelsToEMUs(imageWidth),
+            height: excelPos.pixelsToEMUs(imageHeight)
         });
 
         picture.setMedia(picRef);
         this._drawings.addDrawing(picture);
-    };
-
-    /**
-     * 
-     * @param {Function} fn 
-     * @example 
-     *  customStyle(cellData, dgCol, existingStyle) {
-     *      return existingStyle;
-     *  }
-     */
-    ExcelBuilderMultiGridExporter.prototype.setCustomStyleFunction = function(fn) {
-        this._customStyleFunction = fn;
     };
 
     ExcelBuilderMultiGridExporter.prototype.attachWorkSheet = function (workbook, worksheet, gridProps) {
@@ -329,6 +409,9 @@
         var styledData = [];
 
         for(var i=0;i<gridProps.length;i++) {
+
+            this._map[gridProps[i].ref] = { offsetRows: (styledData.length + (this.needSeparator ? this.separatorCount : 0)) };
+
             this.filterExportableColumns(gridProps[i].grid);
 
             var table = new ExcelBuilder.Table();
@@ -337,7 +420,7 @@
 
             var data = this.multiGridData[i] || [];
             // table.styleInfo.themeStyle = style || '';
-            if (data.length > 0 && this._headerIndex !== -1) {
+            if (data.length > 0 && this._headerIndices[i] !== -1) {
                 table.setReferenceRange([1, 1], [data[0].length, data.length]);
                 table.setTableColumns(this.getColumnLabels(gridProps[i].grid, data[0]));
             }
@@ -347,28 +430,31 @@
                     styledData = styledData.concat([{value: ''}]);
                 }
             }
+
+            // if(this._customBase64ImageFunction) {
+                for(var m=0;m<data.length;m++) {
+                    [].forEach.call(gridProps[i].grid.getColumns(), function(col) {
+                        this.attachImages(workbook, worksheet, data[m], m, col, gridProps[i].ref);
+                        data[m][col.dataField] = m !== this._headerIndices[i] ? col.hideText ? '' : data[m][col.dataField] : col.hideHeaderText ? '' : data[m][col.dataField];
+                    }.bind(this));
+                }
+            // }
             
-            styledData = styledData.concat(this.setStyles(data, gridProps[i].grid, this.defaultStyles()));
+            styledData = styledData.concat(this.setStyles(data, i, this.defaultStyles()));
 
             if( !this._isMultiTabbed ) this.needSeparator = true;
         }
 
-
+        
+        this.mergeCellGroups(worksheet, (this._isMultiTabbed ? gridProps[i - 1].ref : null) );
         worksheet.setData(styledData);
         this.setColumnsWidth(worksheet, gridProps);
 
         this.setPageMargins(worksheet);
-        styledData.map(function(d, i) {
-            if(d.value !== "") {
-                return this.attachImages(workbook, worksheet, i, 5);
-            } else {
-                return d;
-            }
-        }.bind(this));
         
     };
 
-    ExcelBuilderMultiGridExporter.prototype.setStyles = function(data, grid, style) {
+    ExcelBuilderMultiGridExporter.prototype.setStyles = function(data, gridIndex, style) {
 
         // borderTypes = [ 'top', 'topleft', 'left', 'bottomleft', 'bottom', 'bottomright', 'right', 'topright' ];
 
@@ -386,7 +472,7 @@
                 cell['value'] = data[r][dgCol.dataField];
                 cell['metadata'] = {};
 
-                var type = this._headerIndex == r ? 'header' : this._footerIndex === r ? 'footer' : r % 2 === 0 ? 'dataCell0' : 'dataCell1';
+                var type = this._headerIndices[gridIndex] === r ? 'header' : this._footerIndices[gridIndex] === r ? 'footer' : r % 2 === 0 ? 'dataCell0' : 'dataCell1';
 
                 var edge = false;
                 var firstRow = type === 'header' || r === 0, lastRow = type === 'footer' || r == data.length - 1, firstCol = c == 0, lastCol = c == Object.keys(data[r]).length - 1;
@@ -551,6 +637,11 @@
                 }, alignment: {
                     horizontal: 'center',
                     vertical: 'center'
+                }, fill: {
+                    type: 'pattern',
+                    patternType: 'solid',
+                    fgColor: 'FF888888',
+                    bgColor: 'FF000000'
                 }, border: {
 
                 }
@@ -563,7 +654,7 @@
                 }, fill: {
                     type: 'pattern',
                     patternType: 'solid',
-                    fgColor: 'FFFFEF00',
+                    fgColor: 'FF004444',
                     bgColor: 'FF000000'
                 }, border: {
                     
@@ -595,22 +686,16 @@
             }
             this._exportableColumns.push(col);
         }
-    }
-
-    /**
-     * set name of the download file.
-     * @return
-     *
-     */
-    ExcelBuilderMultiGridExporter.prototype.setFileName = function (filename) {
-        this._exportFileName = filename;
     };
 
-    /**
-     * Extension of the download file.
-     * @return
-     *
-     */
+    ExcelBuilderMultiGridExporter.prototype.getText = function (htmlText) {
+        // parse html too and fetch textContent from that html
+        var parser = new DOMParser();
+        var doc = parser.parseFromString('<span>' + htmlText + '</span>', "text/xml");
+        htmlText = doc.firstChild.outerText || doc.firstChild.textContent;
+        return htmlText;
+    };
+
     ExcelBuilderMultiGridExporter.prototype.getExtension = function () {
         return "xlsx";
     };

@@ -19,7 +19,7 @@
 
     <link rel="import" href="../../../paper-button/paper-button.html">
     
-    <script src="libs/excel-builder.compiled.min.js"></script>
+    <script src="libs/excel-builder.compiled.js"></script>
     <script src="libs/ExcelBuilderMultiGridExporter.js"></script>
 
 </head>
@@ -30,13 +30,13 @@
 
 
         <iron-ajax auto url="../data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
-        <iron-ajax auto url="../data/dobs.json" handle-as="json" last-response="{{ajaxResponse1}}" id="xhr"></iron-ajax>
+        <iron-ajax auto url="../data/dobs.2.json" handle-as="json" last-response="{{ajaxResponse1}}" id="xhr"></iron-ajax>
 
         <div class="card">
             <h1>Basic grid demo</h1>
             <paper-button on-click="exportGridsMerged">Export excel merged</paper-button>
             <paper-button on-click="exportGridsTabbed">Export excel tabbed</paper-button>
-            <flxs-tree-grid id="grid1" editable="true" enableHeaders="false" enableFilters="true" dataProvider="{{ ajaxResponse }}"
+            <flxs-tree-grid id="grid1" editable="true" enableHeaders="true" enableFilters="true" dataProvider="{{ ajaxResponse }}"
                             style="width:600px;height:400px">
                 <flxs-tree-grid-column dataField="id" headerText="Sl. No" columnWidthMode="fitToContent" filterControl="TextInput" filterOperation="Contains"></flxs-tree-grid-column>
                 <flxs-tree-grid-column editable="true" dataField="first_name" headerText="First Name" columnWidthMode="fitToContent">
@@ -51,6 +51,8 @@
             <br>
             <flxs-tree-grid id="grid2" editable="true" dataProvider="{{ ajaxResponse1 }}"
                             rollOverColor="[[_rollOverColors]]" style="width:400px;height:400px">
+                            <flxs-tree-grid-column editable="false" enableIcon="true" iconFunction="[[getUpDownStatus]]" iconPlacementFunction="[[placeIcon]]" hideText="true" dataField="rate" headerText="Rate" columnWidthMode="fitToContent">
+                            </flxs-tree-grid-column>
                             <flxs-tree-grid-column editable="true" dataField="first_name" headerText="First Name" columnWidthMode="fitToContent">
                             </flxs-tree-grid-column>
                             <flxs-tree-grid-column editable="true" dataField="last_name" headerWordWrap="true"
@@ -64,9 +66,50 @@
 
     <script>
         window.addEventListener('WebComponentsReady', function () {
+
+            flexiciousNmsp.Constants.IMAGE_PATH = "../../images";
+            flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+            flexiciousNmsp.StyleDefaults.defaults.toolbarImagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+
+            const base64Images = [];
+
+            const toDataURL = function(url, callback) {
+                var xhr = new XMLHttpRequest();
+                xhr.onload = function() {
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                    callback(reader.result);
+                }
+                reader.readAsDataURL(xhr.response);
+                };
+                xhr.open('GET', url);
+                xhr.responseType = 'blob';
+                xhr.send();
+            };
+
             Polymer({
                 is: 'basic-grid-demo',
-                // _rollOverColors: 0xFF4500
+                // _rollOverColors: 0xFF4500,
+                ready: function() {
+                    toDataURL(flexiciousNmsp.Constants.IMAGE_PATH+'/test/arrow_up_24.png', function(data) {
+                        base64Images.push(data.replace('data:image/png;base64,', ''));
+                    });
+                    toDataURL(flexiciousNmsp.Constants.IMAGE_PATH+'/test/arrow_down_24.png', function(data) {
+                        base64Images.push(data.replace('data:image/png;base64,', ''));
+                    });
+                    toDataURL(flexiciousNmsp.Constants.IMAGE_PATH+'/test/arrow_up_g_24.png', function(data) {
+                        base64Images.push(data.replace('data:image/png;base64,', ''));
+                    });
+                },
+                getUpDownStatus: function(cell, state) {
+                    if(cell.rowInfo.getIsDataRow()) {
+                        return flexiciousNmsp.StyleDefaults.defaults.imagesRoot + '/test/arrow_' + cell.rowInfo.getData()[cell.getColumn().dataField] + '_24.png';
+                    }
+                    return null;
+                },
+                placeIcon: function(cell, icon) {
+                    icon.move(0,0);
+                },
                 exportGridsMerged: function () {
                     this.exportGrids(false);
                 },
@@ -74,7 +117,7 @@
                     this.exportGrids(true);
                 },
                 exportGrids: function (tabbed) {
-                    var grids = [{grid: this.$.grid1.grid, sheet: "dobs"}, {grid: this.$.grid2.grid, sheet: "dobs2"}];
+                    var grids = [{grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs"}, {grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2"}];
                     var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
                     multigridExporter.setFileName('exported-grid_' + (tabbed ? 'tabbed_' : '') + new Date().toDateString());
                     multigridExporter.setCustomStyleFunction(function(cellData, dgCol, existingStyle) {
@@ -116,6 +159,29 @@
                         
                         return null;
                     });
+                    multigridExporter.setCustomBase64ImageFunction(function(data, col) {
+                        if( col.enableIcon ) {
+                            var imageInfo = {};
+                            imageInfo.imageName = "arrow_" + data[col.dataField] + '_24.png';
+                            imageInfo.dataURL = data[col.dataField] === 'up' ? base64Images[0] : data[col.dataField] === 'down' ? base64Images[1] : ''; 
+                            return imageInfo.dataURL === '' ? null : imageInfo;
+                        }
+                    });
+                    
+
+                    var imageInfo = {};
+                    imageInfo.imageName = "arrow_up_24_g.png";
+                    imageInfo.dataURL = base64Images[2]; 
+                    imageInfo.imageHeight = imageInfo.imageWidth = 24;
+                            
+
+                    multigridExporter.setMergeCells([
+                        { c:[2, 3], r:[8, 11], ref: 'g2', icon: imageInfo },
+                        { c:[1, 1], r:[1, 4], ref: 'g1', icon: imageInfo },
+                        { c:[1, 2], r:[5, 6], ref: 'g1', icon: imageInfo },
+                        { c:[0, 0], r:[6, 11], ref: 'g2', icon: imageInfo },
+                        { c:[3, 3], r:[24, 26], ref: 'g2', icon: imageInfo  },
+                    ]);
                     multigridExporter.generate(grids, tabbed);
                 }
             });

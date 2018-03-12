@@ -33,6 +33,8 @@
 
         this.separatorCount = 2;
 
+        this._pageMargins = {};
+
         this._exportFileName = "exported-grid";
 
         this._headerIndices = [];
@@ -45,6 +47,8 @@
 
         this._customBase64ImageFunction = null;
 
+        this._customFormStyleFunction = null;
+
         this._drawings = null;
 
         this._cellGroups = [];
@@ -52,6 +56,8 @@
         this._map = {};
 
         this._ws = null;
+
+        this._isGridComp = null;
 
         this.defaultImages = [ 
             'iVBORw0KGgoAAAANSUhEUgAAACwAAAAgCAYAAABpRpp6AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTnU1rJkAAAD4UlEQVRYR82Y+0sUURTH7f34Iah+6A9ZhmGHZSlCWTFUlIpMMqUnm2VmSJlt1qbZ0sNFKCErKzOJHlT2fkv2IEGRHhpk1k9F/dQPQVTfzp257s7cubtuu2Psgc/dufecOfMZZh9XM1wu14QMHgDSHmPgISbTEWPgISbNdDYHUVWWC6/iAj2VJNCQXVyBuqYz1M7ae+DiQWzbutu2LsMYeIhJxqe79Vjqlgkkh1oQpLbR/r0tq+EdzSu5qL02bMmLGAMPMclYo7FmCnz+ME3t+VSp9imWG2LSO7tiSxsDDzH5LJSlN/H4O2lqzTnJ5ixROg97H32hlL3WGHiIyROFrJEX9d3faWrNpUJf6zrMV/Ow68YITY21ikyrtFZ9M5IzYww8xGR4PrvbXDq0rqdC//H1WEBvMU3TqHc+6m5+pGUjtzEi7YX//PvIuhlj4CEmnRbuP+nHAsWD0uZnGH4eRj77xlEKsOdWVLp8Icu/iMxF4v5wOCk80LYBCxUNK8NPMTJ4GdsXmd4CaiGCt6PS8fgvwgOnynXZknAPyV5BTa7wIdOll1Gp/Hwz4y786swmZJLsiqYnGBm6ilqZLP2orGjqoXJ5DzNMeCL3tSVTFX7dXkGybhQf6saHoS7sjCFbfPgJlct7iIyb8JuOzcgi2eUHSPbddQTyZLJ0Mwe7qVzeQwYTnsR9bclkhd+eqyRZF9xrz+HV0A3U5ctl2c2I544FE57MfW3JZIQHO6vgG90g0XtXk+5D3CgKPaZyeY94OCo8eL4K2QrtO7acxu0LAeN7ViK7LPSIyuU9xoIJT+G+tuS/CH++F0AOyWZVduDN9z/Anx/4cD2APIu0iqX7H1K5vEciOCY8dLoIqrsclz79pikPkh6+WoNFurSKJfsesNXIOW2N7ZZ5IjgrrORgdU0QDa09+MK8f33FyyNl8DDZhvu0EK1vK/PApVVZ1hLBWWH+6N3rLuDjz2/oPbqKNucqFtffpRJrfSXbZycpPJX72pLJCkdRURi8Q2l7/bgIt+gblEw6tK7HYn9jIxpNhI7H/oCtYl93nlo6lOdjwYSnc19b8n7AS8IKcnbZH2kq9LeU6E9DXXmWpvKaWDDhmdxXWrBcZY/WjYLqYzS15/+VjoZS2hNTT8WHwD35n0HxGFP4fVcABbq0gyiZ8J/oo/b2642FRZiFrIjRHt6DLaWp/F/CDV/RBuwItVI7+TUSgQnP5q6RkBWmC0x4DveMG7KTnSahIOFpCRenQ5DwRPFOR0nLIOFJTI6JE1M50/krW5sgwNZmEHOIuZxZxGRCrxFvPB6j55jh6/q1TTXU3zXvLyn68YefgryNAAAAAElFTkSuQmCC',
@@ -160,6 +166,18 @@
      * 
      * @param {Function} fn 
      * @example
+     *  customFormStyle(cell, existingStyle) {
+     *      return existingStyle;
+     *  }
+     */
+    ExcelBuilderMultiGridExporter.prototype.setCustomFormStyleFunction = function(fn) {
+        this._customFormStyleFunction = fn;
+    };
+
+    /**
+     * 
+     * @param {Function} fn 
+     * @example
      *  getBase64ImageString(data, col) {
      *      return <base64ImageString>
      *  }
@@ -214,14 +232,23 @@
         this.stylesheet = new_wb.getStyleSheet();
 
         for (i = 0; i < gridProps.length; i++) {
-            this.writeHeader(gridProps[i].grid);
-            [].forEach.call(gridProps[i].grid.getDataProviderNoPaging(), function (data) {
-                this.writeRecord(gridProps[i].grid, data);
-            }, this);
 
-            this.writeFooter(gridProps[i].grid, gridProps[i].grid.getDataProviderNoPaging());
-            this.multiGridData.push(this.data.slice(0));
-            this.data = [];
+            var isGrid = gridProps[i].hasOwnProperty('grid');
+
+            if(isGrid) {
+                this.writeHeader(gridProps[i].grid);
+                [].forEach.call(gridProps[i].grid.getDataProviderNoPaging(), function (data) {
+                    this.writeRecord(gridProps[i].grid, data);
+                }, this);
+    
+                this.writeFooter(gridProps[i].grid, gridProps[i].grid.getDataProviderNoPaging());
+                this.multiGridData.push(this.data.slice(0));
+                this.data = [];
+            } else {
+                this.multiGridData.push(gridProps[i].form);
+                this._headerIndices.push(-1);
+                this._footerIndices.push(-1);
+            }
 
             if (multiTab) {
                 ws = new_wb.createWorksheet({ name: this.getValidSheetName(gridProps[i]) });
@@ -279,7 +306,7 @@
     };
 
     ExcelBuilderMultiGridExporter.prototype.pixelToExcelInches = function(pixels) {
-      return ((pixels - 12) / 7.0  +  1);  
+      return pixels ? ((pixels - 12) / 7.0  +  1) : pixels;  
     };
 
     ExcelBuilderMultiGridExporter.prototype.setColumnsWidth = function (ws, gridProps) {
@@ -287,16 +314,28 @@
 
         var cws = [];
         [].forEach.call(gridProps, function(gridProp) {
-            this.filterExportableColumns(gridProp.grid);
-            this._exportableColumns.map(function(col, index) {
+            if(gridProp.hasOwnProperty('grid')) {
+                this.filterExportableColumns(gridProp.grid);
+                this._exportableColumns.map(function(col, index) {
 
-                if( index < cws.length ) {
-                    cws[index] = Math.max(cws[index], col.getWidth())
-                } else {
-                    cws.push(col.getWidth());
-                }
-                
-            }.bind(this));
+                    if( index < cws.length ) {
+                        cws[index] = Math.max(cws[index], col.getWidth())
+                    } else {
+                        cws.push(col.getWidth());
+                    }
+                    
+                }.bind(this));
+            } else if(gridProp.hasOwnProperty('form') && gridProp.hasOwnProperty('colWidths')) {
+                gridProp.colWidths.map(function(colW, index) {
+
+                    if( index < cws.length ) {
+                        cws[index] = Math.max(cws[index], colW)
+                    } else {
+                        cws.push(colW);
+                    }
+                    
+                }.bind(this));
+            }
         }.bind(this));
 
         [].forEach.call(cws, function (w) {
@@ -312,8 +351,26 @@
         ws.mergeCells(a1NotationFrom, a1NotationTo);
     };
 
-    ExcelBuilderMultiGridExporter.prototype.setPageMargins = function(ws, top, right, bottom, left, header, footer) {
-        ws.setPageMargin({ top: top || 0.7, bottom: bottom || 0.7, left: left || 0.7, right: right || 0.7, header: header || 0.3, footer: footer || 0.3 });
+    /**
+     * each margin value will be measured in pixels.
+     * @param {Number} top 
+     * @param {Number} right 
+     * @param {Number} bottom 
+     * @param {Number} left 
+     * @param {Number} header 
+     * @param {Number} footer 
+     */
+    ExcelBuilderMultiGridExporter.prototype.setPageMargins = function(top, right, bottom, left, header, footer) {
+        this._pageMargins['top'] = this.pixelToExcelInches(top);
+        this._pageMargins['right'] = this.pixelToExcelInches(right);
+        this._pageMargins['bottom'] = this.pixelToExcelInches(bottom);
+        this._pageMargins['left'] = this.pixelToExcelInches(left);
+        this._pageMargins['header'] = this.pixelToExcelInches(header);
+        this._pageMargins['footer'] = this.pixelToExcelInches(footer);
+    };
+
+    ExcelBuilderMultiGridExporter.prototype.setWorksheetPageMargins = function(ws, pageMargins) {
+        ws.setPageMargin({ top: pageMargins.top || 0.7, bottom: pageMargins.bottom || 0.7, left: pageMargins.left || 0.7, right: pageMargins.right || 0.7, header: pageMargins.header || 0.3, footer: pageMargins.footer || 0.3 });
     };
 
     ExcelBuilderMultiGridExporter.prototype.getColumnLabels = function(grid, columns) {
@@ -359,10 +416,11 @@
         return null;
     };
 
-    ExcelBuilderMultiGridExporter.prototype.attachImages = function(wb, ws, data, rowIndex, col, gridRef) {
-        var offsetRows = this._map[gridRef].offsetRows;
+    ExcelBuilderMultiGridExporter.prototype.attachImages = function(wb, ws, data, rowIndex, col, ref) {
+        var offsetRows = this._map[ref].offsetRows;
         var base64ImageInfo;
-        var imageInfoInMergedCell = this.getImageMetadataFromMergedCell(rowIndex, col.getColIndex(), gridRef);
+        var colIndex = this._exportableColumns.indexOf(col) || 0;
+        var imageInfoInMergedCell = this.getImageMetadataFromMergedCell(rowIndex, colIndex, ref);
 
         if(!this._customBase64ImageFunction || !(base64ImageInfo = this._customBase64ImageFunction(data, col))) {
             if(!imageInfoInMergedCell || (imageInfoInMergedCell && imageInfoInMergedCell.prevFetch || !imageInfoInMergedCell.imageInfo)) {
@@ -391,7 +449,7 @@
         var picRef = wb.addMedia('image', base64ImageInfo.imageName, base64ImageInfo.dataURL);
         var picture = new ExcelBuilder.Drawing.Picture();
         picture.createAnchor('oneCellAnchor', {
-            x: col.getColIndex() || 0,
+            x: colIndex,
             y: rowIndex + offsetRows,
             xOff: excelPos.pixelsToEMUs(imageWidth)/4, 
             yOff: excelPos.pixelsToEMUs(imageHeight)/4,
@@ -410,19 +468,24 @@
 
         for(var i=0;i<gridProps.length;i++) {
 
+            this._isGridComp = gridProps[i].hasOwnProperty('grid');
+
             this._map[gridProps[i].ref] = { offsetRows: (styledData.length + (this.needSeparator ? this.separatorCount : 0)) };
 
-            this.filterExportableColumns(gridProps[i].grid);
+            if(this._isGridComp) this.filterExportableColumns(gridProps[i].grid);
 
             var table = new ExcelBuilder.Table();
             worksheet.addTable(table);
             workbook.addTable(table);
 
             var data = this.multiGridData[i] || [];
-            // table.styleInfo.themeStyle = style || '';
-            if (data.length > 0 && this._headerIndices[i] !== -1) {
-                table.setReferenceRange([1, 1], [data[0].length, data.length]);
-                table.setTableColumns(this.getColumnLabels(gridProps[i].grid, data[0]));
+            table.setReferenceRange([1, 1], [data[0].length, data.length]);
+
+            if(this._isGridComp) {
+                // table.styleInfo.themeStyle = style || '';
+                if (data.length > 0 && this._headerIndices[i] !== -1) {
+                    table.setTableColumns(this.getColumnLabels(gridProps[i].grid, data[0]));
+                }
             }
 
             if( this.needSeparator ) {
@@ -432,11 +495,13 @@
             }
 
             // if(this._customBase64ImageFunction) {
-                for(var m=0;m<data.length;m++) {
-                    [].forEach.call(gridProps[i].grid.getColumns(), function(col) {
-                        this.attachImages(workbook, worksheet, data[m], m, col, gridProps[i].ref);
-                        data[m][col.dataField] = m !== this._headerIndices[i] ? col.hideText ? '' : data[m][col.dataField] : col.hideHeaderText ? '' : data[m][col.dataField];
-                    }.bind(this));
+                if(this._isGridComp) {
+                    for(var m=0;m<data.length;m++) {
+                        [].forEach.call(gridProps[i].grid.getColumns(), function(col) {
+                            this.attachImages(workbook, worksheet, data[m], m, col, gridProps[i].ref);
+                            data[m][col.dataField] = m !== this._headerIndices[i] ? col.hideText ? '' : data[m][col.dataField] : col.hideHeaderText ? '' : data[m][col.dataField];
+                        }.bind(this));
+                    }
                 }
             // }
             
@@ -450,105 +515,133 @@
         worksheet.setData(styledData);
         this.setColumnsWidth(worksheet, gridProps);
 
-        this.setPageMargins(worksheet);
+        this.setWorksheetPageMargins(worksheet, this._pageMargins);
         
     };
 
-    ExcelBuilderMultiGridExporter.prototype.setStyles = function(data, gridIndex, style) {
+    ExcelBuilderMultiGridExporter.prototype.setStyles = function(data, compIndex, style) {
 
         // borderTypes = [ 'top', 'topleft', 'left', 'bottomleft', 'bottom', 'bottomright', 'right', 'topright' ];
 
         var items = [];
         for(var r=0;r<data.length;r++) {
             var item = [];
-            for(var m=0, c=0;m<this._exportableColumns.length;m++) {
-                var dgCol = this._exportableColumns[m];
+            if(this._isGridComp) {
+                for(var m=0, c=0;m<this._exportableColumns.length;m++, c++) {
+                    var dgCol = this._exportableColumns[m];
 
-                if(!data[r].hasOwnProperty(dgCol.dataField)) {
-                    continue;
-                }
-
-                var cell = {};
-                cell['value'] = data[r][dgCol.dataField];
-                cell['metadata'] = {};
-
-                var type = this._headerIndices[gridIndex] === r ? 'header' : this._footerIndices[gridIndex] === r ? 'footer' : r % 2 === 0 ? 'dataCell0' : 'dataCell1';
-
-                var edge = false;
-                var firstRow = type === 'header' || r === 0, lastRow = type === 'footer' || r == data.length - 1, firstCol = c == 0, lastCol = c == Object.keys(data[r]).length - 1;
-                var top = false, left = false, bottom = false, right = false;
-
-                if( firstRow && !firstCol && !lastCol ) {
-                    edge = true;
-                    top = true;
-                }
-                if( firstRow && firstCol ) {
-                    edge = true;
-                    top = true;
-                    left = true;
-                }
-                if( !firstRow && !lastRow && firstCol ) {
-                    edge = true;
-                    left = true;
-                }
-                if( lastRow && firstCol ) {
-                    edge = true;
-                    left = true;
-                    bottom = true;
-                }
-                if( lastRow && !firstCol && !lastCol ) {
-                    edge = true;
-                    bottom = true;
-                }
-                if( lastRow && lastCol ) {
-                    edge = true;
-                    bottom = true;
-                    right = true;
-                }
-                if( !firstRow && !lastRow && lastCol ) {
-                    edge = true;
-                    right = true;
-                }
-                if( firstRow && lastCol ) {
-                    edge = true;
-                    top = true;
-                    right = true;
-                }
-
-                var _borderBoxStyle = {};
-
-                if( edge ) {
-                    _borderBoxStyle.top = top;
-                    _borderBoxStyle.left = left;
-                    _borderBoxStyle.bottom = bottom;
-                    _borderBoxStyle.right = right;
-                    _borderBoxStyle.style = 'thick';
-                    _borderBoxStyle.color = 'FF00FF00';
-                }
-
-                if( this._customStyleFunction ) {
-                    var typ = 'custom_' + type;
-                    var cellData = this.deepClone(data[r]);
-                    cellData['rowIndex'] = r;
-                    cellData['cellType'] = type;
-                    var s = this._customStyleFunction(cellData, dgCol, this.deepClone(style[type]));
-                    if( s ) {
-                        type = typ;
-                        style[type] = s;
+                    if(!data[r].hasOwnProperty(dgCol.dataField)) {
+                        continue;
                     }
+                    
+                    item.push(this.createCell(data, data[r][dgCol.dataField], compIndex, { r: r, c: c, dgCol: dgCol }, style));
                 }
-
-                cell['metadata']['style'] = this.generateStyleId(type, style, _borderBoxStyle, [r, c]).id;
-                
-                item.push(cell);
-
-                c++;
+            } else {
+                for(var c=0;c<data[r].length;c++) {
+                    item.push(this.createCell(data, data[r][c], compIndex, { r: r, c: c }, style));
+                }
             }
 
             items.push(item);
         }
         
         return items;
+    };
+
+    ExcelBuilderMultiGridExporter.prototype.createCell = function (dp, value, compIndex, cellInfo, style) {
+        var cell = {};
+        cell['value'] = value;
+        cell['metadata'] = {};
+
+        var c = cellInfo.c;
+        var r = cellInfo.r;
+        var dgCol = cellInfo.dgCol;
+
+        var type = this._headerIndices[compIndex] === r ? 'header' : this._footerIndices[compIndex] === r ? 'footer' : r % 2 === 0 ? 'dataCell0' : 'dataCell1';
+
+        var edge = false;
+        var firstRow = type === 'header' || r === 0, lastRow = type === 'footer' || r == dp.length - 1, firstCol = c == 0, lastCol = c == (!Array.isArray(dp[r]) ? Object.keys(dp[r]) : dp[r]).length - 1;
+        var top = false, left = false, bottom = false, right = false;
+
+        if (firstRow && !firstCol && !lastCol) {
+            edge = true;
+            top = true;
+        }
+        if (firstRow && firstCol) {
+            edge = true;
+            top = true;
+            left = true;
+        }
+        if (!firstRow && !lastRow && firstCol) {
+            edge = true;
+            left = true;
+        }
+        if (lastRow && firstCol) {
+            edge = true;
+            left = true;
+            bottom = true;
+        }
+        if (lastRow && !firstCol && !lastCol) {
+            edge = true;
+            bottom = true;
+        }
+        if (lastRow && lastCol) {
+            edge = true;
+            bottom = true;
+            right = true;
+        }
+        if (!firstRow && !lastRow && lastCol) {
+            edge = true;
+            right = true;
+        }
+        if (firstRow && lastCol) {
+            edge = true;
+            top = true;
+            right = true;
+        }
+
+        var _borderBoxStyle = {};
+
+        if (edge) {
+            _borderBoxStyle.top = top;
+            _borderBoxStyle.left = left;
+            _borderBoxStyle.bottom = bottom;
+            _borderBoxStyle.right = right;
+            _borderBoxStyle.style = 'thick';
+            _borderBoxStyle.color = 'FF00FF00';
+        }
+
+        if(this._isGridComp) {
+
+            if (this._customStyleFunction) {
+                var typ = 'custom_' + type;
+                var cellData = this.deepClone(dp[r]);
+                cellData['rowIndex'] = r;
+                cellData['cellType'] = type;
+                var s = this._customStyleFunction(cellData, dgCol, this.deepClone(style[type]));
+                if (s) {
+                    type = typ;
+                    style[type] = s;
+                }
+            }
+
+        } else {
+            if (this._customFormStyleFunction) {
+                var typ = 'custom_' + type;
+                var cellData = {};
+                cellData['data'] = this.deepClone(dp[r]);
+                cellData['rowIndex'] = r;
+                cellData['colIndex'] = c;
+                var s = this._customFormStyleFunction(cellData, this.deepClone(style[type]));
+                if (s) {
+                    type = typ;
+                    style[type] = s;
+                }
+            }
+        }
+
+        cell['metadata']['style'] = this.generateStyleId(type, style, _borderBoxStyle, [r, c]).id;
+        return cell;
     };
 
     ExcelBuilderMultiGridExporter.prototype.generateStyleId = function(type, style, box, c) {

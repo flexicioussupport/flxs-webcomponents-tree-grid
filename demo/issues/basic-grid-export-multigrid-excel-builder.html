@@ -49,17 +49,19 @@
             </flxs-tree-grid>
             <br>
             <br>
-            <flxs-tree-grid id="grid2" editable="true" dataProvider="{{ ajaxResponse1 }}"
-                            rollOverColor="[[_rollOverColors]]" style="width:400px;height:400px">
-                            <flxs-tree-grid-column editable="false" enableIcon="true" iconFunction="[[getUpDownStatus]]" iconPlacementFunction="[[placeIcon]]" hideText="true" dataField="rate" headerText="Rate" columnWidthMode="fitToContent">
-                            </flxs-tree-grid-column>
-                            <flxs-tree-grid-column editable="true" dataField="first_name" headerText="First Name" columnWidthMode="fitToContent">
-                            </flxs-tree-grid-column>
-                            <flxs-tree-grid-column editable="true" dataField="last_name" headerWordWrap="true"
-                                                   headerText="Last Name" columnWidthMode="fitToContent" filterControl="TextInput" filterOperation="Contains">
-                            </flxs-tree-grid-column>
-                            <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth"  columnWidthMode="fitToContent">
-                            </flxs-tree-grid-column>
+            <flxs-tree-grid id="grid2" editable="true" dataProvider="{{ ajaxResponse1 }}" rollOverColor="[[_rollOverColors]]" style="width:400px;height:400px">
+            
+                <flxs-tree-grid-column excludeFromExport="true" width="10" columnWidthMode="fixed"></flxs-tree-grid-column>
+                <flxs-tree-grid-column editable="false" enableIcon="true" iconFunction="[[getUpDownStatus]]" iconPlacementFunction="[[placeIcon]]"
+                    hideText="true" dataField="rate" headerText="Rate" columnWidthMode="fitToContent">
+                </flxs-tree-grid-column>
+                <flxs-tree-grid-column editable="true" dataField="first_name" headerText="First Name" columnWidthMode="fitToContent">
+                </flxs-tree-grid-column>
+                <flxs-tree-grid-column editable="true" dataField="last_name" headerWordWrap="true" headerText="Last Name" columnWidthMode="fitToContent"
+                    filterControl="TextInput" filterOperation="Contains">
+                </flxs-tree-grid-column>
+                <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth" columnWidthMode="fitToContent">
+                </flxs-tree-grid-column>
             </flxs-tree-grid>
         </div>
     </template>
@@ -117,7 +119,20 @@
                     this.exportGrids(true);
                 },
                 exportGrids: function (tabbed) {
-                    var grids = [{grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs"}, {grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2"}];
+
+                    var formData = [
+                        ['year1', 'year2', 'year3', '', '', 'year4', '', 'year5'],
+                        [100, 200, 300, '', '', 500, '', 600],
+                        ['--', '--', 0, '', '', 1000, '', 0],
+                        ['', '', '', '', '', '', '', ''],
+                        [1000, 2000, 3000, '', '', 4000, '', 5000]
+                    ];
+
+                    var formColsWidth = [
+                        160, 160, 160, 160, 160, 160, 160, 160
+                    ]
+
+                    var grids = [{form: formData, ref:'f1', sheet: 'form1', colWidths: formColsWidth}, {grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs"}, {grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2"}];
                     var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
                     multigridExporter.setFileName('exported-grid_' + (tabbed ? 'tabbed_' : '') + new Date().toDateString());
                     multigridExporter.setCustomStyleFunction(function(cellData, dgCol, existingStyle) {
@@ -159,6 +174,23 @@
                         
                         return null;
                     });
+                    multigridExporter.setCustomFormStyleFunction(function(cell, existingStyle) {
+                        
+                        if( cell.colIndex === 0){
+                            existingStyle['fill'] = {
+                                type: 'pattern',
+                                patternType: 'solid',
+                                bgColor: 'FF440000',
+                                fgColor: 'FF440000'
+                            };
+                            existingStyle.font.size = 17;
+                            existingStyle.font.color = 'FFFFFFFF';
+                            existingStyle.font.strike = true;
+                            return existingStyle;
+                        }
+                        
+                        return null;
+                    });
                     multigridExporter.setCustomBase64ImageFunction(function(data, col) {
                         if( col.enableIcon ) {
                             var imageInfo = {};
@@ -181,7 +213,11 @@
                         { c:[1, 2], r:[5, 6], ref: 'g1', icon: imageInfo },
                         { c:[0, 0], r:[6, 11], ref: 'g2', icon: imageInfo },
                         { c:[3, 3], r:[24, 26], ref: 'g2', icon: imageInfo  },
+                        { c:[0, 1], r:[0, 0], ref: 'f1' },
+                        { c:[0, 1], r:[1, 1], ref: 'f1' },
+                        { c:[0, 1], r:[2, 2], ref: 'f1' },
                     ]);
+                    multigridExporter.setPageMargins(11, 11, 11, 11);
                     multigridExporter.generate(grids, tabbed);
                 }
             });

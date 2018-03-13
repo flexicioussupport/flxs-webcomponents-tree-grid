@@ -47,7 +47,7 @@
 
         this._customBase64ImageFunction = null;
 
-        this._customFormStyleFunction = null;
+        this.customFormStyleFunction = null;
 
         this._drawings = null;
 
@@ -246,8 +246,8 @@
                 this.data = [];
             } else {
                 this.multiGridData.push(gridProps[i].form);
-                this._headerIndices.push(-1);
-                this._footerIndices.push(-1);
+                this._headerIndices.push(i);
+                this._footerIndices.push(i);
             }
 
             if (multiTab) {
@@ -474,11 +474,13 @@
 
             if(this._isGridComp) this.filterExportableColumns(gridProps[i].grid);
 
+            var data = this.multiGridData[i] || [];
+
+            /*
             var table = new ExcelBuilder.Table();
             worksheet.addTable(table);
             workbook.addTable(table);
 
-            var data = this.multiGridData[i] || [];
             table.setReferenceRange([1, 1], [data[0].length, data.length]);
 
             if(this._isGridComp) {
@@ -487,6 +489,7 @@
                     table.setTableColumns(this.getColumnLabels(gridProps[i].grid, data[0]));
                 }
             }
+            */
 
             if( this.needSeparator ) {
                 for(var k=0;k<this.separatorCount;k++) {

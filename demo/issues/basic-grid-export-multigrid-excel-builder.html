@@ -191,11 +191,12 @@
                         
                         return null;
                     });
-                    multigridExporter.setCustomBase64ImageFunction(function(data, col) {
+                    multigridExporter.setCustomBase64ImageFunction(function(data, col, cellWidth) {
                         if( col.enableIcon ) {
                             var imageInfo = {};
                             imageInfo.imageName = "arrow_" + data[col.dataField] + '_24.png';
                             imageInfo.dataURL = data[col.dataField] === 'up' ? base64Images[0] : data[col.dataField] === 'down' ? base64Images[1] : ''; 
+                            imageInfo.xOffset = (cellWidth - 24)/2;
                             return imageInfo.dataURL === '' ? null : imageInfo;
                         }
                     });

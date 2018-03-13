@@ -191,11 +191,12 @@
                         
                         return null;
                     });
-                    multigridExporter.setCustomBase64ImageFunction(function(data, col) {
+                    multigridExporter.setCustomBase64ImageFunction(function(data, col, cellWidth) {
                         if( col.enableIcon ) {
                             var imageInfo = {};
                             imageInfo.imageName = "arrow_" + data[col.dataField] + '_24.png';
                             imageInfo.dataURL = data[col.dataField] === 'up' ? base64Images[0] : data[col.dataField] === 'down' ? base64Images[1] : ''; 
+                            imageInfo.xOffset = (cellWidth - 24)/2;
                             return imageInfo.dataURL === '' ? null : imageInfo;
                         }
                     });
@@ -205,14 +206,20 @@
                     imageInfo.imageName = "arrow_up_24_g.png";
                     imageInfo.dataURL = base64Images[2]; 
                     imageInfo.imageHeight = imageInfo.imageWidth = 24;
+                    imageInfo.hideText = true;
+
+                    var imageInfo2 = {};
+                    imageInfo2.imageName = "arrow_up_24_g.png";
+                    imageInfo2.dataURL = base64Images[2]; 
+                    imageInfo2.imageHeight = imageInfo2.imageWidth = 24;
                             
 
                     multigridExporter.setMergeCells([
                         { c:[2, 3], r:[8, 11], ref: 'g2', icon: imageInfo },
                         { c:[1, 1], r:[1, 4], ref: 'g1', icon: imageInfo },
-                        { c:[1, 2], r:[5, 6], ref: 'g1', icon: imageInfo },
-                        { c:[0, 0], r:[6, 11], ref: 'g2', icon: imageInfo },
-                        { c:[3, 3], r:[24, 26], ref: 'g2', icon: imageInfo  },
+                        { c:[1, 2], r:[5, 6], ref: 'g1', icon: imageInfo2 },
+                        { c:[0, 0], r:[6, 11], ref: 'g2', icon: imageInfo2 },
+                        { c:[3, 3], r:[24, 26], ref: 'g2', icon: imageInfo2  },
                         { c:[0, 1], r:[0, 0], ref: 'f1' },
                         { c:[0, 1], r:[1, 1], ref: 'f1' },
                         { c:[0, 1], r:[2, 2], ref: 'f1' },

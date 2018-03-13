@@ -180,7 +180,7 @@
      * 
      * @param {Function} fn 
      * @example
-     *  getBase64ImageString(data, col, cellWidth) {
+     *  getBase64ImageString(data, col) {
      *      return <base64ImageString>
      *  }
      */
@@ -443,6 +443,8 @@
 
         picture.setMedia(picRef);
         this._drawings.addDrawing(picture);
+
+        data[col.dataField] = base64ImageInfo.hideText ? '' : data[col.dataField];
     };
 
     ExcelBuilderMultiGridExporter.prototype.attachWorkSheet = function (workbook, worksheet, gridProps) {

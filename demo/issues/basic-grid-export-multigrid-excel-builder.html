@@ -89,6 +89,17 @@
                 xhr.send();
             };
 
+            function getPngDimensions(base64) {
+                const header = atob(base64.slice(0, 50)).slice(16,24)
+                const uint8 = Uint8Array.from(header, c => c.charCodeAt(0))
+                const dataView = new DataView(uint8.buffer)
+
+                return {
+                    width: dataView.getInt32(0),
+                    height: dataView.getInt32(4)
+                }
+            }
+
             Polymer({
                 is: 'basic-grid-demo',
                 // _rollOverColors: 0xFF4500,
@@ -132,7 +143,7 @@
                         160, 160, 160, 160, 160, 160, 160, 160
                     ]
 
-                    var grids = [{form: formData, ref:'f1', sheet: 'form1', colWidths: formColsWidth}, {grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs"}, {grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2"}];
+                    var grids = [ {grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2"}];
                     var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
                     multigridExporter.setFileName('exported-grid_' + (tabbed ? 'tabbed_' : '') + new Date().toDateString());
                     multigridExporter.setCustomStyleFunction(function(cellData, dgCol, existingStyle) {
@@ -196,22 +207,29 @@
                             var imageInfo = {};
                             imageInfo.imageName = "arrow_" + data[col.dataField] + '_24.png';
                             imageInfo.dataURL = data[col.dataField] === 'up' ? base64Images[0] : data[col.dataField] === 'down' ? base64Images[1] : ''; 
-                            imageInfo.xOffset = (cellWidth - 24)/2;
+                            if(imageInfo.dataURL !== '') {
+                                var size = getPngDimensions(imageInfo.dataURL);
+                                imageInfo.xOffset = (cellWidth - size.width)/2;
+                            }
                             return imageInfo.dataURL === '' ? null : imageInfo;
                         }
                     });
                     
+                    
+                    var size = getPngDimensions(base64Images[2]);
 
                     var imageInfo = {};
                     imageInfo.imageName = "arrow_up_24_g.png";
                     imageInfo.dataURL = base64Images[2]; 
-                    imageInfo.imageHeight = imageInfo.imageWidth = 24;
+                    imageInfo.imageHeight = size.height;
+                    imageInfo.imageWidth = size.width;
                     imageInfo.hideText = true;
 
                     var imageInfo2 = {};
                     imageInfo2.imageName = "arrow_up_24_g.png";
                     imageInfo2.dataURL = base64Images[2]; 
-                    imageInfo2.imageHeight = imageInfo2.imageWidth = 24;
+                    imageInfo2.imageHeight = size.height;
+                    imageInfo2.imageWidth = size.width;
                             
 
                     multigridExporter.setMergeCells([

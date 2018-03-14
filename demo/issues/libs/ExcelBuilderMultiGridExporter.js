@@ -511,7 +511,7 @@
             // if(this._customBase64ImageFunction) {
                 if(this._isGridComp) {
                     for(var m=0;m<data.length;m++) {
-                        gridProps[i].grid.getColumns().map(function(col, index) {
+                        this._exportableColumns.map(function(col, index) {
                             this.attachImages(workbook, worksheet, data[m], m, index, col, gridProps[i].ref);
                             data[m][col.dataField] = m !== this._headerIndices[i] ? col.hideText ? '' : data[m][col.dataField] : col.hideHeaderText ? '' : data[m][col.dataField];
                         }.bind(this));

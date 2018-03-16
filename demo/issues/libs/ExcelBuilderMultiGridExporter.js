@@ -53,6 +53,8 @@
 
         this._cellGroups = [];
 
+        this._paddings = {};
+
         this._map = {};
 
         this._ws = null;
@@ -322,6 +324,14 @@
     ExcelBuilderMultiGridExporter.prototype.setColumnsWidth = function (ws) {
         var wscols = [];
 
+        if( this._paddings.left ) {
+            this._cws = [this._paddings.left].concat(this._cws);
+        } 
+
+        if( this._paddings.right ) {
+            this._cws = this._cws.concat([this._paddings.right]);
+        } 
+
         [].forEach.call(this._cws, function (w) {
             wscols.push({ width: this.pixelToExcelInches(w) });
         }.bind(this));
@@ -333,6 +343,20 @@
         var a1NotationFrom = excelUtil.positionToLetterRef(startColIndex + 1, startRowIndex + 1);
         var a1NotationTo   = excelUtil.positionToLetterRef(endColIndex + 1, endRowIndex + 1);
         ws.mergeCells(a1NotationFrom, a1NotationTo);
+    };
+
+    /**
+     * 
+     * @param {Number} top 
+     * @param {Number} left 
+     * @param {Number} bottom 
+     * @param {Number} right 
+     */
+    ExcelBuilderMultiGridExporter.prototype.setPadding = function(top, left, bottom, right) {
+        if(top > 0) this._paddings['top'] = top;
+        if(left > 0) this._paddings['left'] = left;
+        if(bottom > 0) this._paddings['bottom'] = bottom;
+        if(right > 0) this._paddings['right'] = right;
     };
 
     /**
@@ -373,7 +397,9 @@
                 if(this.isValidRowCols(rowcols)) {
                     var offset = this._map[rowcols.ref] ? (this._map[rowcols.ref].offsetRows || 0) : -1;
                     if(offset !== -1 && (!gridRef || (gridRef && rowcols.ref === gridRef)))
-                        this.mergeCells(ws, rowcols.r[0] + offset, rowcols.c[0], rowcols.r[1] + offset, rowcols.c[1]);
+                        var cellTopOff = this._paddings.top ? 1 : 0;
+                        var cellLeftOff = this._paddings.left ? 1 : 0;
+                        this.mergeCells(ws, cellTopOff + rowcols.r[0] + offset, cellLeftOff + rowcols.c[0], cellTopOff + rowcols.r[1] + offset, cellLeftOff + rowcols.c[1]);
                 }
             }.bind(this));
         }
@@ -403,7 +429,13 @@
     ExcelBuilderMultiGridExporter.prototype.attachImages = function(wb, ws, data, rowIndex, cellIndex, col, ref) {
         var offsetRows = this._map[ref].offsetRows;
         var base64ImageInfo;
-        var colIndex = this._exportableColumns.indexOf(col) || 0;
+        var colIndex = this._exportableColumns.indexOf(col);
+        colIndex = colIndex < 0 ? col.getColIndex() : colIndex;
+        colIndex = colIndex < 0 ? 0 : colIndex;
+
+        var cellTopOff = this._paddings.top ? 1 : 0;
+        var cellLeftOff = this._paddings.left ? 1 : 0;
+
         var imageInfoInMergedCell = this.getImageMetadataFromMergedCell(rowIndex, colIndex, ref);
 
         if(!this._customBase64ImageFunction || !(base64ImageInfo = this._customBase64ImageFunction(data, col, this._cws[cellIndex]))) {
@@ -433,8 +465,8 @@
         var picRef = wb.addMedia('image', base64ImageInfo.imageName, base64ImageInfo.dataURL);
         var picture = new ExcelBuilder.Drawing.Picture();
         picture.createAnchor('oneCellAnchor', {
-            x: colIndex,
-            y: rowIndex + offsetRows,
+            x: cellLeftOff + colIndex,
+            y: cellTopOff + rowIndex + offsetRows,
             xOff: excelPos.pixelsToEMUs(base64ImageInfo.xOffset || (imageWidth/4)), 
             yOff: excelPos.pixelsToEMUs(base64ImageInfo.yOffset || (imageHeight/4)),
             width: excelPos.pixelsToEMUs(imageWidth),
@@ -444,7 +476,10 @@
         picture.setMedia(picRef);
         this._drawings.addDrawing(picture);
 
-        data[col.dataField] = base64ImageInfo.hideText ? '' : data[col.dataField];
+        if( col.dataField )
+            data[col.dataField] = base64ImageInfo.hideText ? '' : data[col.dataField];
+        else
+            data[cellIndex] = base64ImageInfo.hideText ? '' : data[cellIndex];
     };
 
     ExcelBuilderMultiGridExporter.prototype.attachWorkSheet = function (workbook, worksheet, gridProps) {
@@ -458,7 +493,7 @@
                 this._exportableColumns.map(function(col, index) {
 
                     if( index < this._cws.length ) {
-                        this._cws[index] = Math.max(this._cws[index], col.getWidth())
+                        this._cws[index] = Math.max(this._cws[index], col.getWidth());
                     } else {
                         this._cws.push(col.getWidth());
                     }
@@ -468,7 +503,7 @@
                 gridProps[i].colWidths.map(function(colW, index) {
 
                     if( index < this._cws.length ) {
-                        this._cws[index] = Math.max(this._cws[index], colW)
+                        this._cws[index] = Math.max(this._cws[index], colW);
                     } else {
                         this._cws.push(colW);
                     }
@@ -487,37 +522,28 @@
 
             var data = this.multiGridData[i] || [];
 
-            /*
-            var table = new ExcelBuilder.Table();
-            worksheet.addTable(table);
-            workbook.addTable(table);
-
-            table.setReferenceRange([1, 1], [data[0].length, data.length]);
-
-            if(this._isGridComp) {
-                // table.styleInfo.themeStyle = style || '';
-                if (data.length > 0 && this._headerIndices[i] !== -1) {
-                    table.setTableColumns(this.getColumnLabels(gridProps[i].grid, data[0]));
-                }
-            }
-            */
-
             if( this.needSeparator ) {
                 for(var k=0;k<this.separatorCount;k++) {
                     styledData = styledData.concat([{value: ''}]);
                 }
             }
 
-            // if(this._customBase64ImageFunction) {
+            for(var m=0;m<data.length;m++) {
                 if(this._isGridComp) {
-                    for(var m=0;m<data.length;m++) {
-                        this._exportableColumns.map(function(col, index) {
-                            this.attachImages(workbook, worksheet, data[m], m, index, col, gridProps[i].ref);
-                            data[m][col.dataField] = m !== this._headerIndices[i] ? col.hideText ? '' : data[m][col.dataField] : col.hideHeaderText ? '' : data[m][col.dataField];
-                        }.bind(this));
-                    }
+                    this._exportableColumns.map(function(col, index) {
+                        this.attachImages(workbook, worksheet, data[m], m, index, col, gridProps[i].ref);
+                        data[m][col.dataField] = m !== this._headerIndices[i] ? col.hideText ? '' : data[m][col.dataField] : col.hideHeaderText ? '' : data[m][col.dataField];
+                    }.bind(this));
+                } else {
+                    data[m].map(function(item, index) {
+                        this.attachImages(workbook, worksheet, data[m], m, index, {
+                            getColIndex: function() {
+                                return index;
+                            }
+                        }, gridProps[i].ref);
+                    }.bind(this));
                 }
-            // }
+            }
             
             styledData = styledData.concat(this.setStyles(data, i, this.defaultStyles()));
 
@@ -526,11 +552,50 @@
 
         
         this.mergeCellGroups(worksheet, (this._isMultiTabbed ? gridProps[i - 1].ref : null) );
+
+        if( Object.keys(this._paddings).length>0 ) {
+            this.insertPaddingRowCol(styledData);
+        }
+
         worksheet.setData(styledData);
         this.setColumnsWidth(worksheet, gridProps);
 
+        if(this._paddings.top) {
+            worksheet.setRowInstructions(0, {height: this._paddings.top});
+        }
+
+        if(this._paddings.bottom) {
+            worksheet.setRowInstructions(styledData.length - 1, {height: this._paddings.top});
+        }
+
         this.setWorksheetPageMargins(worksheet, this._pageMargins);
         
+    };
+
+    ExcelBuilderMultiGridExporter.prototype.insertPaddingRowCol = function(wsData) {
+        var totalCols = wsData[0].length;
+        var item = [];
+        for(var i=0;i<totalCols;i++) {
+            item.push({value: ''});
+        }
+        if( this._paddings.top ) {
+            wsData.splice(0, 0, this.deepClone(item));
+        }
+        if( this._paddings.bottom ) {
+            wsData.splice(wsData.length, 0, this.deepClone(item));
+        }
+
+        [].forEach.call(wsData, function(row) {
+            if(Array.isArray(row)) {
+                if( this._paddings.left ) {
+                    row.splice(0, 0, [{value: ''}]);
+                } 
+        
+                if( this._paddings.right ) {
+                    row.splice(row.length, 0, [{value: ''}]);
+                }
+            } 
+        }.bind(this));
     };
 
     ExcelBuilderMultiGridExporter.prototype.setStyles = function(data, compIndex, style) {

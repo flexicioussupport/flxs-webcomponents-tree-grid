@@ -143,7 +143,7 @@
                         160, 160, 160, 160, 160, 160, 160, 160
                     ]
 
-                    var grids = [ {grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2"}];
+                    var grids = [{ form: formData, ref:'f1', sheet:'', colWidths: formColsWidth }, {grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs1"}, {grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2"}];
                     var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
                     multigridExporter.setFileName('exported-grid_' + (tabbed ? 'tabbed_' : '') + new Date().toDateString());
                     multigridExporter.setCustomStyleFunction(function(cellData, dgCol, existingStyle) {
@@ -238,11 +238,11 @@
                         { c:[1, 2], r:[5, 6], ref: 'g1', icon: imageInfo2 },
                         { c:[0, 0], r:[6, 11], ref: 'g2', icon: imageInfo2 },
                         { c:[3, 3], r:[24, 26], ref: 'g2', icon: imageInfo2  },
-                        { c:[0, 1], r:[0, 0], ref: 'f1' },
-                        { c:[0, 1], r:[1, 1], ref: 'f1' },
-                        { c:[0, 1], r:[2, 2], ref: 'f1' },
+                        { c:[7, 7], r:[1, 2], ref: 'f1', icon: imageInfo },
+                        { c:[1, 2], r:[4, 4], ref: 'f1' },
                     ]);
                     multigridExporter.setPageMargins(11, 11, 11, 11);
+                    multigridExporter.setPadding(20, 30, 20, 30);
                     multigridExporter.generate(grids, tabbed);
                 }
             });

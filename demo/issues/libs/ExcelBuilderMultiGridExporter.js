@@ -250,8 +250,8 @@
                 this.data = [];
             } else {
                 this.multiGridData.push(gridProps[i].form);
-                this._headerIndices.push(i);
-                this._footerIndices.push(i);
+                this._headerIndices.push(-1);
+                this._footerIndices.push(-1);
             }
 
             if (multiTab) {
@@ -396,10 +396,11 @@
             [].forEach.call(this._cellGroups, function(rowcols){
                 if(this.isValidRowCols(rowcols)) {
                     var offset = this._map[rowcols.ref] ? (this._map[rowcols.ref].offsetRows || 0) : -1;
-                    if(offset !== -1 && (!gridRef || (gridRef && rowcols.ref === gridRef)))
+                    if(offset !== -1 && (!gridRef || (gridRef && rowcols.ref === gridRef))) {
                         var cellTopOff = this._paddings.top ? 1 : 0;
                         var cellLeftOff = this._paddings.left ? 1 : 0;
                         this.mergeCells(ws, cellTopOff + rowcols.r[0] + offset, cellLeftOff + rowcols.c[0], cellTopOff + rowcols.r[1] + offset, cellLeftOff + rowcols.c[1]);
+                    }
                 }
             }.bind(this));
         }

@@ -19,8 +19,8 @@
 
     <link rel="import" href="../../../paper-button/paper-button.html">
     
-    <script src="libs/excel-builder.compiled.min.js"></script>
-    <script src="libs/ExcelBuilderMultiGridExporter.js"></script>
+    <script src="../../dependencies/excel-builder.compiled.min.js"></script>
+    <script src="../../dependencies/ExcelBuilderMultiGridExporter.js"></script>
 
 </head>
 
@@ -143,32 +143,44 @@
                         160, 160, 160, 160, 160, 160, 160, 160
                     ]
 
-                    var grids = [{ form: formData, ref:'f1', sheet:'', colWidths: formColsWidth }, {grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs1"}, {grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2"}];
+                    var grids = [{ form: formData, ref:'f1', sheet:'text1', colWidths: formColsWidth }, {grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs1"}, {grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2"}];
                     var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
                     multigridExporter.setFileName('exported-grid_' + (tabbed ? 'tabbed_' : '') + new Date().toDateString());
                     multigridExporter.setCustomStyleFunction(function(cellData, dgCol, existingStyle) {
                         
 
                         if( cellData.cellType.indexOf('dataCell') !== -1){
-                            if(cellData[dgCol.dataField].toString().indexOf('1995') != -1) {
+
+                            if(cellData.isMerged) {
                                 existingStyle['fill'] = {
                                     type: 'pattern',
                                     patternType: 'solid',
                                     bgColor: 'FF222222',
                                     fgColor: 'FF222222'
                                 };
-                                existingStyle.font.size = 17;
-                                existingStyle.font.color = 'FFDFDFDF';
-                                existingStyle.font.strike = true;
+                                existingStyle.font.color = 'FFFFFFFF';
                                 return existingStyle;
-                            } else if(cellData.rowIndex % 3 === 0 ) {
+                            }
+
+                            if(cellData[dgCol.dataField].toString().indexOf('1995') != -1) {
                                 existingStyle['fill'] = {
                                     type: 'pattern',
                                     patternType: 'solid',
-                                    bgColor: 'FF880000',
-                                    fgColor: 'FF880000'
+                                    bgColor: 'FFFFAA00',
+                                    fgColor: 'FFFFAA00'
                                 };
-                                existingStyle.font.color = 'FF00FF00';
+                                // existingStyle.font.size = 17;
+                                existingStyle.font.color = 'FF000000';
+                                // existingStyle.font.strike = true;
+                                return existingStyle;
+                            } else if(cellData.rowIndex % 2 === 0 ) {
+                                existingStyle['fill'] = {
+                                    type: 'pattern',
+                                    patternType: 'solid',
+                                    bgColor: 'FF9F9F9F',
+                                    fgColor: 'FF9F9F9F'
+                                };
+                                existingStyle.font.color = 'FF000000';
                                 return existingStyle;
                             } else if( cellData.rowIndex === 4 && dgCol.getColIndex() === 0) {
                                 existingStyle['fill'] = {
@@ -177,7 +189,7 @@
                                     bgColor: 'FF000088',
                                     fgColor: 'FF000088'
                                 };
-                                existingStyle.font.size = 28;
+                                // existingStyle.font.size = 28;
                                 existingStyle.font.color = 'FFFFFF00';
                                 return existingStyle;
                             }
@@ -186,17 +198,26 @@
                         return null;
                     });
                     multigridExporter.setCustomFormStyleFunction(function(cell, existingStyle) {
-                        
+                        if(cell.isMerged) {
+                            existingStyle['fill'] = {
+                                type: 'pattern',
+                                patternType: 'solid',
+                                bgColor: 'FF222222',
+                                fgColor: 'FF222222'
+                            };
+                            existingStyle.font.color = 'FFFFFFFF';
+                            return existingStyle;
+                        }
                         if( cell.colIndex === 0){
                             existingStyle['fill'] = {
                                 type: 'pattern',
                                 patternType: 'solid',
-                                bgColor: 'FF440000',
-                                fgColor: 'FF440000'
+                                bgColor: 'FFFFFFFF',
+                                fgColor: 'FFFFFFFF'
                             };
-                            existingStyle.font.size = 17;
-                            existingStyle.font.color = 'FFFFFFFF';
-                            existingStyle.font.strike = true;
+                            // existingStyle.font.size = 17;
+                            existingStyle.font.color = 'FF000000';
+                            // existingStyle.font.strike = true;
                             return existingStyle;
                         }
                         
@@ -233,15 +254,15 @@
                             
 
                     multigridExporter.setMergeCells([
-                        { c:[2, 3], r:[8, 11], ref: 'g2', icon: imageInfo },
+                        { c:[2, 3], r:[8, 11], ref: 'g2', icon: imageInfo2 },
                         { c:[1, 1], r:[1, 4], ref: 'g1', icon: imageInfo },
                         { c:[1, 2], r:[5, 6], ref: 'g1', icon: imageInfo2 },
                         { c:[0, 0], r:[6, 11], ref: 'g2', icon: imageInfo2 },
                         { c:[3, 3], r:[24, 26], ref: 'g2', icon: imageInfo2  },
-                        { c:[7, 7], r:[1, 2], ref: 'f1', icon: imageInfo },
+                        { c:[7, 7], r:[1, 2], ref: 'f1' },
                         { c:[1, 2], r:[4, 4], ref: 'f1' },
                     ]);
-                    multigridExporter.setPageMargins(11, 11, 11, 11);
+                    multigridExporter.setPageMargins(6, 6, 6, 6);
                     multigridExporter.setPadding(20, 30, 20, 30);
                     multigridExporter.generate(grids, tabbed);
                 }

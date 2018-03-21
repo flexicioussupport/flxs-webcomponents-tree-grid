@@ -679,16 +679,28 @@
             top = true;
             right = true;
         }
+        
+        if(!firstRow && !lastRow && !firstCol && !lastCol) {
+            edge = false;
+            top = true;
+            right = true;
+            left = true;
+            bottom = true;
+        }
 
         var _borderBoxStyle = {};
 
+        _borderBoxStyle.top = top;
+        _borderBoxStyle.left = left;
+        _borderBoxStyle.bottom = bottom;
+        _borderBoxStyle.right = right;
+        
         if (edge) {
-            _borderBoxStyle.top = top;
-            _borderBoxStyle.left = left;
-            _borderBoxStyle.bottom = bottom;
-            _borderBoxStyle.right = right;
             _borderBoxStyle.style = 'thick';
             _borderBoxStyle.color = 'FF00FF00';
+        } else {
+            _borderBoxStyle.style = 'thin';
+            _borderBoxStyle.color = 'FFFFFFFF';
         }
 
         if(this._isGridComp) {

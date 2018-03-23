@@ -20,8 +20,9 @@
     <link rel="import" href="../../../paper-button/paper-button.html">
     
     <script src="../../dependencies/excel-builder.compiled.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
     <script src="../../dependencies/ExcelBuilderMultiGridExporter.js"></script>
-
+    
 </head>
 
 <body class="fullbleed" unresolved>
@@ -132,20 +133,143 @@
                 exportGrids: function (tabbed) {
 
                     var formData = [
-                        ['year1', 'year2', 'year3', '', '', 'year4', '', 'year5'],
-                        [100, 200, 300, '', '', 500, '', 600],
-                        ['--', '--', 0, '', '', 1000, '', 0],
-                        ['', '', '', '', '', '', '', ''],
-                        [1000, 2000, 3000, '', '', 4000, '', 5000]
+                        [{ value: 'YEAR1' }, { value: 'YEAR2' }, { value: 'YEAR3' }, { value: '' }, { value: '' }, { value: 'YEAR4' }, { value: '' }, { value: 'YEAR5' }],
+                        [{ value: 100 }, { value: 200 }, { value: 300 }, { value: '' }, { value: '' }, { value: 500 }, { value: '' }, { value: '<p>year &nbsp;&nbsp; year6 <br /> year7, year8, year9+</p>'}],
+                        [{ value: '--' }, { value: '--' }, { value: 0 }, { value: '' }, { value: '' }, { value: '10000000000000' }, { value: '' }, { value: 0 }],
+                        [{ value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }],
+                        [{ value: 1000 }, { value: 2000 }, { value: 3000 }, { value: '' }, { value: '' }, { value: 4000 }, { value: '' }, { value: 5000 }]
                     ];
 
                     var formColsWidth = [
                         160, 160, 160, 160, 160, 160, 160, 160
-                    ]
+                    ];
 
-                    var grids = [{ form: formData, ref:'f1', sheet:'text1', colWidths: formColsWidth }, {grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs1"}, {grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2"}];
+                    var grids = [
+                        { form: formData, ref: 'f1', sheet: 'text1', colWidths: formColsWidth }, 
+                        { grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs1" }, 
+                        { grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2" }
+                    ];
+
                     var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
+                    // please set it false and try custom styling with setCustomStylesFunction instead of previous methods
+                    multigridExporter.enabledOldApi = false;
                     multigridExporter.setFileName('exported-grid_' + (tabbed ? 'tabbed_' : '') + new Date().toDateString());
+                    
+                    multigridExporter.setCustomValueFunction(function (cell) {
+                        if (cell.ref === 'g2' && cell.isDataRow && cell.fdgColumn && cell.fdgColumn.dataField === 'rate') {
+                            return cell.rowData[cell.fdgColumn.dataField] === "up" ? 1 : 0;
+                        }
+                    });
+                    multigridExporter.setCustomStylesFunction(function (cell, existingStyle) {
+
+                        if (cell.isGrid) {
+                            if (cell.isDataRow) {
+                                var dgCol = cell.fdgColumn;
+
+                                if (cell.isMerged) {
+                                    existingStyle['fill'] = {
+                                        type: 'pattern',
+                                        patternType: 'solid',
+                                        bgColor: 'FF222222',
+                                        fgColor: 'FF222222'
+                                    };
+                                    existingStyle.font.color = 'FFFFFFFF';
+                                    return existingStyle;
+                                }
+
+                                if (cell.rowData[dgCol.dataField].toString().indexOf('1995') != -1) {
+                                    existingStyle['fill'] = {
+                                        type: 'pattern',
+                                        patternType: 'solid',
+                                        bgColor: 'FFFFAA00',
+                                        fgColor: 'FFFFAA00'
+                                    };
+                                    // existingStyle.font.size = 17;
+                                    existingStyle.font.color = 'FF000000';
+                                    existingStyle.font.size = 24;
+                                    existingStyle.alignment.wrapText = true;
+                                    // existingStyle.font.strike = true;
+                                    return existingStyle;
+                                } else if (cell.rowIndex % 2 === 0) {
+                                    existingStyle['fill'] = {
+                                        type: 'pattern',
+                                        patternType: 'solid',
+                                        bgColor: 'FF9F9F9F',
+                                        fgColor: 'FF9F9F9F'
+                                    };
+                                    existingStyle.font.color = 'FF000000';
+                                    return existingStyle;
+                                } else if (cell.rowIndex === 4 && dgCol.getColIndex() === 0) {
+                                    existingStyle['fill'] = {
+                                        type: 'pattern',
+                                        patternType: 'solid',
+                                        bgColor: 'FF000088',
+                                        fgColor: 'FF000088'
+                                    };
+                                    // existingStyle.font.size = 28;
+                                    existingStyle.font.color = 'FFFFFF00';
+                                    return existingStyle;
+                                }
+                            }
+
+                            if (cell.isHeaderRow && cell.ref === 'g2') {
+                                existingStyle['fill'] = {
+                                    type: 'pattern',
+                                    patternType: 'solid',
+                                    bgColor: 'FF008800',
+                                    fgColor: 'FF008800'
+                                };
+                                existingStyle.font.color = 'FFFFFFFF';
+                                return existingStyle;
+                            } 
+                        } else {
+                            if (cell.isMerged) {
+                                existingStyle['fill'] = {
+                                    type: 'pattern',
+                                    patternType: 'solid',
+                                    bgColor: 'FF222222',
+                                    fgColor: 'FF222222'
+                                };
+                                existingStyle.font.color = 'FFFFFFFF';
+                                existingStyle.font.size = 24;
+                                existingStyle.alignment.wrapText = true;
+                                return existingStyle;
+                            }
+                            if (cell.colIndex === 0) {
+                                existingStyle['fill'] = {
+                                    type: 'pattern',
+                                    patternType: 'solid',
+                                    bgColor: 'FFFFFFFF',
+                                    fgColor: 'FFFFFFFF'
+                                };
+                                // existingStyle.font.size = 17;
+                                existingStyle.font.color = 'FF000000';
+                                // existingStyle.font.strike = true;
+                                return existingStyle;
+                            }
+                        }
+
+                        return null;
+                    });
+                    multigridExporter.setCustomBase64ImageFunction(function (data, col, cellWidth) {
+                        if (col.enableIcon) {
+                            var imageInfo = {};
+                            imageInfo.imageName = "arrow_" + data[col.dataField] + '_24.png';
+                            imageInfo.dataURL = data[col.dataField] === 'up' ? base64Images[0] : data[col.dataField] === 'down' ? base64Images[1] : '';
+                            if (imageInfo.dataURL !== '') {
+                                var size = getPngDimensions(imageInfo.dataURL);
+                                imageInfo.xOffset = (cellWidth - size.width) / 2;
+                            }
+                            return imageInfo.dataURL === '' ? null : imageInfo;
+                        }
+                    });
+
+                    /**
+                     * Please use new styling api => setCustomStylesFunction(function (cell, existingStyle) { ... }); instead of previous 
+                     * two apis as those have been merge to single one, also now you can style by ref (reference key for each component).
+                     * 
+                     * Note: in this example if you set <code> enabledOldApi=false <code>; it will unlock new styling api.
+                     */
                     multigridExporter.setCustomStyleFunction(function(cellData, dgCol, existingStyle) {
                         
 
@@ -198,6 +322,7 @@
                         return null;
                     });
                     multigridExporter.setCustomFormStyleFunction(function(cell, existingStyle) {
+                        return null;
                         if(cell.isMerged) {
                             existingStyle['fill'] = {
                                 type: 'pattern',
@@ -223,45 +348,32 @@
                         
                         return null;
                     });
-                    multigridExporter.setCustomBase64ImageFunction(function(data, col, cellWidth) {
-                        if( col.enableIcon ) {
-                            var imageInfo = {};
-                            imageInfo.imageName = "arrow_" + data[col.dataField] + '_24.png';
-                            imageInfo.dataURL = data[col.dataField] === 'up' ? base64Images[0] : data[col.dataField] === 'down' ? base64Images[1] : ''; 
-                            if(imageInfo.dataURL !== '') {
-                                var size = getPngDimensions(imageInfo.dataURL);
-                                imageInfo.xOffset = (cellWidth - size.width)/2;
-                            }
-                            return imageInfo.dataURL === '' ? null : imageInfo;
-                        }
-                    });
-                    
-                    
+
                     var size = getPngDimensions(base64Images[2]);
 
                     var imageInfo = {};
                     imageInfo.imageName = "arrow_up_24_g.png";
-                    imageInfo.dataURL = base64Images[2]; 
+                    imageInfo.dataURL = base64Images[2];
                     imageInfo.imageHeight = size.height;
                     imageInfo.imageWidth = size.width;
                     imageInfo.hideText = true;
 
                     var imageInfo2 = {};
                     imageInfo2.imageName = "arrow_up_24_g.png";
-                    imageInfo2.dataURL = base64Images[2]; 
+                    imageInfo2.dataURL = base64Images[2];
                     imageInfo2.imageHeight = size.height;
                     imageInfo2.imageWidth = size.width;
-                            
 
                     multigridExporter.setMergeCells([
-                        { c:[2, 3], r:[8, 11], ref: 'g2', icon: imageInfo2 },
-                        { c:[1, 1], r:[1, 4], ref: 'g1', icon: imageInfo },
-                        { c:[1, 2], r:[5, 6], ref: 'g1', icon: imageInfo2 },
-                        { c:[0, 0], r:[6, 11], ref: 'g2', icon: imageInfo2 },
-                        { c:[3, 3], r:[24, 26], ref: 'g2', icon: imageInfo2  },
-                        { c:[7, 7], r:[1, 2], ref: 'f1' },
-                        { c:[1, 2], r:[4, 4], ref: 'f1' },
+                        { c: [2, 3], r: [8, 11], ref: 'g2', icon: imageInfo2 },
+                        { c: [1, 1], r: [1, 4], ref: 'g1', icon: imageInfo },
+                        { c: [1, 2], r: [5, 6], ref: 'g1', icon: imageInfo2, rowHeight: 60 },
+                        { c: [0, 0], r: [6, 11], ref: 'g2', icon: imageInfo2, rowHeight: 60 },
+                        { c: [3, 3], r: [24, 26], ref: 'g2', icon: imageInfo2, rowHeight: 60 },
+                        { c: [7, 7], r: [1, 2], ref: 'f1' },
+                        { c: [1, 2], r: [4, 4], ref: 'f1' },
                     ]);
+
                     multigridExporter.setPageMargins(6, 6, 6, 6);
                     multigridExporter.setPadding(20, 30, 20, 30);
                     multigridExporter.generate(grids, tabbed);

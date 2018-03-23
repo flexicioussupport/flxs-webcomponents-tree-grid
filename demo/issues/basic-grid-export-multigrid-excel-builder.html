@@ -61,7 +61,7 @@
                 <flxs-tree-grid-column editable="true" dataField="last_name" headerWordWrap="true" headerText="Last Name" columnWidthMode="fitToContent"
                     filterControl="TextInput" filterOperation="Contains">
                 </flxs-tree-grid-column>
-                <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth" columnWidthMode="fitToContent">
+                <flxs-tree-grid-column dataField="dob" labelFunction="[[getFormattedDate]]" headerWordWrap="true" headerText="Date of Birth" columnWidthMode="fitToContent">
                 </flxs-tree-grid-column>
             </flxs-tree-grid>
         </div>
@@ -115,6 +115,10 @@
                         base64Images.push(data.replace('data:image/png;base64,', ''));
                     });
                 },
+                getFormattedDate: function(item, col) {
+                    var val = flexiciousNmsp.UIUtils.resolveExpression(item, col.dataField);
+                    return val ? moment(val).format('DD-MMM-YYYY HH:MM') : "";
+                },
                 getUpDownStatus: function(cell, state) {
                     if(cell.rowInfo.getIsDataRow()) {
                         return flexiciousNmsp.StyleDefaults.defaults.imagesRoot + '/test/arrow_' + cell.rowInfo.getData()[cell.getColumn().dataField] + '_24.png';
@@ -134,14 +138,14 @@
 
                     var formData = [
                         [{ value: 'YEAR1' }, { value: 'YEAR2' }, { value: 'YEAR3' }, { value: '' }, { value: '' }, { value: 'YEAR4' }, { value: '' }, { value: 'YEAR5' }],
-                        [{ value: 100 }, { value: 200 }, { value: 300 }, { value: '' }, { value: '' }, { value: 500 }, { value: '' }, { value: '<p>year &nbsp;&nbsp; year6 <br /> year7, year8, year9+</p>'}],
+                        [{ value: 100 }, { value: 200 }, { value: 300 }, { value: '' }, { value: '' }, { value: 500 }, { value: '' }, { value: '<br><p>year &nbsp;&nbsp; &copy; & year6 year7, year8, year9+</p>'}],
                         [{ value: '--' }, { value: '--' }, { value: 0 }, { value: '' }, { value: '' }, { value: '10000000000000' }, { value: '' }, { value: 0 }],
-                        [{ value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }],
+                        [{ value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '87%' }, { value: '' }],
                         [{ value: 1000 }, { value: 2000 }, { value: 3000 }, { value: '' }, { value: '' }, { value: 4000 }, { value: '' }, { value: 5000 }]
                     ];
 
                     var formColsWidth = [
-                        160, 160, 160, 160, 160, 160, 160, 160
+                        160, 160, 160, 160, 160, 160, 160, 400
                     ];
 
                     var grids = [
@@ -153,116 +157,117 @@
                     var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
                     // please set it false and try custom styling with setCustomStylesFunction instead of previous methods
                     multigridExporter.enabledOldApi = false;
+                    // multigridExporter.defaultFont =  'Amplitude BRK';
                     multigridExporter.setFileName('exported-grid_' + (tabbed ? 'tabbed_' : '') + new Date().toDateString());
                     
                     multigridExporter.setCustomValueFunction(function (cell) {
-                        if (cell.ref === 'g2' && cell.isDataRow && cell.fdgColumn && cell.fdgColumn.dataField === 'rate') {
-                            return cell.rowData[cell.fdgColumn.dataField] === "up" ? 1 : 0;
+                        if (cell.ref === 'g2' && cell.isDataRow && cell.fdgColumn && cell.fdgColumn.dataField === 'dob') {
+                            return cell.rowData[cell.fdgColumn.dataField].toUpperCase();
                         }
-                    });
+                     });
                     multigridExporter.setCustomStylesFunction(function (cell, existingStyle) {
 
-                        if (cell.isGrid) {
-                            if (cell.isDataRow) {
-                                var dgCol = cell.fdgColumn;
+                       if (cell.isGrid) {
+                           if (cell.isDataRow) {
+                               var dgCol = cell.fdgColumn;
 
-                                if (cell.isMerged) {
-                                    existingStyle['fill'] = {
-                                        type: 'pattern',
-                                        patternType: 'solid',
-                                        bgColor: 'FF222222',
-                                        fgColor: 'FF222222'
-                                    };
-                                    existingStyle.font.color = 'FFFFFFFF';
-                                    return existingStyle;
-                                }
+                               if (cell.isMerged) {
+                                   existingStyle['fill'] = {
+                                       type: 'pattern',
+                                       patternType: 'solid',
+                                       bgColor: 'FF222222',
+                                       fgColor: 'FF222222'
+                                   };
+                                   existingStyle.font.color = 'FFFFFFFF';
+                                   return existingStyle;
+                               }
 
-                                if (cell.rowData[dgCol.dataField].toString().indexOf('1995') != -1) {
-                                    existingStyle['fill'] = {
-                                        type: 'pattern',
-                                        patternType: 'solid',
-                                        bgColor: 'FFFFAA00',
-                                        fgColor: 'FFFFAA00'
-                                    };
-                                    // existingStyle.font.size = 17;
-                                    existingStyle.font.color = 'FF000000';
-                                    existingStyle.font.size = 24;
-                                    existingStyle.alignment.wrapText = true;
-                                    // existingStyle.font.strike = true;
-                                    return existingStyle;
-                                } else if (cell.rowIndex % 2 === 0) {
-                                    existingStyle['fill'] = {
-                                        type: 'pattern',
-                                        patternType: 'solid',
-                                        bgColor: 'FF9F9F9F',
-                                        fgColor: 'FF9F9F9F'
-                                    };
-                                    existingStyle.font.color = 'FF000000';
-                                    return existingStyle;
-                                } else if (cell.rowIndex === 4 && dgCol.getColIndex() === 0) {
-                                    existingStyle['fill'] = {
-                                        type: 'pattern',
-                                        patternType: 'solid',
-                                        bgColor: 'FF000088',
-                                        fgColor: 'FF000088'
-                                    };
-                                    // existingStyle.font.size = 28;
-                                    existingStyle.font.color = 'FFFFFF00';
-                                    return existingStyle;
-                                }
-                            }
+                               if (cell.rowData[dgCol.dataField].toString().indexOf('1995') != -1) {
+                                   existingStyle['fill'] = {
+                                       type: 'pattern',
+                                       patternType: 'solid',
+                                       bgColor: 'FFFFAA00',
+                                       fgColor: 'FFFFAA00'
+                                   };
+                                   // existingStyle.font.size = 17;
+                                   existingStyle.font.color = 'FF000000';
+                                   existingStyle.font.size = 24;
+                                   existingStyle.alignment.wrapText = true;
+                                   // existingStyle.font.strike = true;
+                                   return existingStyle;
+                               } else if (cell.rowIndex % 2 === 0) {
+                                   existingStyle['fill'] = {
+                                       type: 'pattern',
+                                       patternType: 'solid',
+                                       bgColor: 'FF9F9F9F',
+                                       fgColor: 'FF9F9F9F'
+                                   };
+                                   existingStyle.font.color = 'FF000000';
+                                   return existingStyle;
+                               } else if (cell.rowIndex === 4 && dgCol.getColIndex() === 0) {
+                                   existingStyle['fill'] = {
+                                       type: 'pattern',
+                                       patternType: 'solid',
+                                       bgColor: 'FF000088',
+                                       fgColor: 'FF000088'
+                                   };
+                                   // existingStyle.font.size = 28;
+                                   existingStyle.font.color = 'FFFFFF00';
+                                   return existingStyle;
+                               }
+                           }
 
-                            if (cell.isHeaderRow && cell.ref === 'g2') {
-                                existingStyle['fill'] = {
-                                    type: 'pattern',
-                                    patternType: 'solid',
-                                    bgColor: 'FF008800',
-                                    fgColor: 'FF008800'
-                                };
-                                existingStyle.font.color = 'FFFFFFFF';
-                                return existingStyle;
-                            } 
-                        } else {
-                            if (cell.isMerged) {
-                                existingStyle['fill'] = {
-                                    type: 'pattern',
-                                    patternType: 'solid',
-                                    bgColor: 'FF222222',
-                                    fgColor: 'FF222222'
-                                };
-                                existingStyle.font.color = 'FFFFFFFF';
-                                existingStyle.font.size = 24;
-                                existingStyle.alignment.wrapText = true;
-                                return existingStyle;
-                            }
-                            if (cell.colIndex === 0) {
-                                existingStyle['fill'] = {
-                                    type: 'pattern',
-                                    patternType: 'solid',
-                                    bgColor: 'FFFFFFFF',
-                                    fgColor: 'FFFFFFFF'
-                                };
-                                // existingStyle.font.size = 17;
-                                existingStyle.font.color = 'FF000000';
-                                // existingStyle.font.strike = true;
-                                return existingStyle;
-                            }
-                        }
+                           if (cell.isHeaderRow && cell.ref === 'g2') {
+                               existingStyle['fill'] = {
+                                   type: 'pattern',
+                                   patternType: 'solid',
+                                   bgColor: 'FF008800',
+                                   fgColor: 'FF008800'
+                               };
+                               existingStyle.font.color = 'FFFFFFFF';
+                               return existingStyle;
+                           } 
+                       } else {
+                           if (cell.isMerged) {
+                               existingStyle['fill'] = {
+                                   type: 'pattern',
+                                   patternType: 'solid',
+                                   bgColor: 'FF222222',
+                                   fgColor: 'FF222222'
+                               };
+                               existingStyle.font.color = 'FFFFFFFF';
+                               existingStyle.font.size = 24;
+                               existingStyle.alignment.wrapText = true;
+                               return existingStyle;
+                           }
+                           if (cell.colIndex === 0) {
+                               existingStyle['fill'] = {
+                                   type: 'pattern',
+                                   patternType: 'solid',
+                                   bgColor: 'FFFFFFFF',
+                                   fgColor: 'FFFFFFFF'
+                               };
+                               // existingStyle.font.size = 17;
+                               existingStyle.font.color = 'FF000000';
+                               // existingStyle.font.strike = true;
+                               return existingStyle;
+                           }
+                       }
 
-                        return null;
-                    });
-                    multigridExporter.setCustomBase64ImageFunction(function (data, col, cellWidth) {
-                        if (col.enableIcon) {
-                            var imageInfo = {};
-                            imageInfo.imageName = "arrow_" + data[col.dataField] + '_24.png';
-                            imageInfo.dataURL = data[col.dataField] === 'up' ? base64Images[0] : data[col.dataField] === 'down' ? base64Images[1] : '';
-                            if (imageInfo.dataURL !== '') {
-                                var size = getPngDimensions(imageInfo.dataURL);
-                                imageInfo.xOffset = (cellWidth - size.width) / 2;
-                            }
-                            return imageInfo.dataURL === '' ? null : imageInfo;
-                        }
-                    });
+                       return null;
+                     });
+                     multigridExporter.setCustomBase64ImageFunction(function (data, col, cellWidth) {
+                       if (col.enableIcon) {
+                           var imageInfo = {};
+                           imageInfo.imageName = "arrow_" + data[col.dataField] + '_24.png';
+                           imageInfo.dataURL = data[col.dataField] === 'up' ? base64Images[0] : data[col.dataField] === 'down' ? base64Images[1] : '';
+                           if (imageInfo.dataURL !== '') {
+                               var size = getPngDimensions(imageInfo.dataURL);
+                               imageInfo.xOffset = (cellWidth - size.width) / 2;
+                           }
+                           return imageInfo.dataURL === '' ? null : imageInfo;
+                       }
+                     });
 
                     /**
                      * Please use new styling api => setCustomStylesFunction(function (cell, existingStyle) { ... }); instead of previous 
@@ -273,81 +278,81 @@
                     multigridExporter.setCustomStyleFunction(function(cellData, dgCol, existingStyle) {
                         
 
-                        if( cellData.cellType.indexOf('dataCell') !== -1){
+                       if( cellData.cellType.indexOf('dataCell') !== -1){
 
-                            if(cellData.isMerged) {
-                                existingStyle['fill'] = {
-                                    type: 'pattern',
-                                    patternType: 'solid',
-                                    bgColor: 'FF222222',
-                                    fgColor: 'FF222222'
-                                };
-                                existingStyle.font.color = 'FFFFFFFF';
-                                return existingStyle;
-                            }
+                           if(cellData.isMerged) {
+                               existingStyle['fill'] = {
+                                   type: 'pattern',
+                                   patternType: 'solid',
+                                   bgColor: 'FF222222',
+                                   fgColor: 'FF222222'
+                               };
+                               existingStyle.font.color = 'FFFFFFFF';
+                               return existingStyle;
+                           }
 
-                            if(cellData[dgCol.dataField].toString().indexOf('1995') != -1) {
-                                existingStyle['fill'] = {
-                                    type: 'pattern',
-                                    patternType: 'solid',
-                                    bgColor: 'FFFFAA00',
-                                    fgColor: 'FFFFAA00'
-                                };
-                                // existingStyle.font.size = 17;
-                                existingStyle.font.color = 'FF000000';
-                                // existingStyle.font.strike = true;
-                                return existingStyle;
-                            } else if(cellData.rowIndex % 2 === 0 ) {
-                                existingStyle['fill'] = {
-                                    type: 'pattern',
-                                    patternType: 'solid',
-                                    bgColor: 'FF9F9F9F',
-                                    fgColor: 'FF9F9F9F'
-                                };
-                                existingStyle.font.color = 'FF000000';
-                                return existingStyle;
-                            } else if( cellData.rowIndex === 4 && dgCol.getColIndex() === 0) {
-                                existingStyle['fill'] = {
-                                    type: 'pattern',
-                                    patternType: 'solid',
-                                    bgColor: 'FF000088',
-                                    fgColor: 'FF000088'
-                                };
-                                // existingStyle.font.size = 28;
-                                existingStyle.font.color = 'FFFFFF00';
-                                return existingStyle;
-                            }
-                        }
+                           if(cellData[dgCol.dataField].toString().indexOf('1995') != -1) {
+                               existingStyle['fill'] = {
+                                   type: 'pattern',
+                                   patternType: 'solid',
+                                   bgColor: 'FFFFAA00',
+                                   fgColor: 'FFFFAA00'
+                               };
+                               // existingStyle.font.size = 17;
+                               existingStyle.font.color = 'FF000000';
+                               // existingStyle.font.strike = true;
+                               return existingStyle;
+                           } else if(cellData.rowIndex % 2 === 0 ) {
+                               existingStyle['fill'] = {
+                                   type: 'pattern',
+                                   patternType: 'solid',
+                                   bgColor: 'FF9F9F9F',
+                                   fgColor: 'FF9F9F9F'
+                               };
+                               existingStyle.font.color = 'FF000000';
+                               return existingStyle;
+                           } else if( cellData.rowIndex === 4 && dgCol.getColIndex() === 0) {
+                               existingStyle['fill'] = {
+                                   type: 'pattern',
+                                   patternType: 'solid',
+                                   bgColor: 'FF000088',
+                                   fgColor: 'FF000088'
+                               };
+                               // existingStyle.font.size = 28;
+                               existingStyle.font.color = 'FFFFFF00';
+                               return existingStyle;
+                           }
+                       }
                         
-                        return null;
-                    });
+                       return null;
+                     });
                     multigridExporter.setCustomFormStyleFunction(function(cell, existingStyle) {
-                        return null;
-                        if(cell.isMerged) {
-                            existingStyle['fill'] = {
-                                type: 'pattern',
-                                patternType: 'solid',
-                                bgColor: 'FF222222',
-                                fgColor: 'FF222222'
-                            };
-                            existingStyle.font.color = 'FFFFFFFF';
-                            return existingStyle;
-                        }
-                        if( cell.colIndex === 0){
-                            existingStyle['fill'] = {
-                                type: 'pattern',
-                                patternType: 'solid',
-                                bgColor: 'FFFFFFFF',
-                                fgColor: 'FFFFFFFF'
-                            };
-                            // existingStyle.font.size = 17;
-                            existingStyle.font.color = 'FF000000';
-                            // existingStyle.font.strike = true;
-                            return existingStyle;
-                        }
+                       return null;
+                       if(cell.isMerged) {
+                           existingStyle['fill'] = {
+                               type: 'pattern',
+                               patternType: 'solid',
+                               bgColor: 'FF222222',
+                               fgColor: 'FF222222'
+                           };
+                           existingStyle.font.color = 'FFFFFFFF';
+                           return existingStyle;
+                       }
+                       if( cell.colIndex === 0){
+                           existingStyle['fill'] = {
+                               type: 'pattern',
+                               patternType: 'solid',
+                               bgColor: 'FFFFFFFF',
+                               fgColor: 'FFFFFFFF'
+                           };
+                           // existingStyle.font.size = 17;
+                           existingStyle.font.color = 'FF000000';
+                           // existingStyle.font.strike = true;
+                           return existingStyle;
+                       }
                         
-                        return null;
-                    });
+                       return null;
+                     });
 
                     var size = getPngDimensions(base64Images[2]);
 
@@ -372,7 +377,7 @@
                         { c: [3, 3], r: [24, 26], ref: 'g2', icon: imageInfo2, rowHeight: 60 },
                         { c: [7, 7], r: [1, 2], ref: 'f1' },
                         { c: [1, 2], r: [4, 4], ref: 'f1' },
-                    ]);
+                     ]);
 
                     multigridExporter.setPageMargins(6, 6, 6, 6);
                     multigridExporter.setPadding(20, 30, 20, 30);

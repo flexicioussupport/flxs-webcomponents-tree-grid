@@ -73,6 +73,8 @@
 
         // set default font as property
         // this.defaultFont = "Amplitude BRK";
+        // this.tableBorderStyle = "thick";
+        // this.tableBorderColor = "FFFF0000";
 
         this.defaultImages = [
             'iVBORw0KGgoAAAANSUhEUgAAACwAAAAgCAYAAABpRpp6AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTnU1rJkAAAD4UlEQVRYR82Y+0sUURTH7f34Iah+6A9ZhmGHZSlCWTFUlIpMMqUnm2VmSJlt1qbZ0sNFKCErKzOJHlT2fkv2IEGRHhpk1k9F/dQPQVTfzp257s7cubtuu2Psgc/dufecOfMZZh9XM1wu14QMHgDSHmPgISbTEWPgISbNdDYHUVWWC6/iAj2VJNCQXVyBuqYz1M7ae+DiQWzbutu2LsMYeIhJxqe79Vjqlgkkh1oQpLbR/r0tq+EdzSu5qL02bMmLGAMPMclYo7FmCnz+ME3t+VSp9imWG2LSO7tiSxsDDzH5LJSlN/H4O2lqzTnJ5ixROg97H32hlL3WGHiIyROFrJEX9d3faWrNpUJf6zrMV/Ow68YITY21ikyrtFZ9M5IzYww8xGR4PrvbXDq0rqdC//H1WEBvMU3TqHc+6m5+pGUjtzEi7YX//PvIuhlj4CEmnRbuP+nHAsWD0uZnGH4eRj77xlEKsOdWVLp8Icu/iMxF4v5wOCk80LYBCxUNK8NPMTJ4GdsXmd4CaiGCt6PS8fgvwgOnynXZknAPyV5BTa7wIdOll1Gp/Hwz4y786swmZJLsiqYnGBm6ilqZLP2orGjqoXJ5DzNMeCL3tSVTFX7dXkGybhQf6saHoS7sjCFbfPgJlct7iIyb8JuOzcgi2eUHSPbddQTyZLJ0Mwe7qVzeQwYTnsR9bclkhd+eqyRZF9xrz+HV0A3U5ctl2c2I544FE57MfW3JZIQHO6vgG90g0XtXk+5D3CgKPaZyeY94OCo8eL4K2QrtO7acxu0LAeN7ViK7LPSIyuU9xoIJT+G+tuS/CH++F0AOyWZVduDN9z/Anx/4cD2APIu0iqX7H1K5vEciOCY8dLoIqrsclz79pikPkh6+WoNFurSKJfsesNXIOW2N7ZZ5IjgrrORgdU0QDa09+MK8f33FyyNl8DDZhvu0EK1vK/PApVVZ1hLBWWH+6N3rLuDjz2/oPbqKNucqFtffpRJrfSXbZycpPJX72pLJCkdRURi8Q2l7/bgIt+gblEw6tK7HYn9jIxpNhI7H/oCtYl93nlo6lOdjwYSnc19b8n7AS8IKcnbZH2kq9LeU6E9DXXmWpvKaWDDhmdxXWrBcZY/WjYLqYzS15/+VjoZS2hNTT8WHwD35n0HxGFP4fVcABbq0gyiZ8J/oo/b2642FRZiFrIjRHt6DLaWp/F/CDV/RBuwItVI7+TUSgQnP5q6RkBWmC0x4DveMG7KTnSahIOFpCRenQ5DwRPFOR0nLIOFJTI6JE1M50/krW5sgwNZmEHOIuZxZxGRCrxFvPB6j55jh6/q1TTXU3zXvLyn68YefgryNAAAAAElFTkSuQmCC',
@@ -827,8 +829,8 @@
         _borderBoxStyle.left = left;
         _borderBoxStyle.bottom = bottom;
         _borderBoxStyle.right = right;
-        _borderBoxStyle.style = 'thin';
-        _borderBoxStyle.color = edge ? 'FF000000' : 'FFCCCCCC';
+        _borderBoxStyle.style = edge && this.tableBorderStyle ? this.tableBorderStyle : 'thin';
+        _borderBoxStyle.color = edge && this.tableBorderColor ? this.tableBorderColor : 'FFCCCCCC';
 
         if (isMergeCell) {
             var s = this.deepClone(style[type]);

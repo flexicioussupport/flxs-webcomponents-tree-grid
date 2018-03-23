@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../../flxs-tree-grid.html">
+  <link rel="import" href="../../flxs-tree-grid-column.html">
+  
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      
+
+      <iron-ajax auto url="../data/animals.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h3>Basic grid demo</h3>
+        <flxs-tree-grid id="grid0" dataProvider="{{ ajaxResponse }}" noDataMessage="" horizontalScrollPolicy="auto"
+          forcePagerRow="true" enableFilters="true" enableExport="true" variableRowHeight="true" variableHeaderHeight="true"
+          textAlign="right" style="width:400px;height:493px">
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="id" headerText="ID" headerAlign="center" columnWidthMode="fitToContent"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="animal" width="150" headerAlign="center" headerText="Animal" filterControl="TextInput" filterOperation="Contains" ></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="scientific" headerText="Scientific Name" width="150" headerAlign="center" filterControl="TextInput"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="chars" headerText="Arbitary Alphanumeric Chars" width="100" headerWordWrap="true" wordwrap="true" headerAlign="center"></flxs-tree-grid-column>  
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+
+        flexiciousNmsp.Constants.IMAGE_PATH = "../../images";
+        flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+        flexiciousNmsp.StyleDefaults.defaults.toolbarImagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+
+        Polymer({
+          is: 'basic-grid-demo'
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

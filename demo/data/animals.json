@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "animal": "Lizard, collared",
+        "scientific": "Crotaphytus collaris",
+        "chars": "IL81 5217 6062 7107 9546 187"
+    },
+    {
+        "id": 2,
+        "animal": "American woodcock",
+        "scientific": "Scolopax minor",
+        "chars": "FR97 6459 4989 68ZI ZAUY HYFD L15"
+    },
+    {
+        "id": 3,
+        "animal": "Gray langur",
+        "scientific": "Semnopithecus entellus",
+        "chars": "FR35 7337 2884 25J6 IHRN WTYX N64"
+    },
+    {
+        "id": 4,
+        "animal": "Swamp deer",
+        "scientific": "Cervus duvauceli",
+        "chars": "TR04 0615 3BHY CFPG EHRV IPH7 Y7"
+    },
+    {
+        "id": 5,
+        "animal": "Glossy ibis",
+        "scientific": "Plegadis falcinellus",
+        "chars": "GT29 GIVH MQNA TKFG 6Y3E 42I3 QZPD"
+    },
+    {
+        "id": 6,
+        "animal": "Sea birds (unidentified)",
+        "scientific": "unavailable",
+        "chars": "CH27 4936 4YR6 ZQTB 5PQT M"
+    },
+    {
+        "id": 7,
+        "animal": "Cougar",
+        "scientific": "Felis concolor",
+        "chars": "LV39 HLLN TJLX 8XS8 FHGK T"
+    },
+    {
+        "id": 8,
+        "animal": "Ringtail, common",
+        "scientific": "Pseudocheirus peregrinus",
+        "chars": "EE71 7982 4976 4272 9391"
+    },
+    {
+        "id": 9,
+        "animal": "Goose, snow",
+        "scientific": "Anser caerulescens",
+        "chars": "FR67 8481 2235 950P X7LR UPIT X87"
+    },
+    {
+        "id": 10,
+        "animal": "Giant girdled lizard",
+        "scientific": "Cordylus giganteus",
+        "chars": "GL65 5887 4839 6895 66"
+    }
+]

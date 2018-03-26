@@ -268,6 +268,7 @@
 
         var i;
         var ws;
+        var pInExport;
 
         /* build workbook */
         var new_wb = ExcelBuilder.Builder.createWorkbook();
@@ -278,12 +279,15 @@
             var isGrid = gridProps[i].hasOwnProperty('grid');
 
             if (isGrid) {
+                pInExport = !!gridProps[i].grid.inExport;
+                gridProps[i].grid.inExport = gridProps[i].hasOwnProperty('inExport') ? gridProps[i].inExport : gridProps[i].grid.inExport;
                 this.writeHeader(gridProps[i].grid);
                 [].forEach.call(gridProps[i].grid.getDataProviderNoPaging(), function (data) {
                     this.writeRecord(gridProps[i].grid, data);
                 }, this);
 
                 this.writeFooter(gridProps[i].grid, gridProps[i].grid.getDataProviderNoPaging());
+                gridProps[i].grid.inExport = pInExport;
                 this.multiGridData.push(this.data.slice(0));
                 this.data = [];
             } else {
@@ -728,15 +732,8 @@
             rowData: this.deepClone(dp[r]),
             rowIndex: r,
             colIndex: c,
-            _rowHeight: 0,
-
-            get rowHeight() {
-                return this._rowHeight;
-            },
-
-            set rowHeight(value) {
-                this._rowHeight = value;
-            },
+            rowHeight: 0,
+            wrapText: isMergeCell,
 
             get isGrid() {
                 return isGrid;
@@ -834,7 +831,7 @@
 
         if (isMergeCell) {
             var s = this.deepClone(style[type]);
-            s.alignment.wrapText = true;
+            s.alignment.wrapText = info.wrapText;
             style[type] = s;
         }
 
@@ -854,11 +851,13 @@
                     cellData['rowIndex'] = r;
                     cellData['cellType'] = type;
                     cellData['isMerged'] = isMergeCell;
+                    cellData['wrapText'] = isMergeCell;
                     cellData['ref'] = ref;
                     var s = this._customStyleFunction(cellData, dgCol, this.deepClone(style[type]));
                     if (s) {
                         type = typ;
-                        style[type] = s;
+                        style[type] = s;           
+                        style[type].alignment.wrapText = style[type].alignment.hasOwnProperty('wrapText') ? style[type].alignment.wrapText : cellData.wrapText;
                     }
                 }
 
@@ -870,11 +869,13 @@
                     cellData['rowIndex'] = r;
                     cellData['colIndex'] = c;
                     cellData['isMerged'] = isMergeCell;
+                    cellData['wrapText'] = isMergeCell;
                     cellData['ref'] = ref;
                     var s = this._customFormStyleFunction(cellData, this.deepClone(style[type]));
                     if (s) {
                         type = typ;
-                        style[type] = s;
+                        style[type] = s;           
+                        style[type].alignment.wrapText = style[type].alignment.hasOwnProperty('wrapText') ? style[type].alignment.wrapText : cellData.wrapText;
                     }
                 }
             }
@@ -885,6 +886,7 @@
                 if (s) {
                     type = typ;
                     style[type] = s;
+                    style[type].alignment.wrapText = style[type].alignment.hasOwnProperty('wrapText') ? style[type].alignment.wrapText : info.wrapText;
 
                     if(info.rowHeight) {
                         this.setRowHeight( info.rowIndex + paddingRowOffset, info.rowHeight );
@@ -967,8 +969,7 @@
                 }, alignment: {
                     horizontal: 'center',
                     vertical: 'center',
-                    shrinkToFit: true,
-                    wrapText: false
+                    shrinkToFit: true
                 }, fill: {
                     type: 'pattern',
                     patternType: 'solid',
@@ -985,8 +986,7 @@
                 }, alignment: {
                     horizontal: 'center',
                     vertical: 'center',
-                    shrinkToFit: true,
-                    wrapText: false
+                    shrinkToFit: true
                 }, fill: {
                     type: 'pattern',
                     patternType: 'solid',
@@ -1002,8 +1002,7 @@
                 }, alignment: {
                     horizontal: 'center',
                     vertical: 'center',
-                    shrinkToFit: true,
-                    wrapText: false
+                    shrinkToFit: true
                 }, fill: {
                     type: 'pattern',
                     patternType: 'solid',
@@ -1019,8 +1018,7 @@
                 }, alignment: {
                     horizontal: 'center',
                     vertical: 'center',
-                    shrinkToFit: true,
-                    wrapText: false
+                    shrinkToFit: true
                 }, fill: {
                     type: 'pattern',
                     patternType: 'solid',
@@ -1037,8 +1035,7 @@
                 }, alignment: {
                     horizontal: 'center',
                     vertical: 'center',
-                    shrinkToFit: true,
-                    wrapText: false
+                    shrinkToFit: true
                 }, fill: {
                     type: 'pattern',
                     patternType: 'solid',

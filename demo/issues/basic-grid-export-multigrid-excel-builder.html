@@ -116,8 +116,9 @@
                     });
                 },
                 getFormattedDate: function(item, col) {
+                    var inExport = col.getLevel().grid.inExport;
                     var val = flexiciousNmsp.UIUtils.resolveExpression(item, col.dataField);
-                    return val ? moment(val).format('DD-MMM-YYYY HH:MM') : "";
+                    return val ? !inExport ? moment(val).format('DD-MMM-YYYY HH:MM') : '&copy; ' + moment(val).format('DD-MMM-YYYY HH:MM') : "";
                 },
                 getUpDownStatus: function(cell, state) {
                     if(cell.rowInfo.getIsDataRow()) {
@@ -137,7 +138,7 @@
                 exportGrids: function (tabbed) {
 
                     var formData = [
-                        [{ value: 'YEAR1' }, { value: 'YEAR2' }, { value: 'YEAR3' }, { value: '' }, { value: '' }, { value: 'YEAR4' }, { value: '' }, { value: 'YEAR5' }],
+                        [{ value: 'YEAR1' }, { value: 'YEAR2' }, { value: 'YEAR3' }, { value: '' }, { value: '' }, { value: 'YEAR4' }, { value: '' }, { value: 'YEAR5<BR>YEAR6' }],
                         [{ value: 100 }, { value: 200 }, { value: 300 }, { value: '' }, { value: '' }, { value: 500 }, { value: '' }, { value: '<br><p>year &nbsp;&nbsp; &copy; & year6 year7, year8, year9+</p>'}],
                         [{ value: '--' }, { value: '--' }, { value: 0 }, { value: '' }, { value: '' }, { value: '10000000000000' }, { value: '' }, { value: 0 }],
                         [{ value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '87%' }, { value: '' }],
@@ -150,13 +151,15 @@
 
                     var grids = [
                         { form: formData, ref: 'f1', sheet: 'text1', colWidths: formColsWidth }, 
-                        { grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs1" }, 
-                        { grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2" }
+                        { grid: this.$.grid1.grid, inExport: true, ref: 'g1', sheet: "dobs1" }, 
+                        { grid: this.$.grid2.grid, inExport: false, ref: 'g2', sheet: "dobs2" }
                     ];
 
                     var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
                     // please set it false and try custom styling with setCustomStylesFunction instead of previous methods
                     multigridExporter.enabledOldApi = false;
+                    // multigridExporter.tableBorderStyle = "thick";
+                    // multigridExporter.tableBorderColor = "FFFF0000";
                     // multigridExporter.defaultFont =  'Amplitude BRK';
                     multigridExporter.setFileName('exported-grid_' + (tabbed ? 'tabbed_' : '') + new Date().toDateString());
                     
@@ -327,7 +330,6 @@
                        return null;
                      });
                     multigridExporter.setCustomFormStyleFunction(function(cell, existingStyle) {
-                       return null;
                        if(cell.isMerged) {
                            existingStyle['fill'] = {
                                type: 'pattern',
@@ -370,12 +372,12 @@
                     imageInfo2.imageWidth = size.width;
 
                     multigridExporter.setMergeCells([
-                        { c: [2, 3], r: [8, 11], ref: 'g2', icon: imageInfo2 },
-                        { c: [1, 1], r: [1, 4], ref: 'g1', icon: imageInfo },
-                        { c: [1, 2], r: [5, 6], ref: 'g1', icon: imageInfo2, rowHeight: 60 },
-                        { c: [0, 0], r: [6, 11], ref: 'g2', icon: imageInfo2, rowHeight: 60 },
-                        { c: [3, 3], r: [24, 26], ref: 'g2', icon: imageInfo2, rowHeight: 60 },
-                        { c: [7, 7], r: [1, 2], ref: 'f1' },
+                        // { c: [2, 3], r: [8, 11], ref: 'g2', icon: imageInfo2 },
+                        // { c: [1, 1], r: [1, 4], ref: 'g1', icon: imageInfo },
+                        // { c: [1, 2], r: [5, 6], ref: 'g1', icon: imageInfo2, rowHeight: 60 },
+                        // { c: [0, 0], r: [6, 11], ref: 'g2', icon: imageInfo2, rowHeight: 60 },
+                        // { c: [3, 3], r: [24, 26], ref: 'g2', icon: imageInfo2, rowHeight: 60 },
+                        { c: [7, 7], r: [1, 2], ref: 'f1', rowHeight: 80 },
                         { c: [1, 2], r: [4, 4], ref: 'f1' },
                      ]);
 

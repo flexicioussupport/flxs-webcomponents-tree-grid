@@ -19,8 +19,8 @@
 
     <link rel="import" href="../../../paper-button/paper-button.html">
     
-    <script src="../../dependencies/excel-builder.compiled.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
+    <script src="../../dependencies/excel-builder.compiled.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
     <script src="../../dependencies/ExcelBuilderMultiGridExporter.js"></script>
     
 </head>
@@ -37,15 +37,15 @@
             <h1>Basic grid demo</h1>
             <paper-button on-click="exportGridsMerged">Export excel merged</paper-button>
             <paper-button on-click="exportGridsTabbed">Export excel tabbed</paper-button>
-            <flxs-tree-grid id="grid1" editable="true" enableHeaders="true" enableFilters="true" dataProvider="{{ ajaxResponse }}"
-                            style="width:600px;height:400px">
-                <flxs-tree-grid-column dataField="id" headerText="Sl. No" columnWidthMode="fitToContent" filterControl="TextInput" filterOperation="Contains"></flxs-tree-grid-column>
-                <flxs-tree-grid-column editable="true" dataField="first_name" headerText="First Name" columnWidthMode="fitToContent">
+            <flxs-tree-grid id="grid1" editable="true" enableHeaders="true" enableFilters="true" horizontalScrollPolicy="auto" dataProvider="{{ ajaxResponse }}"
+                            style="width:200px;height:400px">
+                <flxs-tree-grid-column dataField="id" headerText="Sl. No" columnWidthMode="fitToContent" textAlign="right" headerAlign="center" filterControl="TextInput" filterOperation="Contains"></flxs-tree-grid-column>
+                <flxs-tree-grid-column editable="true" dataField="first_name" textAlign="right"  headerText="First Name" columnWidthMode="fixed" width="600">
                 </flxs-tree-grid-column>
                 <flxs-tree-grid-column editable="true" dataField="last_name" headerWordWrap="true"
-                                       headerText="Last Name" columnWidthMode="fitToContent" filterControl="TextInput" filterOperation="Contains">
+                                       headerText="Last Name" columnWidthMode="fitToContent" textAlign="left" filterControl="TextInput" filterOperation="Contains">
                 </flxs-tree-grid-column>
-                <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth"  columnWidthMode="fitToContent">
+                <flxs-tree-grid-column dataField="dob" headerWordWrap="true" headerText="Date of Birth" headerAlign="center" columnWidthMode="fitToContent">
                 </flxs-tree-grid-column>
             </flxs-tree-grid>
             <br>
@@ -118,7 +118,7 @@
                 getFormattedDate: function(item, col) {
                     var inExport = col.getLevel().grid.inExport;
                     var val = flexiciousNmsp.UIUtils.resolveExpression(item, col.dataField);
-                    return val ? !inExport ? moment(val).format('DD-MMM-YYYY HH:MM') : '&copy; ' + moment(val).format('DD-MMM-YYYY HH:MM') : "";
+                    return val ? !inExport ? moment(val).format('DD-MMM-YYYY HH:MM') : moment(val).format() : "";
                 },
                 getUpDownStatus: function(cell, state) {
                     if(cell.rowInfo.getIsDataRow()) {
@@ -151,8 +151,8 @@
 
                     var grids = [
                         { form: formData, ref: 'f1', sheet: 'text1', colWidths: formColsWidth }, 
-                        { grid: this.$.grid1.grid, inExport: true, ref: 'g1', sheet: "dobs1" }, 
-                        { grid: this.$.grid2.grid, inExport: false, ref: 'g2', sheet: "dobs2" }
+                        { grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs1" }, 
+                        { grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2" }
                     ];
 
                     var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
@@ -242,6 +242,10 @@
                                existingStyle.font.size = 24;
                                existingStyle.alignment.wrapText = true;
                                return existingStyle;
+                           } else {
+                               
+                            cell.wrapText = true;
+                            return existingStyle;
                            }
                            if (cell.colIndex === 0) {
                                existingStyle['fill'] = {
@@ -330,6 +334,9 @@
                        return null;
                      });
                     multigridExporter.setCustomFormStyleFunction(function(cell, existingStyle) {
+                       
+                        cell.wrapText = true;
+                        
                        if(cell.isMerged) {
                            existingStyle['fill'] = {
                                type: 'pattern',
@@ -338,6 +345,8 @@
                                fgColor: 'FF222222'
                            };
                            existingStyle.font.color = 'FFFFFFFF';
+                           return existingStyle;
+                       } else {
                            return existingStyle;
                        }
                        if( cell.colIndex === 0){

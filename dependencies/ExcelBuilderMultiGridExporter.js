@@ -280,7 +280,7 @@
 
             if (isGrid) {
                 pInExport = !!gridProps[i].grid.inExport;
-                gridProps[i].grid.inExport = gridProps[i].hasOwnProperty('inExport') ? gridProps[i].inExport : gridProps[i].grid.inExport;
+                gridProps[i].grid.inExport = true;
                 this.writeHeader(gridProps[i].grid);
                 [].forEach.call(gridProps[i].grid.getDataProviderNoPaging(), function (data) {
                     this.writeRecord(gridProps[i].grid, data);
@@ -401,6 +401,10 @@
         ws.mergeCells(a1NotationFrom, a1NotationTo);
     };
 
+    ExcelBuilderMultiGridExporter.prototype.isDate = function(value) {
+        return isNaN(value) && !(/[\!\@\#\$\%]+$/.test(value)) && !isNaN(new Date(value));
+    }
+
     /**
      * 
      * @param {Number} top 
@@ -437,13 +441,17 @@
         ws.setPageMargin({ top: pageMargins.top || 0.7, bottom: pageMargins.bottom || 0.7, left: pageMargins.left || 0.7, right: pageMargins.right || 0.7, header: pageMargins.header || 0.3, footer: pageMargins.footer || 0.3 });
     };
 
-    ExcelBuilderMultiGridExporter.prototype.getColumnLabels = function (grid, columns) {
+    ExcelBuilderMultiGridExporter.prototype.getColumnLabels = function (grid) {
         var colTexts = [];
-        var headerData = columns;
-        var dgCols = this._exportableColumns;
-        [].forEach.call(dgCols, function (col) {
-            colTexts.push(headerData[col.dataField]);
-        });
+        var colIndex = 0;
+        for (var i = 0; i < grid.getExportableColumns().length; i++) {
+            var col = grid.getExportableColumns()[i];
+            if (!grid.excelOptions.exporter.isIncludedInExport(col)) {
+                continue;
+            }
+            colTexts.push(this.getText(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex)));
+            colIndex++;
+        }
         return colTexts;
     };
 
@@ -599,7 +607,9 @@
 
             this._isGridComp = gridProps[i].hasOwnProperty('grid');
 
-            this._map[gridProps[i].ref] = { offsetRows: (styledData.length + (this.needSeparator ? this.separatorCount : 0)) };
+            var offsetRows = (styledData.length + (this.needSeparator ? this.separatorCount : 0));
+
+            this._map[gridProps[i].ref] = { offsetRows: offsetRows };
 
             if (this._isGridComp) this.filterExportableColumns(gridProps[i].grid);
 
@@ -611,8 +621,31 @@
                 }
             }
 
+            if (this._isGridComp) {
+
+                var table = new ExcelBuilder.Table();
+                worksheet.addTable(table);
+                workbook.addTable(table);
+
+                var paddingLeftCell = this._paddings.left ? 1 : 0;
+                var paddingTopCell = this._paddings.top ? 1 : 0;
+
+                var tableRange = [
+                    [paddingLeftCell + 1, paddingTopCell + (offsetRows + 1) + this._headerIndices[i]], 
+                    [paddingLeftCell + this._exportableColumns.length, paddingTopCell + (offsetRows + 1) + this._headerIndices[i] + gridProps[i].grid.getDataProvider().length]];
+                
+                table.setReferenceRange(tableRange[0], tableRange[1]);
+                table.setTableColumns(this.getColumnLabels(gridProps[i].grid));
+
+                table.addAutoFilter(
+                    [tableRange[0][0], tableRange[0][1] + (this._headerIndices[i] !== -1 ? 1 : 0)],
+                    [tableRange[1][0], tableRange[1][1] - (this._footerIndices[i] !== -1 ? 1 : 0)]
+                );
+            }
+
             for (var m = 0; m < data.length; m++) {
                 if (this._isGridComp) {
+
                     this._exportableColumns.map(function (col, index) {
                         this.attachImages(workbook, worksheet, data[m], m, index, col, gridProps[i].ref);
                         if ((m === this._headerIndices[i] && col.hideHeaderText) || (m !== this._headerIndices[i] && col.hideText)) {
@@ -767,7 +800,8 @@
             v = this._customValueFunction(info);
             v = v === 0 ? String(v) : v;
         }
-        value = v ? v : !isNaN(value) ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : value;
+        // value = v ? v : !isNaN(value) ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : value;
+        value = v ? v : !isNaN(value) ? Number(value) : value;
 
         cell['value'] = !info.hideText ? value : '';
         cell['metadata'] = {};
@@ -835,10 +869,32 @@
             style[type] = s;
         }
 
-        if (!isNaN(value.toString().replace(/\,/g, ''))) {
-            style[type].alignment.horizontal = 'right';
+        if (!isNaN(value.toString())) {
+            style[type].format = '#,###';
+        } else if(this.isDate(value)) {
+            style[type].format = 14;
+        } 
+
+        if(!isGrid) {
+            if (!isNaN(value.toString())) {
+                style[type].alignment.horizontal = 'right';
+            } else {
+                style[type].alignment.horizontal = 'center';
+            }
         } else {
-            style[type].alignment.horizontal = 'center';
+            var align = 'left';
+            switch(type) {
+                case "header":
+                    align = info.fdgColumn.headerAlign;
+                    break;
+                case "dataCell0":
+                case "dataCell1":
+                    align = info.fdgColumn.textAlign;
+                    break;
+                case "footer":
+                    align = info.fdgColumn.footerAlign;
+            }
+            style[type].alignment.horizontal = align;
         }
 
         if (this.enabledOldApi) {

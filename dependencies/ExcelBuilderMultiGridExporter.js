@@ -519,7 +519,7 @@
         if (!this._customBase64ImageFunction || !(base64ImageInfo = this._customBase64ImageFunction(data, col, this._cws[cellIndex]))) {
             if (!imageInfoInMergedCell || (imageInfoInMergedCell && imageInfoInMergedCell.prevFetch || !imageInfoInMergedCell.imageInfo)) {
 
-                if (col.dataField)
+                if (col.hasOwnProperty('dataField'))
                     data[col.dataField] = this.getText(data[col.dataField]);
                 else
                     data[cellIndex].value = this.getText(data[cellIndex].value);
@@ -563,7 +563,7 @@
         if (!base64ImageInfo || !base64ImageInfo.hasOwnProperty('base64ImageInfo') || !base64ImageInfo.hideText)
             return;
 
-        if (col.dataField) {
+        if (col.hasOwnProperty('dataField')) {
             data[col.dataField] = this.getText(data[col.dataField]);
             data[col.dataField + "_hideText"] = base64ImageInfo.hideText;
         } else {
@@ -801,6 +801,7 @@
             v = v === 0 ? String(v) : v;
         }
         // value = v ? v : !isNaN(value) ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : value;
+        value = value.replace(/\,/g, "");
         value = v ? v : !isNaN(value) ? Number(value) : value;
 
         cell['value'] = !info.hideText ? value : '';
@@ -872,8 +873,11 @@
         if (!isNaN(value.toString())) {
             style[type].format = '#,###';
         } else if(this.isDate(value)) {
-            style[type].format = 14;
-        } 
+            // style[type].format = 14;
+            cell['value'] = moment(cell['value']).format('YYYY-MM-DD HH:MM:SS');
+        } else {
+            style[type].alignment.wrapText = (cell['value'].match(/\n/g) || []).length > 0;
+        }
 
         if(!isGrid) {
             if (!isNaN(value.toString())) {
@@ -883,16 +887,18 @@
             }
         } else {
             var align = 'left';
-            switch(type) {
-                case "header":
-                    align = info.fdgColumn.headerAlign;
-                    break;
-                case "dataCell0":
-                case "dataCell1":
-                    align = info.fdgColumn.textAlign;
-                    break;
-                case "footer":
-                    align = info.fdgColumn.footerAlign;
+            if(!info.fdgLevel.grid.inExport) {
+                switch(type) {
+                    case "header":
+                        align = info.fdgColumn.headerAlign;
+                        break;
+                    case "dataCell0":
+                    case "dataCell1":
+                        align = info.fdgColumn.textAlign;
+                        break;
+                    case "footer":
+                        align = info.fdgColumn.footerAlign;
+                }
             }
             style[type].alignment.horizontal = align;
         }
@@ -913,7 +919,7 @@
                     if (s) {
                         type = typ;
                         style[type] = s;           
-                        style[type].alignment.wrapText = style[type].alignment.hasOwnProperty('wrapText') ? style[type].alignment.wrapText : cellData.wrapText;
+                        style[type].alignment.wrapText = cellData.wrapText || style[type].alignment.wrapText;
                     }
                 }
 
@@ -930,8 +936,8 @@
                     var s = this._customFormStyleFunction(cellData, this.deepClone(style[type]));
                     if (s) {
                         type = typ;
-                        style[type] = s;           
-                        style[type].alignment.wrapText = style[type].alignment.hasOwnProperty('wrapText') ? style[type].alignment.wrapText : cellData.wrapText;
+                        style[type] = s;
+                        style[type].alignment.wrapText = cellData.wrapText || style[type].alignment.wrapText;
                     }
                 }
             }
@@ -942,8 +948,8 @@
                 if (s) {
                     type = typ;
                     style[type] = s;
-                    style[type].alignment.wrapText = style[type].alignment.hasOwnProperty('wrapText') ? style[type].alignment.wrapText : info.wrapText;
-
+                    style[type].alignment.wrapText = cellData.wrapText || style[type].alignment.wrapText;
+                    
                     if(info.rowHeight) {
                         this.setRowHeight( info.rowIndex + paddingRowOffset, info.rowHeight );
                     }
@@ -1024,8 +1030,7 @@
                     fontName: this.defaultFont || 'AmplitudeTF'
                 }, alignment: {
                     horizontal: 'center',
-                    vertical: 'center',
-                    shrinkToFit: true
+                    vertical: 'center'
                 }, fill: {
                     type: 'pattern',
                     patternType: 'solid',
@@ -1041,8 +1046,7 @@
                     fontName: this.defaultFont || 'AmplitudeTF'
                 }, alignment: {
                     horizontal: 'center',
-                    vertical: 'center',
-                    shrinkToFit: true
+                    vertical: 'center'
                 }, fill: {
                     type: 'pattern',
                     patternType: 'solid',
@@ -1057,8 +1061,7 @@
                     fontName: this.defaultFont || 'AmplitudeTF'
                 }, alignment: {
                     horizontal: 'center',
-                    vertical: 'center',
-                    shrinkToFit: true
+                    vertical: 'center'
                 }, fill: {
                     type: 'pattern',
                     patternType: 'solid',
@@ -1073,8 +1076,7 @@
                     fontName: this.defaultFont || 'AmplitudeTF'
                 }, alignment: {
                     horizontal: 'center',
-                    vertical: 'center',
-                    shrinkToFit: true
+                    vertical: 'center'
                 }, fill: {
                     type: 'pattern',
                     patternType: 'solid',
@@ -1090,8 +1092,7 @@
                     color: 'FFFFFFFF'
                 }, alignment: {
                     horizontal: 'center',
-                    vertical: 'center',
-                    shrinkToFit: true
+                    vertical: 'center'
                 }, fill: {
                     type: 'pattern',
                     patternType: 'solid',

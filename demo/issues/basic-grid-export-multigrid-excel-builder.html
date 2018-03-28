@@ -19,7 +19,7 @@
 
     <link rel="import" href="../../../paper-button/paper-button.html">
     
-    <script src="../../dependencies/excel-builder.compiled.js"></script>
+    <script src="../../dependencies/excel-builder.compiled.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.21.0/moment.min.js"></script>
     <script src="../../dependencies/ExcelBuilderMultiGridExporter.js"></script>
     
@@ -32,7 +32,7 @@
 
         <iron-ajax auto url="../data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
         <iron-ajax auto url="../data/dobs.2.json" handle-as="json" last-response="{{ajaxResponse1}}" id="xhr"></iron-ajax>
-
+        
         <div class="card">
             <h1>Basic grid demo</h1>
             <paper-button on-click="exportGridsMerged">Export excel merged</paper-button>
@@ -118,7 +118,7 @@
                 getFormattedDate: function(item, col) {
                     var inExport = col.getLevel().grid.inExport;
                     var val = flexiciousNmsp.UIUtils.resolveExpression(item, col.dataField);
-                    return val ? !inExport ? moment(val).format('DD-MMM-YYYY HH:MM') : moment(val).format() : "";
+                    return val ? !inExport ? moment(val).format('DD-MMM-YYYY HH:MM') : moment(val).format('M/D/YYYY h:mm') : "";
                 },
                 getUpDownStatus: function(cell, state) {
                     if(cell.rowInfo.getIsDataRow()) {
@@ -139,14 +139,14 @@
 
                     var formData = [
                         [{ value: 'YEAR1' }, { value: 'YEAR2' }, { value: 'YEAR3' }, { value: '' }, { value: '' }, { value: 'YEAR4' }, { value: '' }, { value: 'YEAR5<BR>YEAR6' }],
-                        [{ value: 100 }, { value: 200 }, { value: 300 }, { value: '' }, { value: '' }, { value: 500 }, { value: '' }, { value: '<br><p>year &nbsp;&nbsp; &copy; & year6 year7, year8, year9+</p>'}],
+                        [{ value: 100 }, { value: 200 }, { value: 300 }, { value: '' }, { value: '' }, { value: 500 }, { value: '' }, { value: 'year    © & year6 year7, year8, year9+\r\nyear    © & year6 year7, year8, year9+\r\nyear    © & year6 year7, year8, year9+\r\nyear    © & year6 year7, year8, year9+\r\nyear    © & year6 year7, year8, year9+\r\nyear    © & year6 year7, year8, year9+'}],
                         [{ value: '--' }, { value: '--' }, { value: 0 }, { value: '' }, { value: '' }, { value: '10000000000000' }, { value: '' }, { value: 0 }],
                         [{ value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '' }, { value: '87%' }, { value: '' }],
-                        [{ value: 1000 }, { value: 2000 }, { value: 3000 }, { value: '' }, { value: '' }, { value: 4000 }, { value: '' }, { value: 5000 }]
+                        [{ value: 1000 }, { value: '2,000' }, { value: '3,000' }, { value: '' }, { value: '' }, { value: 4000 }, { value: '' }, { value: 5000 }]
                     ];
 
                     var formColsWidth = [
-                        160, 160, 160, 160, 160, 160, 160, 400
+                        160, 160, 160, 160, 160, 250, 160, 400
                     ];
 
                     var grids = [
@@ -157,7 +157,7 @@
 
                     var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
                     // please set it false and try custom styling with setCustomStylesFunction instead of previous methods
-                    multigridExporter.enabledOldApi = false;
+                    multigridExporter.enabledOldApi = true;
                     // multigridExporter.tableBorderStyle = "thick";
                     // multigridExporter.tableBorderColor = "FFFF0000";
                     // multigridExporter.defaultFont =  'Amplitude BRK';
@@ -334,8 +334,6 @@
                        return null;
                      });
                     multigridExporter.setCustomFormStyleFunction(function(cell, existingStyle) {
-                       
-                        cell.wrapText = true;
                         
                        if(cell.isMerged) {
                            existingStyle['fill'] = {
@@ -363,7 +361,7 @@
                        }
                         
                        return null;
-                     });
+                    });
 
                     var size = getPngDimensions(base64Images[2]);
 
@@ -386,7 +384,7 @@
                         // { c: [1, 2], r: [5, 6], ref: 'g1', icon: imageInfo2, rowHeight: 60 },
                         // { c: [0, 0], r: [6, 11], ref: 'g2', icon: imageInfo2, rowHeight: 60 },
                         // { c: [3, 3], r: [24, 26], ref: 'g2', icon: imageInfo2, rowHeight: 60 },
-                        { c: [7, 7], r: [1, 2], ref: 'f1', rowHeight: 80 },
+                        // { c: [7, 7], r: [1, 2], ref: 'f1', rowHeight: 80 },
                         { c: [1, 2], r: [4, 4], ref: 'f1' },
                      ]);
 

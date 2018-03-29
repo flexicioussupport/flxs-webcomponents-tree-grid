@@ -112,7 +112,7 @@
     /**
      * @private
      */
-    ExcelBuilderMultiGridExporter.prototype.writeRecord = function (grid, record) {
+    ExcelBuilderMultiGridExporter.prototype.writeRecord = function (grid, record, extra) {
 
         var colIndex = 0;
         var exporter = grid.excelOptions.exporter;
@@ -127,9 +127,42 @@
             value = value ? this.getText(value) : "";
             item[col.dataField] = (value ? isNaN(value) ? value : Number(value) : "");
         }
+
+        this.copyProperties(extra, item);
         this.data.push(item);
         return "";
 
+    };
+
+    ExcelBuilderMultiGridExporter.prototype.recursiveFetchRecords = function(grid, exportChildren, level, records) {
+
+        if(typeof exportChildren === 'undefined') exportChildren = false;
+        records = records || grid.getDataProviderNoPaging();
+        level = level || grid.getColumnLevel();
+
+        [].forEach.call(records, function (data, index, records) {
+
+            var extra = {};
+            extra._nestDepth = level.getNestDepth();
+
+            if(extra._nestDepth>1) {
+                if( index === 0 ) {
+                    extra._firstChild = true;
+                } else if ( index === records.length - 1 ) {
+                    extra._lastChild = true;
+                }
+            }
+
+            this.writeRecord(grid, data, extra);
+            if(exportChildren) {
+                if(level.isItemOpen(data)) {
+                    var children = level.getChildren(data);
+                    if( children.length > 0 ) {
+                        this.recursiveFetchRecords(grid, exportChildren, level.nextLevel, children);
+                    }
+                }
+            }
+        }, this);
     };
 
     /**
@@ -260,7 +293,9 @@
      * }
      * @param {Boolean} multiTab default set to false
      */
-    ExcelBuilderMultiGridExporter.prototype.generate = function (gridProps, multiTab) {
+    ExcelBuilderMultiGridExporter.prototype.generate = function (props, multiTab) {
+
+        var gridProps = props.slice(0);
 
         if (typeof multiTab === 'undefined') multiTab = false;
 
@@ -268,7 +303,6 @@
 
         var i;
         var ws;
-        var pInExport;
 
         /* build workbook */
         var new_wb = ExcelBuilder.Builder.createWorkbook();
@@ -279,15 +313,11 @@
             var isGrid = gridProps[i].hasOwnProperty('grid');
 
             if (isGrid) {
-                pInExport = !!gridProps[i].grid.inExport;
-                gridProps[i].grid.inExport = true;
+                gridProps[i].pInExport = !!gridProps[i].grid.inExport;
+                gridProps[i].grid.inExport = gridProps[i].hasOwnProperty('inExport') ? gridProps[i].inExport : gridProps[i].grid.inExport;
                 this.writeHeader(gridProps[i].grid);
-                [].forEach.call(gridProps[i].grid.getDataProviderNoPaging(), function (data) {
-                    this.writeRecord(gridProps[i].grid, data);
-                }, this);
-
+                this.recursiveFetchRecords(gridProps[i].grid, gridProps[i].showChild);
                 this.writeFooter(gridProps[i].grid, gridProps[i].grid.getDataProviderNoPaging());
-                gridProps[i].grid.inExport = pInExport;
                 this.multiGridData.push(this.data.slice(0));
                 this.data = [];
             } else {
@@ -320,6 +350,11 @@
 
             if (window.hasOwnProperty('stylz')) {
                 delete window.stylz;
+            }
+
+            for (i = 0; i < gridProps.length; i++) {
+                if( gridProps[i].grid )
+                    gridProps[i].grid.inExport = gridProps[i].pInExport;
             }
 
         }.bind(this));
@@ -402,7 +437,7 @@
     };
 
     ExcelBuilderMultiGridExporter.prototype.isDate = function(value) {
-        return isNaN(value) && !(/[\!\@\#\$\%]+$/.test(value)) && !isNaN(new Date(value));
+        return isNaN(value) && !(/[\!\@\#\$\%]+/.test(value)) && !isNaN(new Date(value));
     }
 
     /**
@@ -632,7 +667,7 @@
 
                 var tableRange = [
                     [paddingLeftCell + 1, paddingTopCell + (offsetRows + 1) + this._headerIndices[i]], 
-                    [paddingLeftCell + this._exportableColumns.length, paddingTopCell + (offsetRows + 1) + this._headerIndices[i] + gridProps[i].grid.getDataProvider().length]];
+                    [paddingLeftCell + this._exportableColumns.length, paddingTopCell + (offsetRows + 1) + this._headerIndices[i] + data.length]];
                 
                 table.setReferenceRange(tableRange[0], tableRange[1]);
                 table.setTableColumns(this.getColumnLabels(gridProps[i].grid));
@@ -744,7 +779,7 @@
         return items;
     };
 
-    ExcelBuilderMultiGridExporter.prototype.createCell = function (dp, data, compIndex, cellInfo, style) {
+    ExcelBuilderMultiGridExporter.prototype.createCell = function (dp, data, compIndex, cellInfo, styles) {
         var v;
         var c = cellInfo.c;
         var r = cellInfo.r;
@@ -752,6 +787,7 @@
         var ref = cellInfo.ref;
         var isGrid = cellInfo.isGrid;
         var paddingRowOffset = this._paddings.top ? 1 : 0;
+        var style = this.deepClone(styles);
 
         var value = typeof data === 'object' ? data.hasOwnProperty('value') ? data.value : "" : data;
 
@@ -768,6 +804,18 @@
             rowHeight: 0,
             wrapText: isMergeCell,
 
+            get isFirstChild() {
+                return !!this.rowData._firstChild;
+            },
+
+            get isLastChild() {
+                return !!this.rowData._lastChild;
+            },
+
+            get nestDepth() {
+                return this.rowData._nestDepth;
+            },
+
             get isGrid() {
                 return isGrid;
             },
@@ -781,7 +829,11 @@
             },
 
             get fdgLevel() {
-                return dgCol ? dgCol.getLevel() : null;
+                var lvl = this.fdgColumn ? this.fdgColumn.getLevel() : null;
+                if(lvl) {
+                    return lvl.grid.getLevel(this.rowData._nestDepth);
+                }
+                return lvl;
             },
 
             get isHeaderRow() {
@@ -802,7 +854,7 @@
         }
         // value = v ? v : !isNaN(value) ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : value;
         value = value.replace(/\,/g, "");
-        value = v ? v : !isNaN(value) ? Number(value) : value;
+        value = v ? v : value && !isNaN(value) ? Number(value) : value;
 
         cell['value'] = !info.hideText ? value : '';
         cell['metadata'] = {};
@@ -864,14 +916,29 @@
         _borderBoxStyle.style = edge && this.tableBorderStyle ? this.tableBorderStyle : 'thin';
         _borderBoxStyle.color = edge && this.tableBorderColor ? this.tableBorderColor : 'FFCCCCCC';
 
+        if(info.isFirstChild || info.isLastChild) {
+            _borderBoxStyle = { top: info.isFirstChild, left: false, right: false, bottom: info.isLastChild, style: 'thick', color: 'FFFF9900' };
+        }
+        
+
         if (isMergeCell) {
             var s = this.deepClone(style[type]);
             s.alignment.wrapText = info.wrapText;
             style[type] = s;
         }
 
-        if (!isNaN(value.toString())) {
-            style[type].format = '#,###';
+        if ((isNaN(value) && !isNaN(value.replace(/\%?/g, ''))) || !isNaN(value.toString())) {
+            if(!isNaN(value.toString())) {
+                if(value !== '')
+                    style[type].format = "#,##0";
+                else
+                    style[type].format = "#,###";
+            } else {
+                if(!isNaN(value.replace(/\%?/g, ''))) {
+                    cell['value'] = Number(cell['value'].replace(/\%?/g, ''))/100;
+                    style[type].format = '0.00%';
+                }
+            }
         } else if(this.isDate(value)) {
             // style[type].format = 14;
             cell['value'] = moment(cell['value']).format('YYYY-MM-DD HH:MM:SS');
@@ -887,14 +954,14 @@
             }
         } else {
             var align = 'left';
-            if(!info.fdgLevel.grid.inExport) {
+            if(info.fdgColumn.level.grid.inExport === false) {
                 switch(type) {
                     case "header":
                         align = info.fdgColumn.headerAlign;
                         break;
                     case "dataCell0":
                     case "dataCell1":
-                        align = info.fdgColumn.textAlign;
+                        align = info.fdgColumn.textAlign || 'left';
                         break;
                     case "footer":
                         align = info.fdgColumn.footerAlign;
@@ -915,7 +982,7 @@
                     cellData['isMerged'] = isMergeCell;
                     cellData['wrapText'] = isMergeCell;
                     cellData['ref'] = ref;
-                    var s = this._customStyleFunction(cellData, dgCol, this.deepClone(style[type]));
+                    var s = this._customStyleFunction(cellData, dgCol, style[type]);
                     if (s) {
                         type = typ;
                         style[type] = s;           
@@ -933,7 +1000,7 @@
                     cellData['isMerged'] = isMergeCell;
                     cellData['wrapText'] = isMergeCell;
                     cellData['ref'] = ref;
-                    var s = this._customFormStyleFunction(cellData, this.deepClone(style[type]));
+                    var s = this._customFormStyleFunction(cellData, style[type]);
                     if (s) {
                         type = typ;
                         style[type] = s;
@@ -944,12 +1011,12 @@
         } else {
             if (this._customStylesFunction) {
                 var typ = 'custom_' + type;
-                var s = this._customStylesFunction(info, this.deepClone(style[type]));
+                var s = this._customStylesFunction(info, style[type]);
                 if (s) {
                     type = typ;
                     style[type] = s;
-                    style[type].alignment.wrapText = cellData.wrapText || style[type].alignment.wrapText;
-                    
+                    style[type].alignment.wrapText = info.wrapText || style[type].alignment.wrapText;
+
                     if(info.rowHeight) {
                         this.setRowHeight( info.rowIndex + paddingRowOffset, info.rowHeight );
                     }
@@ -962,6 +1029,8 @@
         }
 
         cell['metadata']['style'] = this.generateStyleId(type, style, _borderBoxStyle, [r, c]).id;
+
+        info = null;
         return cell;
     };
 
@@ -969,7 +1038,7 @@
 
         box = box || { top: false, left: false, right: false, bottom: false };
 
-        var comboStyles = this.deepClone(style[type]);
+        var comboStyles = style[type];
         var defaultBorderStyle = { style: 'thin', color: 'FFCCCCCC' };
 
         var boxBorder = {};

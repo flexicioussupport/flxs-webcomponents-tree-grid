@@ -16,6 +16,7 @@
     <link rel="import" href="../../../iron-ajax/iron-ajax.html">
     <link rel="import" href="../../flxs-tree-grid.html">
     <link rel="import" href="../../flxs-tree-grid-column.html">
+    <link rel="import" href="../../flxs-tree-grid-column-level.html">
 
     <link rel="import" href="../../../paper-button/paper-button.html">
     
@@ -32,11 +33,26 @@
 
         <iron-ajax auto url="../data/dobs.json" handle-as="json" last-response="{{ajaxResponse}}" id="xhr"></iron-ajax>
         <iron-ajax auto url="../data/dobs.2.json" handle-as="json" last-response="{{ajaxResponse1}}" id="xhr"></iron-ajax>
-        
+        <iron-ajax auto url="../data/hierarchy.json" handle-as="json" last-response="{{ajaxResponse2}}" id="xhr"></iron-ajax>
+
         <div class="card">
-            <h1>Basic grid demo</h1>
             <paper-button on-click="exportGridsMerged">Export excel merged</paper-button>
             <paper-button on-click="exportGridsTabbed">Export excel tabbed</paper-button>
+            
+            <h1>Hierarchical grid demo</h1>
+            <flxs-tree-grid id="grid0" dataProvider="{{ ajaxResponse2 }}" forcePagerRow="true"
+                rowHeight="30"  sortArrowSkin="/sortArrowOrange.png"
+                style="font-family: 'Roboto', sans-serif;height: 400px; width: 600px">
+                <flxs-tree-grid-column-level childrenField="sub">
+                    <flxs-tree-grid-column type="checkbox" ></flxs-tree-grid-column>
+                    <flxs-tree-grid-column dataField="id" headerText="ID" filterControl="TextInput"  labelFunction="[[_filterCount]]" filterOperation="BeginsWith" enableRecursiveSearch="true"></flxs-tree-grid-column>
+                    <flxs-tree-grid-column dataField="type" headerText="Type" filterControl="ComboBox" filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+                    <flxs-tree-grid-column dataField="price" headerText="Price" labelFunction="[[getLabel]]"></flxs-tree-grid-column>
+                    <flxs-tree-grid-column-level rowHeight="21" reusePreviousLevelColumns="true"></flxs-tree-grid-column-level>
+                </flxs-tree-grid-column-level>
+            </flxs-tree-grid>
+            
+            <h1>Basic grid demo</h1>
             <flxs-tree-grid id="grid1" editable="true" enableHeaders="true" enableFilters="true" horizontalScrollPolicy="auto" dataProvider="{{ ajaxResponse }}"
                             style="width:200px;height:400px">
                 <flxs-tree-grid-column dataField="id" headerText="Sl. No" columnWidthMode="fitToContent" textAlign="right" headerAlign="center" filterControl="TextInput" filterOperation="Contains"></flxs-tree-grid-column>
@@ -120,6 +136,11 @@
                     var val = flexiciousNmsp.UIUtils.resolveExpression(item, col.dataField);
                     return val ? !inExport ? moment(val).format('DD-MMM-YYYY HH:MM') : moment(val).format('M/D/YYYY h:mm') : "";
                 },
+                getLabel: function(item, col) {
+                    var val = flexiciousNmsp.UIUtils.resolveExpression(item, col.dataField);
+                    val = val || '';
+                    return col.getLevel().grid.inExport ? val.replace(/\$\s/, '') : val;
+                },
                 getUpDownStatus: function(cell, state) {
                     if(cell.rowInfo.getIsDataRow()) {
                         return flexiciousNmsp.StyleDefaults.defaults.imagesRoot + '/test/arrow_' + cell.rowInfo.getData()[cell.getColumn().dataField] + '_24.png';
@@ -146,12 +167,13 @@
                     ];
 
                     var formColsWidth = [
-                        160, 160, 160, 160, 160, 250, 160, 400
+                        160, 160, 160, 160, 160, 300, 160, 400
                     ];
 
                     var grids = [
-                        { form: formData, ref: 'f1', sheet: 'text1', colWidths: formColsWidth }, 
-                        { grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs1" }, 
+                        { form: formData, ref: 'f1', sheet: 'text1',  colWidths: formColsWidth }, 
+                        { grid: this.$.grid0.grid, ref: 'g0', sheet: "abcde", showChild: true, inExport: false }, 
+                        { grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs1", inExport: false }, 
                         { grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2" }
                     ];
 
@@ -285,7 +307,7 @@
                     multigridExporter.setCustomStyleFunction(function(cellData, dgCol, existingStyle) {
                         
 
-                       if( cellData.cellType.indexOf('dataCell') !== -1){
+                        if( cellData.cellType.indexOf('dataCell') !== -1){
 
                            if(cellData.isMerged) {
                                existingStyle['fill'] = {
@@ -334,7 +356,7 @@
                        return null;
                      });
                     multigridExporter.setCustomFormStyleFunction(function(cell, existingStyle) {
-                        
+                       
                        if(cell.isMerged) {
                            existingStyle['fill'] = {
                                type: 'pattern',
@@ -361,7 +383,7 @@
                        }
                         
                        return null;
-                    });
+                     });
 
                     var size = getPngDimensions(base64Images[2]);
 

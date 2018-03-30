@@ -37,7 +37,7 @@ function updateDataProvider(elem) {
     readJsonFile('data/GridAPITestDATA_' + elem.value.toUpperCase() + '.json', function(data) {
         dataSource = data;
         grid.setDataProvider(dataSource[0].before);
-        grid.rebuildBody(true);
+        grid.expandAll();
     });
 }
 

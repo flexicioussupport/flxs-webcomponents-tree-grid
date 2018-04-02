@@ -124,8 +124,8 @@
                 continue;
             }
             var value = col.itemToLabel(record);
-            value = value ? this.getText(value) : "";
-            item[col.dataField] = (value ? isNaN(value) ? value : Number(value) : "");
+            value = (value || value === 0) ? this.getText(value) : "";
+            item[col.dataField] = (value === '' || isNaN(value)) ? value : Number(value);
         }
 
         this.copyProperties(extra, item);
@@ -314,7 +314,7 @@
 
             if (isGrid) {
                 gridProps[i].pInExport = !!gridProps[i].grid.inExport;
-                gridProps[i].grid.inExport = gridProps[i].hasOwnProperty('inExport') ? gridProps[i].inExport : gridProps[i].grid.inExport;
+                gridProps[i].grid.inExport = true;
                 this.writeHeader(gridProps[i].grid);
                 this.recursiveFetchRecords(gridProps[i].grid, gridProps[i].showChild);
                 this.writeFooter(gridProps[i].grid, gridProps[i].grid.getDataProviderNoPaging());
@@ -348,13 +348,14 @@
             this.columns = [];
             this.data = [];
 
-            if (window.hasOwnProperty('stylz')) {
-                delete window.stylz;
+            for(var i=0;i<gridProps.length;i++) {
+                if( gridProps[i].grid ) {
+                    gridProps[i].grid.inExport = gridProps[i].pInExport;
+                }
             }
 
-            for (i = 0; i < gridProps.length; i++) {
-                if( gridProps[i].grid )
-                    gridProps[i].grid.inExport = gridProps[i].pInExport;
+            if (window.hasOwnProperty('stylz')) {
+                delete window.stylz;
             }
 
         }.bind(this));
@@ -404,7 +405,7 @@
         if (!htmlText) return htmlText;
         var e1 = document.createElement('div');
         e1.innerHTML = htmlText;
-        return e1.innerText;
+        return e1.innerText.replace(/^[\s]*|[\s]*$/g, '');
     }
 
     ExcelBuilderMultiGridExporter.prototype.setColumnsWidth = function (ws) {
@@ -437,7 +438,7 @@
     };
 
     ExcelBuilderMultiGridExporter.prototype.isDate = function(value) {
-        return isNaN(value) && !(/[\!\@\#\$\%]+/.test(value)) && !isNaN(new Date(value));
+        return isNaN(value) && !(/[a-zA-Z\@\#\$\%]+/.test(value)) && !isNaN(new Date(value));
     }
 
     /**
@@ -854,7 +855,7 @@
         }
         // value = v ? v : !isNaN(value) ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : value;
         value = value.replace(/\,/g, "");
-        value = v ? v : value && !isNaN(value) ? Number(value) : value;
+        value = v ? v : (value === 0 || (value && !isNaN(value))) ? Number(value) : value;
 
         cell['value'] = !info.hideText ? value : '';
         cell['metadata'] = {};
@@ -927,21 +928,24 @@
             style[type] = s;
         }
 
-        if ((isNaN(value) && !isNaN(value.replace(/\%?/g, ''))) || !isNaN(value.toString())) {
+        if ((isNaN(value) && !isNaN(value.replace(/\%?$/g, ''))) || !isNaN(value.toString())) {
             if(!isNaN(value.toString())) {
                 if(value !== '')
                     style[type].format = "#,##0";
-                else
+                else {
                     style[type].format = "#,###";
+                }
             } else {
-                if(!isNaN(value.replace(/\%?/g, ''))) {
-                    cell['value'] = Number(cell['value'].replace(/\%?/g, ''))/100;
+                if(!isNaN(value.replace(/\%?$/g, ''))) {
+                    cell['value'] = Number(cell['value'].replace(/\%?$/g, ''))/100;
                     style[type].format = '0.00%';
                 }
             }
         } else if(this.isDate(value)) {
+            style[type].format = 'yyyy-mm-dd hh:mm:ss';
             // style[type].format = 14;
-            cell['value'] = moment(cell['value']).format('YYYY-MM-DD HH:MM:SS');
+            cell['value'] = new Date(cell['value']);
+            cell.metadata.type = 'date';
         } else {
             style[type].alignment.wrapText = (cell['value'].match(/\n/g) || []).length > 0;
         }
@@ -954,18 +958,16 @@
             }
         } else {
             var align = 'left';
-            if(info.fdgColumn.level.grid.inExport === false) {
-                switch(type) {
-                    case "header":
-                        align = info.fdgColumn.headerAlign;
-                        break;
-                    case "dataCell0":
-                    case "dataCell1":
-                        align = info.fdgColumn.textAlign || 'left';
-                        break;
-                    case "footer":
-                        align = info.fdgColumn.footerAlign;
-                }
+            switch(type) {
+                case "header":
+                    align = info.fdgColumn.headerAlign || 'center';
+                    break;
+                case "dataCell0":
+                case "dataCell1":
+                    align = info.fdgColumn.textAlign || 'left';
+                    break;
+                case "footer":
+                    align = info.fdgColumn.footerAlign || 'right';
             }
             style[type].alignment.horizontal = align;
         }

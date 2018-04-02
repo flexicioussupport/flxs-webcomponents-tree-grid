@@ -132,9 +132,8 @@
                     });
                 },
                 getFormattedDate: function(item, col) {
-                    var inExport = col.getLevel().grid.inExport;
                     var val = flexiciousNmsp.UIUtils.resolveExpression(item, col.dataField);
-                    return val ? !inExport ? moment(val).format('DD-MMM-YYYY HH:MM') : moment(val).format('M/D/YYYY h:mm') : "";
+                    return val ? moment(val).format('YYYY-MM-DD HH:MM:SS') : "";
                 },
                 getLabel: function(item, col) {
                     var val = flexiciousNmsp.UIUtils.resolveExpression(item, col.dataField);
@@ -172,14 +171,14 @@
 
                     var grids = [
                         { form: formData, ref: 'f1', sheet: 'text1',  colWidths: formColsWidth }, 
-                        { grid: this.$.grid0.grid, ref: 'g0', sheet: "abcde", showChild: true, inExport: false }, 
-                        { grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs1", inExport: false }, 
+                        { grid: this.$.grid0.grid, ref: 'g0', sheet: "abcde", showChild: true }, 
+                        { grid: this.$.grid1.grid, ref: 'g1', sheet: "dobs1" }, 
                         { grid: this.$.grid2.grid, ref: 'g2', sheet: "dobs2" }
                     ];
 
                     var multigridExporter = new flexiciousNmsp.ExcelBuilderMultiGridExporter();
                     // please set it false and try custom styling with setCustomStylesFunction instead of previous methods
-                    multigridExporter.enabledOldApi = true;
+                    multigridExporter.enabledOldApi = false;
                     // multigridExporter.tableBorderStyle = "thick";
                     // multigridExporter.tableBorderColor = "FFFF0000";
                     // multigridExporter.defaultFont =  'Amplitude BRK';
@@ -187,10 +186,16 @@
                     
                     multigridExporter.setCustomValueFunction(function (cell) {
                         if (cell.ref === 'g2' && cell.isDataRow && cell.fdgColumn && cell.fdgColumn.dataField === 'dob') {
-                            return cell.rowData[cell.fdgColumn.dataField].toUpperCase();
+                            return cell.rowData[cell.fdgColumn.dataField];
                         }
                      });
                     multigridExporter.setCustomStylesFunction(function (cell, existingStyle) {
+
+                        if(cell.isGrid && cell.isFooterRow) {
+                            existingStyle.fill.bgColor = 'FF880000';
+                            existingStyle.font.color = 'FFFFFFFF';
+                            return existingStyle;
+                        }
 
                        if (cell.isGrid) {
                            if (cell.isDataRow) {
@@ -305,9 +310,9 @@
                      * Note: in this example if you set <code> enabledOldApi=false <code>; it will unlock new styling api.
                      */
                     multigridExporter.setCustomStyleFunction(function(cellData, dgCol, existingStyle) {
+ 
                         
-
-                        if( cellData.cellType.indexOf('dataCell') !== -1){
+                       if( cellData.cellType.indexOf('dataCell') !== -1){
 
                            if(cellData.isMerged) {
                                existingStyle['fill'] = {
@@ -356,8 +361,8 @@
                        return null;
                      });
                     multigridExporter.setCustomFormStyleFunction(function(cell, existingStyle) {
-                       
-                       if(cell.isMerged) {
+ 
+                        if(cell.isMerged) {
                            existingStyle['fill'] = {
                                type: 'pattern',
                                patternType: 'solid',

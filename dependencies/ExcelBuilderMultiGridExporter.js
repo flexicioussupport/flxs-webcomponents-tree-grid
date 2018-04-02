@@ -667,8 +667,15 @@
                 var paddingTopCell = this._paddings.top ? 1 : 0;
 
                 var tableRange = [
-                    [paddingLeftCell + 1, paddingTopCell + (offsetRows + 1) + this._headerIndices[i]], 
-                    [paddingLeftCell + this._exportableColumns.length, paddingTopCell + (offsetRows + 1) + this._headerIndices[i] + data.length]];
+                    [
+                        paddingLeftCell + 1, 
+                        paddingTopCell + offsetRows + this._headerIndices[i] + 1
+                    ], 
+                    [
+                        paddingLeftCell + this._exportableColumns.length, 
+                        paddingTopCell + offsetRows + this._headerIndices[i] + data.length
+                    ]
+                ];
                 
                 table.setReferenceRange(tableRange[0], tableRange[1]);
                 table.setTableColumns(this.getColumnLabels(gridProps[i].grid));
@@ -935,10 +942,12 @@
                 else {
                     style[type].format = "#,###";
                 }
+                cell.metadata.type = 'number';
             } else {
                 if(!isNaN(value.replace(/\%?$/g, ''))) {
                     cell['value'] = Number(cell['value'].replace(/\%?$/g, ''))/100;
                     style[type].format = '0.00%';
+                    cell.metadata.type = 'number';
                 }
             }
         } else if(this.isDate(value)) {

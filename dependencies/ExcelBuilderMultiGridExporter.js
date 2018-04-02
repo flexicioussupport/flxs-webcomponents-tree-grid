@@ -293,7 +293,9 @@
      * }
      * @param {Boolean} multiTab default set to false
      */
-    ExcelBuilderMultiGridExporter.prototype.generate = function (gridProps, multiTab) {
+    ExcelBuilderMultiGridExporter.prototype.generate = function (props, multiTab) {
+
+        var gridProps = props.slice(0);
 
         if (typeof multiTab === 'undefined') multiTab = false;
 
@@ -311,6 +313,8 @@
             var isGrid = gridProps[i].hasOwnProperty('grid');
 
             if (isGrid) {
+                gridProps[i].pInExport = !!gridProps[i].grid.inExport;
+                gridProps[i].grid.inExport = true;
                 this.writeHeader(gridProps[i].grid);
                 this.recursiveFetchRecords(gridProps[i].grid, gridProps[i].showChild);
                 this.writeFooter(gridProps[i].grid, gridProps[i].grid.getDataProviderNoPaging());
@@ -343,6 +347,12 @@
 
             this.columns = [];
             this.data = [];
+
+            for(var i=0;i<gridProps.length;i++) {
+                if( gridProps[i].grid ) {
+                    gridProps[i].grid.inExport = gridProps[i].pInExport;
+                }
+            }
 
             if (window.hasOwnProperty('stylz')) {
                 delete window.stylz;

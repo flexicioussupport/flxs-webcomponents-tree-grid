@@ -95,7 +95,7 @@
         var nextInt = 0;
         for (var i = 0; i < grid.getExportableColumns().length; i++) {
             var col = grid.getExportableColumns()[i];
-            if (!grid.excelOptions.exporter.isIncludedInExport(col)) {
+            if (!grid.excelOptions.exporter.isIncludedInExport(col) || !col.getVisible()) {
                 continue;
             }
 
@@ -104,10 +104,11 @@
             var existingFields = Object.keys(columns);
 
             if(existingFields.length > 0) {
-                var duplicate = false; 
+                var duplicate = false;
                 for(var k=existingFields.length - 1;k>=0;k--) {
-                    if(columns[existingFields[k]].indexOf(headerText) !== -1) {
-                        nextInt = Number(columns[existingFields[k]].replace(headerText, ''));
+                    var rtext;
+                    if(columns[existingFields[k]].indexOf(headerText) !== -1 && (rtext = columns[existingFields[k]].replace(headerText, '')) && !isNaN(rtext)) {
+                        nextInt = Number(rtext);
                         nextInt += nextInt === 0 ? 2 : 1;
                         columns[this.getUniqueFieldName(col)] = headerText + nextInt;
                         duplicate = true;
@@ -141,7 +142,7 @@
         var item = {};
         for (var i = 0; i < grid.getExportableColumns().length; i++) {
             var col = grid.getExportableColumns()[i];
-            if (!exporter.isIncludedInExport(col)) {
+            if (!exporter.isIncludedInExport(col) || !col.getVisible()) {
                 continue;
             }
             var value = col.itemToLabel(record);
@@ -163,8 +164,11 @@
 
         [].forEach.call(records, function (data, index, records) {
 
+            var children = level.getChildren(data);
+
             var extra = {};
             extra._nestDepth = level.getNestDepth();
+            extra._hasChildren = children.length > 0;
 
             if(extra._nestDepth>1) {
                 if( index === 0 ) {
@@ -177,7 +181,6 @@
             this.writeRecord(grid, data, extra);
             if(exportChildren) {
                 if(level.isItemOpen(data)) {
-                    var children = level.getChildren(data);
                     if( children.length > 0 ) {
                         this.recursiveFetchRecords(grid, exportChildren, level.nextLevel, children);
                     }
@@ -205,7 +208,7 @@
 
             for (var i = 0; i < grid.getExportableColumns().length; i++) {
                 var col = grid.getExportableColumns()[i];
-                if (!exporter.isIncludedInExport(col))
+                if (!exporter.isIncludedInExport(col) || !col.getVisible())
                     continue;
                 var spaces = exporter.getSpaces(col);
                 var value = this.getText(col.calculateFooterValue(dataProvider));
@@ -222,9 +225,9 @@
     };
 
     /**
-     * 
-     * @param {Function} fn 
-     * @example 
+     *
+     * @param {Function} fn
+     * @example
      *  customStyle(cell, existingStyle) {
      *      return existingStyle;
      *  }
@@ -235,8 +238,8 @@
 
     /**
      * @deprecated
-     * @param {Function} fn 
-     * @example 
+     * @param {Function} fn
+     * @example
      *  customStyle(cellData, dgCol, existingStyle) {
      *      return existingStyle;
      *  }
@@ -248,7 +251,7 @@
 
     /**
      * @deprecated
-     * @param {Function} fn 
+     * @param {Function} fn
      * @example
      *  customFormStyle(cell, existingStyle) {
      *      return existingStyle;
@@ -259,8 +262,8 @@
     };
 
     /**
-     * 
-     * @param {Function} fn 
+     *
+     * @param {Function} fn
      * @example
      *  getBase64ImageString(data, col) {
      *      return <base64ImageString>
@@ -271,8 +274,8 @@
     };
 
     /**
-     * 
-     * @param {Function} fn 
+     *
+     * @param {Function} fn
      * @example
      *  getCustomValue(data, col) {
      *      return <base64ImageString>
@@ -284,12 +287,12 @@
 
     /**
      * cellGroups should be array of cells each will have structure like,
-     * { 
-     *   r:[mergeCellRowStartIndex, mergeCellRowEndIndex], 
-     *   c:[mergeCellColStartIndex, mergeCellColEndIndex], 
-     *   ref: <gridProps ref> 
+     * {
+     *   r:[mergeCellRowStartIndex, mergeCellRowEndIndex],
+     *   c:[mergeCellColStartIndex, mergeCellColEndIndex],
+     *   ref: <gridProps ref>
      * }
-     * @param {Array} cellGroups 
+     * @param {Array} cellGroups
      */
     ExcelBuilderMultiGridExporter.prototype.setMergeCells = function (cellGroups) {
         this._cellGroups = cellGroups;
@@ -308,7 +311,7 @@
      *
      * @param gridProps each property should have,
      *  {
-     *    grid: <grid>, 
+     *    grid: <grid>,
      *    ref: <any string to map to merge cells>,
      *    sheet: <sheet-name>
      * }
@@ -430,7 +433,7 @@
     }
 
     ExcelBuilderMultiGridExporter.prototype.getUniqueFieldName = function(fdgColumn) {
-        return fdgColumn.dataField || fdgColumn.getUniqueIdentifier().replace(/\s+/g, '_');
+        return fdgColumn.getDataField() || fdgColumn.getUniqueIdentifier().replace(/\s+/g, '_');
     }
 
     ExcelBuilderMultiGridExporter.prototype.setColumnsWidth = function (ws) {
@@ -467,11 +470,11 @@
     }
 
     /**
-     * 
-     * @param {Number} top 
-     * @param {Number} left 
-     * @param {Number} bottom 
-     * @param {Number} right 
+     *
+     * @param {Number} top
+     * @param {Number} left
+     * @param {Number} bottom
+     * @param {Number} right
      */
     ExcelBuilderMultiGridExporter.prototype.setPadding = function (top, left, bottom, right) {
         if (top > 0) this._paddings['top'] = top;
@@ -482,12 +485,12 @@
 
     /**
      * each margin value will be measured in pixels.
-     * @param {Number} top 
-     * @param {Number} right 
-     * @param {Number} bottom 
-     * @param {Number} left 
-     * @param {Number} header 
-     * @param {Number} footer 
+     * @param {Number} top
+     * @param {Number} right
+     * @param {Number} bottom
+     * @param {Number} left
+     * @param {Number} header
+     * @param {Number} footer
      */
     ExcelBuilderMultiGridExporter.prototype.setPageMargins = function (top, right, bottom, left, header, footer) {
         this._pageMargins['top'] = this.pixelToExcelInches(top);
@@ -508,16 +511,17 @@
         var nextInt = 0;
         for (var i = 0; i < grid.getExportableColumns().length; i++) {
             var col = grid.getExportableColumns()[i];
-            if (!grid.excelOptions.exporter.isIncludedInExport(col)) {
+            if (!grid.excelOptions.exporter.isIncludedInExport(col) || !col.getVisible()) {
                 continue;
             }
             var headerText = this.getText(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex));
 
             if(colTexts.length > 0) {
-                var duplicate = false; 
+                var duplicate = false;
                 for(var k=colTexts.length - 1;k>=0;k--) {
-                    if(colTexts[k].indexOf(headerText) !== -1) {
-                        nextInt = Number(colTexts[k].replace(headerText, ''));
+                    var rtext;
+                    if(colTexts[k].indexOf(headerText) !== -1 && (rtext = colTexts[k].replace(headerText, '')) && !isNaN(rtext)) {
+                        nextInt = Number(rtext);
                         nextInt += nextInt === 0 ? 2 : 1;
                         colTexts.push(headerText + nextInt);
                         duplicate = true;
@@ -713,22 +717,29 @@
 
                 var tableRange = [
                     [
-                        paddingLeftCell + 1, 
+                        paddingLeftCell + 1,
                         paddingTopCell + offsetRows + this._headerIndices[i] + 1
-                    ], 
+                    ],
                     [
-                        paddingLeftCell + this._exportableColumns.length, 
-                        paddingTopCell + offsetRows + this._headerIndices[i] + data.length
+                        paddingLeftCell + this._exportableColumns.length,
+                        paddingTopCell + offsetRows + this._headerIndices[i] + data.length - (this._footerIndices[i] !== -1 ? 1 : 0)
                     ]
                 ];
-                
+
                 table.setReferenceRange(tableRange[0], tableRange[1]);
                 table.setTableColumns(this.getColumnLabels(gridProps[i].grid));
 
-                table.addAutoFilter(
-                    [tableRange[0][0], tableRange[0][1] + (this._headerIndices[i] !== -1 ? 1 : 0)],
-                    [tableRange[1][0], tableRange[1][1] - (this._footerIndices[i] !== -1 ? 1 : 0)]
-                );
+                var filterRowStartIndex = tableRange[0][1] + (this._headerIndices[i] !== -1 ? 1 : 0);
+                var filterRowEndIndex = tableRange[1][1] - (this._footerIndices[i] !== -1 ? 1 : 0);
+
+                if(filterRowEndIndex > filterRowStartIndex) {
+                    table.addAutoFilter(
+                        [tableRange[0][0], filterRowStartIndex],
+                        [tableRange[1][0], filterRowEndIndex]
+                    );
+                }
+
+
             }
 
             for (var m = 0; m < data.length; m++) {
@@ -858,6 +869,10 @@
             wrapText: isMergeCell,
             uniqueFieldName: dgCol ? this.getUniqueFieldName(dgCol) : "",
 
+            get hasChildren() {
+                return !!this.rowData._hasChildren;
+            },
+
             get isFirstChild() {
                 return !!this.rowData._firstChild;
             },
@@ -970,10 +985,10 @@
         _borderBoxStyle.style = edge && this.tableBorderStyle ? this.tableBorderStyle : 'thin';
         _borderBoxStyle.color = edge && this.tableBorderColor ? this.tableBorderColor : 'FFCCCCCC';
 
-        if(info.isFirstChild || info.isLastChild) {
-            _borderBoxStyle = { top: info.isFirstChild, left: false, right: false, bottom: info.isLastChild, style: 'thick', color: 'FFFF9900' };
+        if(info.hasChildren || info.isLastChild) {
+            _borderBoxStyle = { top: info.hasChildren, left: false, right: false, bottom: info.isLastChild, style: 'thick', color: 'FFFF9900' };
         }
-        
+
 
         if (isMergeCell) {
             var s = this.deepClone(style[type]);
@@ -1042,7 +1057,7 @@
                     var s = this._customStyleFunction(cellData, dgCol, style[type]);
                     if (s) {
                         type = typ;
-                        style[type] = s;           
+                        style[type] = s;
                         style[type].alignment.wrapText = cellData.wrapText || style[type].alignment.wrapText;
                     }
                 }
@@ -1151,7 +1166,7 @@
             header: {
                 font: {
                     bold: true,
-                    // underline: true, 
+                    // underline: true,
                     size: 11,
                     fontName: this.defaultFont || 'AmplitudeTF'
                 }, alignment: {
@@ -1213,7 +1228,7 @@
                 }
             }, errorCell: {
                 font: {
-                    // size: 14.5, 
+                    // size: 14.5,
                     fontName:  this.defaultFont || 'AmplitudeTF',
                     color: 'FFFFFFFF'
                 }, alignment: {
@@ -1235,7 +1250,7 @@
         this._exportableColumns = [];
         for (var i = 0; i < grid.getExportableColumns().length; i++) {
             var col = grid.getExportableColumns()[i];
-            if (!grid.excelOptions.exporter.isIncludedInExport(col)) {
+            if (!grid.excelOptions.exporter.isIncludedInExport(col) || !col.getVisible()) {
                 continue;
             }
             this._exportableColumns.push(col);

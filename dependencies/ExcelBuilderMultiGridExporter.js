@@ -169,6 +169,7 @@
             var extra = {};
             extra._nestDepth = level.getNestDepth();
             extra._hasChildren = children.length > 0;
+            extra._itemOpen = level.isItemOpen(data);
 
             if(extra._nestDepth>1) {
                 if( index === 0 ) {
@@ -179,12 +180,8 @@
             }
 
             this.writeRecord(grid, data, extra);
-            if(exportChildren) {
-                if(level.isItemOpen(data)) {
-                    if( children.length > 0 ) {
-                        this.recursiveFetchRecords(grid, exportChildren, level.nextLevel, children);
-                    }
-                }
+            if(exportChildren && extra._itemOpen && children.length > 0 ) {
+                this.recursiveFetchRecords(grid, exportChildren, level.nextLevel, children);
             }
         }, this);
     };
@@ -869,6 +866,10 @@
             wrapText: isMergeCell,
             uniqueFieldName: dgCol ? this.getUniqueFieldName(dgCol) : "",
 
+            get isItemOpen() {
+                return !!this.rowData._itemOpen;
+            },
+
             get hasChildren() {
                 return !!this.rowData._hasChildren;
             },
@@ -985,7 +986,7 @@
         _borderBoxStyle.style = edge && this.tableBorderStyle ? this.tableBorderStyle : 'thin';
         _borderBoxStyle.color = edge && this.tableBorderColor ? this.tableBorderColor : 'FFCCCCCC';
 
-        if(info.hasChildren || info.isLastChild) {
+        if(info.isItemOpen || info.isLastChild) {
             _borderBoxStyle = { top: info.hasChildren, left: false, right: false, bottom: info.isLastChild, style: 'thick', color: 'FFFF9900' };
         }
 

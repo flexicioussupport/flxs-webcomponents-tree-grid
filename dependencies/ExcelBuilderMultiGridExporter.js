@@ -92,14 +92,35 @@
 
         var colIndex = 0;
         var columns = {};
-
+        var nextInt = 0;
         for (var i = 0; i < grid.getExportableColumns().length; i++) {
             var col = grid.getExportableColumns()[i];
             if (!grid.excelOptions.exporter.isIncludedInExport(col)) {
                 continue;
             }
-            var val = this.getText(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex));
-            columns[this.getUniqueFieldName(col)] = val;
+
+            var headerText = this.getText(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex));
+
+            var existingFields = Object.keys(columns);
+
+            if(existingFields.length > 0) {
+                var duplicate = false; 
+                for(var k=existingFields.length - 1;k>=0;k--) {
+                    if(columns[existingFields[k]].indexOf(headerText) !== -1) {
+                        nextInt = Number(columns[existingFields[k]].replace(headerText, ''));
+                        nextInt += nextInt === 0 ? 2 : 1;
+                        columns[this.getUniqueFieldName(col)] = headerText + nextInt;
+                        duplicate = true;
+                        break;
+                    }
+                }
+
+                if(!duplicate) {
+                    columns[this.getUniqueFieldName(col)] = headerText;
+                }
+            } else {
+                columns[this.getUniqueFieldName(col)] = headerText;
+            }
             colIndex++;
         }
 
@@ -484,12 +505,32 @@
     ExcelBuilderMultiGridExporter.prototype.getColumnLabels = function (grid) {
         var colTexts = [];
         var colIndex = 0;
+        var nextInt = 0;
         for (var i = 0; i < grid.getExportableColumns().length; i++) {
             var col = grid.getExportableColumns()[i];
             if (!grid.excelOptions.exporter.isIncludedInExport(col)) {
                 continue;
             }
-            colTexts.push(this.getText(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex)));
+            var headerText = this.getText(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex));
+
+            if(colTexts.length > 0) {
+                var duplicate = false; 
+                for(var k=colTexts.length - 1;k>=0;k--) {
+                    if(colTexts[k].indexOf(headerText) !== -1) {
+                        nextInt = Number(colTexts[k].replace(headerText, ''));
+                        nextInt += nextInt === 0 ? 2 : 1;
+                        colTexts.push(headerText + nextInt);
+                        duplicate = true;
+                        break;
+                    }
+                }
+
+                if(!duplicate) {
+                    colTexts.push(headerText);
+                }
+            } else {
+                colTexts.push(headerText);
+            }
             colIndex++;
         }
         return colTexts;

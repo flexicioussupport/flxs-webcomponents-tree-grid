@@ -174,7 +174,9 @@
             if(extra._nestDepth>1) {
                 if( index === 0 ) {
                     extra._firstChild = true;
-                } else if ( index === records.length - 1 ) {
+                } 
+                
+                if ( index === records.length - 1 ) {
                     extra._lastChild = true;
                 }
             }
@@ -987,7 +989,7 @@
         _borderBoxStyle.color = edge && this.tableBorderColor ? this.tableBorderColor : 'FFCCCCCC';
 
         if(info.isItemOpen || info.isLastChild) {
-            _borderBoxStyle = { top: info.hasChildren, left: false, right: false, bottom: info.isLastChild, style: 'thick', color: 'FFFF9900' };
+            _borderBoxStyle = { top: info.isItemOpen && info.hasChildren, left: false, right: false, bottom: info.isLastChild, style: 'thick', color: 'FFFF9900' };
         }
 
 

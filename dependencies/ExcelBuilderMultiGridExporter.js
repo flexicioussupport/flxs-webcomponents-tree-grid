@@ -92,14 +92,35 @@
 
         var colIndex = 0;
         var columns = {};
-
+        var nextInt = 0;
         for (var i = 0; i < grid.getExportableColumns().length; i++) {
             var col = grid.getExportableColumns()[i];
             if (!grid.excelOptions.exporter.isIncludedInExport(col)) {
                 continue;
             }
-            var val = this.getText(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex));
-            columns[col.dataField] = val;
+
+            var headerText = this.getText(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex));
+
+            var existingFields = Object.keys(columns);
+
+            if(existingFields.length > 0) {
+                var duplicate = false; 
+                for(var k=existingFields.length - 1;k>=0;k--) {
+                    if(columns[existingFields[k]].indexOf(headerText) !== -1) {
+                        nextInt = Number(columns[existingFields[k]].replace(headerText, ''));
+                        nextInt += nextInt === 0 ? 2 : 1;
+                        columns[this.getUniqueFieldName(col)] = headerText + nextInt;
+                        duplicate = true;
+                        break;
+                    }
+                }
+
+                if(!duplicate) {
+                    columns[this.getUniqueFieldName(col)] = headerText;
+                }
+            } else {
+                columns[this.getUniqueFieldName(col)] = headerText;
+            }
             colIndex++;
         }
 
@@ -125,7 +146,7 @@
             }
             var value = col.itemToLabel(record);
             value = (value || value === 0) ? this.getText(value) : "";
-            item[col.dataField] = (value === '' || isNaN(value)) ? value : Number(value);
+            item[this.getUniqueFieldName(col)] = (value === '' || isNaN(value)) ? value : Number(value);
         }
 
         this.copyProperties(extra, item);
@@ -188,7 +209,7 @@
                     continue;
                 var spaces = exporter.getSpaces(col);
                 var value = this.getText(col.calculateFooterValue(dataProvider));
-                footerColumns[col.dataField] = (spaces ? spaces + value : (value ? isNaN(value) ? value : Number(value) : ""));
+                footerColumns[this.getUniqueFieldName(col)] = (spaces ? spaces + value : (value ? isNaN(value) ? value : Number(value) : ""));
                 colIndex++;
             }
 
@@ -408,6 +429,10 @@
         return e1.innerText.replace(/^[\s]*|[\s]*$/g, '');
     }
 
+    ExcelBuilderMultiGridExporter.prototype.getUniqueFieldName = function(fdgColumn) {
+        return fdgColumn.dataField || fdgColumn.getUniqueIdentifier().replace(/\s+/g, '_');
+    }
+
     ExcelBuilderMultiGridExporter.prototype.setColumnsWidth = function (ws) {
         var wscols = [];
 
@@ -480,12 +505,32 @@
     ExcelBuilderMultiGridExporter.prototype.getColumnLabels = function (grid) {
         var colTexts = [];
         var colIndex = 0;
+        var nextInt = 0;
         for (var i = 0; i < grid.getExportableColumns().length; i++) {
             var col = grid.getExportableColumns()[i];
             if (!grid.excelOptions.exporter.isIncludedInExport(col)) {
                 continue;
             }
-            colTexts.push(this.getText(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex)));
+            var headerText = this.getText(flexiciousNmsp.Exporter.getColumnHeader(col, colIndex));
+
+            if(colTexts.length > 0) {
+                var duplicate = false; 
+                for(var k=colTexts.length - 1;k>=0;k--) {
+                    if(colTexts[k].indexOf(headerText) !== -1) {
+                        nextInt = Number(colTexts[k].replace(headerText, ''));
+                        nextInt += nextInt === 0 ? 2 : 1;
+                        colTexts.push(headerText + nextInt);
+                        duplicate = true;
+                        break;
+                    }
+                }
+
+                if(!duplicate) {
+                    colTexts.push(headerText);
+                }
+            } else {
+                colTexts.push(headerText);
+            }
             colIndex++;
         }
         return colTexts;
@@ -555,8 +600,8 @@
         if (!this._customBase64ImageFunction || !(base64ImageInfo = this._customBase64ImageFunction(data, col, this._cws[cellIndex]))) {
             if (!imageInfoInMergedCell || (imageInfoInMergedCell && imageInfoInMergedCell.prevFetch || !imageInfoInMergedCell.imageInfo)) {
 
-                if (col.hasOwnProperty('dataField'))
-                    data[col.dataField] = this.getText(data[col.dataField]);
+                if (col.hasOwnProperty('_uniqueIdentifier'))
+                    data[this.getUniqueFieldName(col)] = this.getText(data[this.getUniqueFieldName(col)]);
                 else
                     data[cellIndex].value = this.getText(data[cellIndex].value);
 
@@ -599,9 +644,9 @@
         if (!base64ImageInfo || !base64ImageInfo.hasOwnProperty('base64ImageInfo') || !base64ImageInfo.hideText)
             return;
 
-        if (col.hasOwnProperty('dataField')) {
-            data[col.dataField] = this.getText(data[col.dataField]);
-            data[col.dataField + "_hideText"] = base64ImageInfo.hideText;
+        if (col.hasOwnProperty('_uniqueIdentifier')) {
+            data[this.getUniqueFieldName(col)] = this.getText(data[this.getUniqueFieldName(col)]);
+            data[this.getUniqueFieldName(col) + "_hideText"] = base64ImageInfo.hideText;
         } else {
             data[cellIndex].value = this.getText(data[cellIndex].value);
             data[cellIndex]['_hideText'] = base64ImageInfo.hideText;
@@ -692,7 +737,7 @@
                     this._exportableColumns.map(function (col, index) {
                         this.attachImages(workbook, worksheet, data[m], m, index, col, gridProps[i].ref);
                         if ((m === this._headerIndices[i] && col.hideHeaderText) || (m !== this._headerIndices[i] && col.hideText)) {
-                            data[m][col.dataField + "_hideText"] = true;
+                            data[m][this.getUniqueFieldName(col) + "_hideText"] = true;
                         }
                     }.bind(this));
                 } else {
@@ -769,11 +814,11 @@
                 for (var m = 0, c = 0; m < this._exportableColumns.length; m++ , c++) {
                     var dgCol = this._exportableColumns[m];
 
-                    if (!data[r].hasOwnProperty(dgCol.dataField)) {
+                    if (!data[r].hasOwnProperty(this.getUniqueFieldName(dgCol))) {
                         continue;
                     }
 
-                    item.push(this.createCell(data, data[r][dgCol.dataField], compIndex, { ref: ref, r: r, c: c, dgCol: dgCol, isGrid: true }, style));
+                    item.push(this.createCell(data, data[r][this.getUniqueFieldName(dgCol)], compIndex, { ref: ref, r: r, c: c, dgCol: dgCol, isGrid: true }, style));
                 }
             } else {
                 for (var c = 0; c < data[r].length; c++) {
@@ -811,6 +856,7 @@
             colIndex: c,
             rowHeight: 0,
             wrapText: isMergeCell,
+            uniqueFieldName: dgCol ? this.getUniqueFieldName(dgCol) : "",
 
             get isFirstChild() {
                 return !!this.rowData._firstChild;
@@ -829,7 +875,7 @@
             },
 
             get hideText() {
-                return dgCol ? this.rowData.hasOwnProperty(dgCol.dataField + '_hideText') ? this.rowData[dgCol.dataField + '_hideText'] : false : !!this.rowData['_hideText'];
+                return dgCol ? this.rowData.hasOwnProperty(this.uniqueFieldName + '_hideText') ? this.rowData[this.uniqueFieldName + '_hideText'] : false : !!this.rowData['_hideText'];
             },
 
             get fdgColumn() {

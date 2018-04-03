@@ -106,8 +106,9 @@
             if(existingFields.length > 0) {
                 var duplicate = false; 
                 for(var k=existingFields.length - 1;k>=0;k--) {
-                    if(columns[existingFields[k]].indexOf(headerText) !== -1) {
-                        nextInt = Number(columns[existingFields[k]].replace(headerText, ''));
+                    var rtext;
+                    if(columns[existingFields[k]].indexOf(headerText) !== -1 && (rtext = columns[existingFields[k]].replace(headerText, '')) && !isNaN(rtext)) {
+                        nextInt = Number(rtext);
                         nextInt += nextInt === 0 ? 2 : 1;
                         columns[this.getUniqueFieldName(col)] = headerText + nextInt;
                         duplicate = true;
@@ -430,7 +431,7 @@
     }
 
     ExcelBuilderMultiGridExporter.prototype.getUniqueFieldName = function(fdgColumn) {
-        return fdgColumn.dataField || fdgColumn.getUniqueIdentifier().replace(/\s+/g, '_');
+        return fdgColumn.getUniqueIdentifier().replace(/\s+/g, '_');
     }
 
     ExcelBuilderMultiGridExporter.prototype.setColumnsWidth = function (ws) {
@@ -516,8 +517,9 @@
             if(colTexts.length > 0) {
                 var duplicate = false; 
                 for(var k=colTexts.length - 1;k>=0;k--) {
-                    if(colTexts[k].indexOf(headerText) !== -1) {
-                        nextInt = Number(colTexts[k].replace(headerText, ''));
+                    var rtext;
+                    if(colTexts[k].indexOf(headerText) !== -1 && (rtext = colTexts[k].replace(headerText, '')) && !isNaN(rtext)) {
+                        nextInt = Number(rtext);
                         nextInt += nextInt === 0 ? 2 : 1;
                         colTexts.push(headerText + nextInt);
                         duplicate = true;
@@ -725,10 +727,17 @@
                 table.setReferenceRange(tableRange[0], tableRange[1]);
                 table.setTableColumns(this.getColumnLabels(gridProps[i].grid));
 
-                table.addAutoFilter(
-                    [tableRange[0][0], tableRange[0][1] + (this._headerIndices[i] !== -1 ? 1 : 0)],
-                    [tableRange[1][0], tableRange[1][1] - (this._footerIndices[i] !== -1 ? 1 : 0)]
-                );
+                var filterRowStartIndex = tableRange[0][1] + (this._headerIndices[i] !== -1 ? 1 : 0);
+                var filterRowEndIndex = tableRange[1][1] - (this._footerIndices[i] !== -1 ? 1 : 0);
+
+                if(filterRowEndIndex > filterRowStartIndex) {
+                    table.addAutoFilter(
+                        [tableRange[0][0], filterRowStartIndex],
+                        [tableRange[1][0], filterRowEndIndex]
+                    );
+                }
+
+                
             }
 
             for (var m = 0; m < data.length; m++) {

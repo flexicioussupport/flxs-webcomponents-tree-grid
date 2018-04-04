@@ -107,7 +107,7 @@
                 var duplicate = false;
                 for(var k=existingFields.length - 1;k>=0;k--) {
                     var rtext;
-                    if(columns[existingFields[k]].indexOf(headerText) !== -1 && (rtext = columns[existingFields[k]].replace(headerText, '')) && !isNaN(rtext)) {
+                    if(columns[existingFields[k]].indexOf(headerText) !== -1 && !isNaN(rtext = columns[existingFields[k]].replace(headerText, ''))) {
                         nextInt = Number(rtext);
                         nextInt += nextInt === 0 ? 2 : 1;
                         columns[this.getUniqueFieldName(col)] = headerText + nextInt;
@@ -170,6 +170,7 @@
             extra._nestDepth = level.getNestDepth();
             extra._hasChildren = children.length > 0;
             extra._itemOpen = level.isItemOpen(data);
+            extra._showInnerLevel = exportChildren;
 
             if(extra._nestDepth>1) {
                 if( index === 0 ) {
@@ -519,7 +520,7 @@
                 var duplicate = false;
                 for(var k=colTexts.length - 1;k>=0;k--) {
                     var rtext;
-                    if(colTexts[k].indexOf(headerText) !== -1 && (rtext = colTexts[k].replace(headerText, '')) && !isNaN(rtext)) {
+                    if(colTexts[k].indexOf(headerText) !== -1 && !isNaN(rtext = colTexts[k].replace(headerText, ''))) {
                         nextInt = Number(rtext);
                         nextInt += nextInt === 0 ? 2 : 1;
                         colTexts.push(headerText + nextInt);
@@ -868,6 +869,10 @@
             wrapText: isMergeCell,
             uniqueFieldName: dgCol ? this.getUniqueFieldName(dgCol) : "",
 
+            get showInnerLevel() {
+                return !!this.rowData._showInnerLevel;
+            },
+
             get isItemOpen() {
                 return !!this.rowData._itemOpen;
             },
@@ -988,7 +993,7 @@
         _borderBoxStyle.style = edge && this.tableBorderStyle ? this.tableBorderStyle : 'thin';
         _borderBoxStyle.color = edge && this.tableBorderColor ? this.tableBorderColor : 'FFCCCCCC';
 
-        if(info.isItemOpen || info.isLastChild) {
+        if(info.showInnerLevel && (info.isItemOpen || info.isLastChild)) {
             _borderBoxStyle = { top: info.isItemOpen && info.hasChildren, left: false, right: false, bottom: info.isLastChild, style: 'thick', color: 'FFFF9900' };
         }
 

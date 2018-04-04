@@ -930,7 +930,7 @@
             v = v === 0 ? String(v) : v;
         }
         // value = v ? v : !isNaN(value) ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : value;
-        value = value.replace(/\,/g, "");
+        value = !isNaN(value.replace(/\,/g, "")) ? value.replace(/\,/g, "") : value;
         value = v ? v : (value === 0 || (value && !isNaN(value))) ? Number(value) : value;
 
         cell['value'] = !info.hideText ? value : '';

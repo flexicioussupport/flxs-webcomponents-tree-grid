@@ -33,12 +33,23 @@ function processDeltaArray(){
         modifiedChildren();
     }
 }
+/*
 function updateDataProvider(elem) {
     readJsonFile('data/GridAPITestDATA_' + elem.value.toUpperCase() + '.json', function(data) {
         dataSource = data;
         grid.setDataProvider(dataSource[0].before);
         grid.expandAll();
     });
+}
+*/
+function updateDataProvider(config) {
+    try {
+        dataSource = JSON.parse(config);
+        grid.setDataProvider(dataSource[0].before);
+        grid.expandAll();
+    } catch(e) {
+        console.log(e);
+    }
 }
 
 function addItems() {
@@ -157,4 +168,12 @@ function readJsonFile(file, callback) {
         }
     }
     rawFile.send(null);
+}
+
+function toggleLoadConfigButtonState(elem) {
+    var textarea = elem;
+    var loadConfigBtn = textarea.parentElement.nextElementSibling;
+    setTimeout(function() {
+        loadConfigBtn.disabled = !textarea.value;
+    }, 0);
 }

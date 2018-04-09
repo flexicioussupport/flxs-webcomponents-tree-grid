@@ -108,15 +108,15 @@
           <label><input type="checkbox" id="cbFilterRows" value="value" checked>Filter Rows</label>
           <label><input type="checkbox" id="cbSortRows" value="value" checked>Sort Rows</label>
           <div>
-              <!-- <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="add">Add</label>
+              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="add">Add</label>
               <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="upd">Update</label>
               <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="del">Remove</label>
               <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="chld">Modified Children</label>
               <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="grouping">Grouping</label>
-              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="un-grouping">Ungrouping</label> -->
+              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="un-grouping">Ungrouping</label>
               <textarea id="configInput" onpaste="toggleLoadConfigButtonState(this)" onkeyup="toggleLoadConfigButtonState(this)"></textarea>
           </div>
-          <paper-button id="loadConfigBtn" onclick="updateDataProvider(this.previousElementSibling.firstElementChild.value)" disabled>Load Config</paper-button>
+          <paper-button id="loadConfigBtn" onclick="updateDataProviderFromConfig(this.previousElementSibling.lastElementChild.value)" disabled>Load Config</paper-button>
           <paper-button onclick="processDeltaArray()">Process Delta</paper-button>
         </div><br/>
         <flxs-tree-grid variableRowHeight="true"  editable="true" id="hgrid" creationComplete="[[onLoad]]" selectedKeyField="id" enableFooters="false" enableFilters="false" enableDynamicLevels="true" horizontalScrollPolicy="auto"  enableExport="true" preferencePersistenceKey="programaticCellFormatting" forcePagerRow="false" style="width: 800px;height: 400px">
@@ -125,7 +125,7 @@
             <flxs-tree-grid-column enableHierarchicalNestIndent="true" dataField="id" headerText="ID"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="version" headerText="Version"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="investor.id" headerText="Investor ID"></flxs-tree-grid-column>
-            <flxs-tree-grid-column wordWrap="true" sortCaseInsensitive="true" dataField="investor.investorNm" sortCaseInsensitive="true" headerText="Investor Name"></flxs-tree-grid-column>
+            <flxs-tree-grid-column wordWrap="true" dataField="investor.investorNm" sortCaseInsensitive="true" headerText="Investor Name"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="investor.country" headerText="Country"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="ownerName" headerText="Owner"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="investor.type.name" headerText="Investor Type"></flxs-tree-grid-column>

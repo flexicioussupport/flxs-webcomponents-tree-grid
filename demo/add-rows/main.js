@@ -33,7 +33,7 @@ function processDeltaArray(){
         modifiedChildren();
     }
 }
-/*
+
 function updateDataProvider(elem) {
     readJsonFile('data/GridAPITestDATA_' + elem.value.toUpperCase() + '.json', function(data) {
         dataSource = data;
@@ -41,8 +41,8 @@ function updateDataProvider(elem) {
         grid.expandAll();
     });
 }
-*/
-function updateDataProvider(config) {
+
+function updateDataProviderFromConfig(config) {
     try {
         dataSource = JSON.parse(config);
         grid.setDataProvider(dataSource[0].before);

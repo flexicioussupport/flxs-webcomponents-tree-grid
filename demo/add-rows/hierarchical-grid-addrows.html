@@ -119,13 +119,13 @@
           <paper-button id="loadConfigBtn" onclick="updateDataProvider(this.previousElementSibling.firstElementChild.value)" disabled>Load Config</paper-button>
           <paper-button onclick="processDeltaArray()">Process Delta</paper-button>
         </div><br/>
-        <flxs-tree-grid editable="true" id="hgrid" creationComplete="[[onLoad]]" selectedKeyField="id" enableFooters="false" enableFilters="false" enableDynamicLevels="true" horizontalScrollPolicy="auto"  enableExport="true" preferencePersistenceKey="programaticCellFormatting" forcePagerRow="false" style="width: 800px;height: 400px">
+        <flxs-tree-grid variableRowHeight="true"  editable="true" id="hgrid" creationComplete="[[onLoad]]" selectedKeyField="id" enableFooters="false" enableFilters="false" enableDynamicLevels="true" horizontalScrollPolicy="auto"  enableExport="true" preferencePersistenceKey="programaticCellFormatting" forcePagerRow="false" style="width: 800px;height: 400px">
           <flxs-tree-grid-column-level childrenField="children" initialSortField="investor.investorNm" selectedKeyField="id" >
             <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
             <flxs-tree-grid-column enableHierarchicalNestIndent="true" dataField="id" headerText="ID"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="version" headerText="Version"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="investor.id" headerText="Investor ID"></flxs-tree-grid-column>
-            <flxs-tree-grid-column dataField="investor.investorNm" sortCaseInsensitive="true" headerText="Investor Name"></flxs-tree-grid-column>
+            <flxs-tree-grid-column wordWrap="true" sortCaseInsensitive="true" dataField="investor.investorNm" sortCaseInsensitive="true" headerText="Investor Name"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="investor.country" headerText="Country"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="ownerName" headerText="Owner"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="investor.type.name" headerText="Investor Type"></flxs-tree-grid-column>

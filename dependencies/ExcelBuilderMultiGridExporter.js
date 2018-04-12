@@ -708,38 +708,42 @@
 
             if (this._isGridComp) {
 
-                var table = new ExcelBuilder.Table();
-                worksheet.addTable(table);
-                workbook.addTable(table);
+                var headers = this._headerIndices[i] !== -1 ? 1 : 0;
+                var footers = this._footerIndices[i] !== -1 ? 1 : 0;
 
-                var paddingLeftCell = this._paddings.left ? 1 : 0;
-                var paddingTopCell = this._paddings.top ? 1 : 0;
+                if(data.length !== headers + footers) {
 
-                var tableRange = [
-                    [
-                        paddingLeftCell + 1,
-                        paddingTopCell + offsetRows + this._headerIndices[i] + 1
-                    ],
-                    [
-                        paddingLeftCell + this._exportableColumns.length,
-                        paddingTopCell + offsetRows + this._headerIndices[i] + data.length - (this._footerIndices[i] !== -1 ? 1 : 0)
-                    ]
-                ];
+                    var table = new ExcelBuilder.Table();
+                    worksheet.addTable(table);
+                    workbook.addTable(table);
 
-                table.setReferenceRange(tableRange[0], tableRange[1]);
-                table.setTableColumns(this.getColumnLabels(gridProps[i].grid));
+                    var paddingLeftCell = this._paddings.left ? 1 : 0;
+                    var paddingTopCell = this._paddings.top ? 1 : 0;
 
-                var filterRowStartIndex = tableRange[0][1] + (this._headerIndices[i] !== -1 ? 1 : 0);
-                var filterRowEndIndex = tableRange[1][1] - (this._footerIndices[i] !== -1 ? 1 : 0);
+                    var tableRange = [
+                        [
+                            paddingLeftCell + 1,
+                            paddingTopCell + offsetRows + this._headerIndices[i] + 1
+                        ],
+                        [
+                            paddingLeftCell + this._exportableColumns.length,
+                            paddingTopCell + offsetRows + this._headerIndices[i] + data.length - footers
+                        ]
+                    ];
 
-                if(filterRowEndIndex > filterRowStartIndex) {
-                    table.addAutoFilter(
-                        [tableRange[0][0], filterRowStartIndex],
-                        [tableRange[1][0], filterRowEndIndex]
-                    );
+                    table.setReferenceRange(tableRange[0], tableRange[1]);
+                    table.setTableColumns(this.getColumnLabels(gridProps[i].grid));
+
+                    var filterRowStartIndex = tableRange[0][1] + headers;
+                    var filterRowEndIndex = tableRange[1][1] - footers;
+
+                    if(filterRowEndIndex > filterRowStartIndex) {
+                        table.addAutoFilter(
+                            [tableRange[0][0], filterRowStartIndex],
+                            [tableRange[1][0], filterRowEndIndex]
+                        );
+                    }
                 }
-
-
             }
 
             for (var m = 0; m < data.length; m++) {

@@ -423,6 +423,18 @@
         return excelPos.pixelsToEMUs(pixels);
     };
 
+    ExcelBuilderMultiGridExporter.prototype.getDecimalZeroPaddings = function(num) {
+        if( typeof num === 'number' ) {
+            var numstr = num.toString();
+            var decimalNum = Math.fround(num - Number(num.toFixed(0)));
+            if( decimalNum !== 0 ) {
+                var precision = numstr.substring(numstr.indexOf('.') + 1).length;
+                return decimalNum.toFixed(precision).replace(/\d/g, '0').substring(1);
+            }
+        }
+        return '';
+    };
+
     ExcelBuilderMultiGridExporter.prototype.getText = function (htmlText) {
         // parse html too and fetch textContent from that html
         htmlText = String(htmlText);
@@ -1011,7 +1023,8 @@
         if ((isNaN(value) && !isNaN(value.replace(/\%?$/g, ''))) || !isNaN(value.toString())) {
             if(!isNaN(value.toString())) {
                 if(value !== '')
-                    style[type].format = "#,##0";
+                    // if no value after decimal point no need to show zeros
+                    style[type].format = "#,##0" + this.getDecimalZeroPaddings(value);
                 else {
                     style[type].format = "#,###";
                 }

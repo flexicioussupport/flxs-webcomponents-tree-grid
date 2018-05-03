@@ -78,6 +78,7 @@
     _onChanged: function () {
     },
     _onItemEditorChanged: function(itemEditor) {
+      if (!this.col) this.col = {};
       this.col.itemEditor = itemEditor;
     }
   });

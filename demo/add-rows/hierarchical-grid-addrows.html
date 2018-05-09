@@ -98,35 +98,36 @@
             color: #000022;
             font-size: 17px;
             font-weight: bold;
-        }      
+        }
       </style>
 
       <div class="card">
         <h1>Hierarchical grid demo</h1>
         <div class="control-bar">
           <label><input type="checkbox" id="cbUpdateDataProvider" value="value" checked>Update DataProvider</label>
-          <label><input type="checkbox" id="cbFilterRows" value="value">Filter Rows</label>
-          <label><input type="checkbox" id="cbSortRows" value="value">Sort Rows</label>
+          <label><input type="checkbox" id="cbFilterRows" value="value" checked>Filter Rows</label>
+          <label><input type="checkbox" id="cbSortRows" value="value" checked>Sort Rows</label>
           <div>
-              <!-- <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="add">Add</label>
+              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="add">Add</label>
               <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="upd">Update</label>
               <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="del">Remove</label>
               <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="chld">Modified Children</label>
               <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="grouping">Grouping</label>
-              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="un-grouping">Ungrouping</label> -->
+              <label><input type="radio" onclick="updateDataProvider(this)" name="action" value="un-grouping">Ungrouping</label><br />
               <textarea id="configInput" onpaste="toggleLoadConfigButtonState(this)" onkeyup="toggleLoadConfigButtonState(this)"></textarea>
           </div>
-          <paper-button id="loadConfigBtn" onclick="updateDataProvider(this.previousElementSibling.firstElementChild.value)" disabled>Load Config</paper-button>
+          <paper-button id="loadConfigBtn" onclick="updateDataProviderFromConfig(this.previousElementSibling.lastElementChild.value)" disabled>Load Config</paper-button>
           <paper-button onclick="processDeltaArray()">Process Delta</paper-button>
         </div><br/>
         <flxs-tree-grid editable="true" id="hgrid" creationComplete="[[onLoad]]" variableRowHeight="true" selectedKeyField="id" enableFooters="false" enableFilters="false" enableDynamicLevels="true" horizontalScrollPolicy="auto"  enableExport="true" preferencePersistenceKey="programaticCellFormatting" forcePagerRow="false" style="width: 800px;height: 400px">
-          <flxs-tree-grid-column-level childrenField="children" >
+          <flxs-tree-grid-column-level childrenField="children" initialSortField="investor.investorNm" selectedKeyField="id" >
             <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
             <flxs-tree-grid-column enableHierarchicalNestIndent="true" dataField="id" headerText="ID"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="version" headerText="Version"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="investor.id" headerText="Investor ID"></flxs-tree-grid-column>
-            <flxs-tree-grid-column dataField="investor.investorNm" headerText="Investor Name" wordWrap="true"></flxs-tree-grid-column>
-            <flxs-tree-grid-column dataField="investor.country" headerText="Country"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="investor.investorNm" sortCaseInsensitive="true" headerText="Investor Name" wordwrap="true" width="50"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="investor.country" headerText="Country" wordwrap="true"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="demandDetail" headerText="Demand Detail" wordwrap="true" textAlign="right"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="ownerName" headerText="Owner"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="investor.type.name" headerText="Investor Type"></flxs-tree-grid-column>
             <flxs-tree-grid-column dataField="effectiveDemand"></flxs-tree-grid-column>

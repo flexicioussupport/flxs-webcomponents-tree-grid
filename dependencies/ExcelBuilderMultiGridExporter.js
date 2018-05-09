@@ -423,6 +423,18 @@
         return excelPos.pixelsToEMUs(pixels);
     };
 
+    ExcelBuilderMultiGridExporter.prototype.getDecimalZeroPaddings = function(num) {
+        if( typeof num === 'number' ) {
+            var numstr = num.toString();
+            var decimalNum = Math.fround(num - Number(num.toFixed(0)));
+            if( decimalNum !== 0 ) {
+                var precision = numstr.substring(numstr.indexOf('.') + 1).length;
+                return decimalNum.toFixed(precision).replace(/\d/g, '0').substring(1);
+            }
+        }
+        return '';
+    };
+
     ExcelBuilderMultiGridExporter.prototype.getText = function (htmlText) {
         // parse html too and fetch textContent from that html
         htmlText = String(htmlText);
@@ -708,38 +720,42 @@
 
             if (this._isGridComp) {
 
-                var table = new ExcelBuilder.Table();
-                worksheet.addTable(table);
-                workbook.addTable(table);
+                var headers = this._headerIndices[i] !== -1 ? 1 : 0;
+                var footers = this._footerIndices[i] !== -1 ? 1 : 0;
 
-                var paddingLeftCell = this._paddings.left ? 1 : 0;
-                var paddingTopCell = this._paddings.top ? 1 : 0;
+                if(data.length !== headers + footers) {
 
-                var tableRange = [
-                    [
-                        paddingLeftCell + 1,
-                        paddingTopCell + offsetRows + this._headerIndices[i] + 1
-                    ],
-                    [
-                        paddingLeftCell + this._exportableColumns.length,
-                        paddingTopCell + offsetRows + this._headerIndices[i] + data.length - (this._footerIndices[i] !== -1 ? 1 : 0)
-                    ]
-                ];
+                    var table = new ExcelBuilder.Table();
+                    worksheet.addTable(table);
+                    workbook.addTable(table);
 
-                table.setReferenceRange(tableRange[0], tableRange[1]);
-                table.setTableColumns(this.getColumnLabels(gridProps[i].grid));
+                    var paddingLeftCell = this._paddings.left ? 1 : 0;
+                    var paddingTopCell = this._paddings.top ? 1 : 0;
 
-                var filterRowStartIndex = tableRange[0][1] + (this._headerIndices[i] !== -1 ? 1 : 0);
-                var filterRowEndIndex = tableRange[1][1] - (this._footerIndices[i] !== -1 ? 1 : 0);
+                    var tableRange = [
+                        [
+                            paddingLeftCell + 1,
+                            paddingTopCell + offsetRows + this._headerIndices[i] + 1
+                        ],
+                        [
+                            paddingLeftCell + this._exportableColumns.length,
+                            paddingTopCell + offsetRows + this._headerIndices[i] + data.length - footers
+                        ]
+                    ];
 
-                if(filterRowEndIndex > filterRowStartIndex) {
-                    table.addAutoFilter(
-                        [tableRange[0][0], filterRowStartIndex],
-                        [tableRange[1][0], filterRowEndIndex]
-                    );
+                    table.setReferenceRange(tableRange[0], tableRange[1]);
+                    table.setTableColumns(this.getColumnLabels(gridProps[i].grid));
+
+                    var filterRowStartIndex = tableRange[0][1] + headers;
+                    var filterRowEndIndex = tableRange[1][1] - footers;
+
+                    if(filterRowEndIndex > filterRowStartIndex) {
+                        table.addAutoFilter(
+                            [tableRange[0][0], filterRowStartIndex],
+                            [tableRange[1][0], filterRowEndIndex]
+                        );
+                    }
                 }
-
-
             }
 
             for (var m = 0; m < data.length; m++) {
@@ -1007,7 +1023,8 @@
         if ((isNaN(value) && !isNaN(value.replace(/\%?$/g, ''))) || !isNaN(value.toString())) {
             if(!isNaN(value.toString())) {
                 if(value !== '')
-                    style[type].format = "#,##0";
+                    // if no value after decimal point no need to show zeros
+                    style[type].format = "#,##0" + this.getDecimalZeroPaddings(value);
                 else {
                     style[type].format = "#,###";
                 }

@@ -33,20 +33,20 @@ function processDeltaArray(){
         modifiedChildren();
     }
 }
-/*
+
 function updateDataProvider(elem) {
     readJsonFile('data/GridAPITestDATA_' + elem.value.toUpperCase() + '.json', function(data) {
         dataSource = data;
         grid.setDataProvider(dataSource[0].before);
-        grid.rebuildBody(true);
+        grid.expandAll();
     });
 }
-*/
-function updateDataProvider(config) {
+
+function updateDataProviderFromConfig(config) {
     try {
         dataSource = JSON.parse(config);
         grid.setDataProvider(dataSource[0].before);
-        grid.rebuildBody(true);
+        grid.expandAll();
     } catch(e) {
         console.log(e);
     }
@@ -59,7 +59,7 @@ function addItems() {
     grid.processDelta(action, items, document.querySelector('hierarchical-grid-demo').$.cbFilterRows.checked, document.querySelector('hierarchical-grid-demo').$.cbSortRows.checked, document.querySelector('hierarchical-grid-demo').$.cbUpdateDataProvider.checked)
 
     setTimeout(function() {
-        if(!grid.getDataProvider().equals(dataSource[0].after))
+        if(dataSource[0].after && !grid.getDataProvider().equals(dataSource[0].after))
             updateLogger(action, items);
     }, [], 250);
 }
@@ -67,14 +67,14 @@ function addItems() {
 function deleteItems() {
     var action = 'remove';
     grid.processDelta(action, dataSource[0].delete, document.querySelector('hierarchical-grid-demo').$.cbFilterRows.checked, document.querySelector('hierarchical-grid-demo').$.cbSortRows.checked, document.querySelector('hierarchical-grid-demo').$.cbUpdateDataProvider.checked);
-    if(!grid.getDataProvider().equals(dataSource[0].after))
+    if(dataSource[0].after && !grid.getDataProvider().equals(dataSource[0].after))
        updateLogger(action, dataSource[0].delete);
 }
 
 function modifiedChildren() {
     var action = 'childrenModified';
     grid.processDelta(action, dataSource[0].childrenModified, document.querySelector('hierarchical-grid-demo').$.cbFilterRows.checked, document.querySelector('hierarchical-grid-demo').$.cbSortRows.checked, document.querySelector('hierarchical-grid-demo').$.cbUpdateDataProvider.checked);
-    if(!grid.getDataProvider().equals(dataSource[0].after))
+    if(dataSource[0].after && !grid.getDataProvider().equals(dataSource[0].after))
        updateLogger(action, dataSource[0].childrenModified);
 }
 
@@ -82,7 +82,7 @@ function updateItems() {
     var action = 'update';
     //moving the copy code from here to core. In core we should be updating the dataprovider, not here.
     grid.processDelta(action, dataSource[0].update, document.querySelector('hierarchical-grid-demo').$.cbFilterRows.checked, document.querySelector('hierarchical-grid-demo').$.cbSortRows.checked, document.querySelector('hierarchical-grid-demo').$.cbUpdateDataProvider.checked);
-    if(!grid.getDataProvider().equals(dataSource[0].after))
+    if(dataSource[0].after && !grid.getDataProvider().equals(dataSource[0].after))
        updateLogger(action, dataSource[0].update);
 }
 

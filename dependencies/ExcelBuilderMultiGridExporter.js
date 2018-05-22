@@ -71,6 +71,8 @@
 
         this.enabledOldApi = false;
 
+        this._styleCache = [];
+
         // set default font as property
         // this.defaultFont = "Amplitude BRK";
         // this.tableBorderStyle = "thick";
@@ -362,6 +364,8 @@
             }
         }
 
+        this._styleCache = null;
+
         /* write file and trigger a download */
         ExcelBuilder.Builder.createFile(new_wb).then(function (data) {
             var fname = this._exportFileName + "." + this.getExtension();
@@ -376,10 +380,6 @@
                 if( gridProps[i].grid ) {
                     gridProps[i].grid.inExport = gridProps[i].pInExport;
                 }
-            }
-
-            if (window.hasOwnProperty('stylz')) {
-                delete window.stylz;
             }
 
         }.bind(this));
@@ -480,6 +480,19 @@
     ExcelBuilderMultiGridExporter.prototype.isDate = function(value) {
         return isNaN(value) && !(/[a-zA-Z\@\#\$\%]+/.test(value)) && !isNaN(new Date(value));
     }
+
+    ExcelBuilderMultiGridExporter.prototype.reuseOrCreateStyle = function(style) {
+        var sstyle = JSON.stringify(style).replace(/,"id":\d+/gm, '');
+        var currentStyleId = this._styleCache.indexOf(sstyle);
+        if( currentStyleId === -1 ) {
+            currentStyleId = this.stylesheet.createFormat(style).id;
+            this._styleCache.push(sstyle);
+        } else {
+            currentStyleId += 1;
+        }
+
+        return currentStyleId;
+    };
 
     /**
      *
@@ -1125,7 +1138,7 @@
             this.setRowHeight( info.rowIndex + paddingRowOffset, style[type].font.size * 2 );
         }
 
-        cell['metadata']['style'] = this.generateStyleId(type, style, _borderBoxStyle, [r, c]).id;
+        cell['metadata']['style'] = this.generateStyleId(type, style, _borderBoxStyle, [r, c]);
 
         info = null;
         return cell;
@@ -1160,10 +1173,7 @@
         this.copyProperties(existingBorder, comboStyles.border, true);
         this.copyProperties(defaultBoxBorder, comboStyles.border);
 
-        window.stylz = window.stylz || [];
-        window.stylz.push({ row: c[0], col: c[1], style: comboStyles });
-
-        return this.stylesheet.createFormat(comboStyles);
+        return this.reuseOrCreateStyle(comboStyles);
     };
 
     ExcelBuilderMultiGridExporter.prototype.copyProperties = function (src, dest, override) {

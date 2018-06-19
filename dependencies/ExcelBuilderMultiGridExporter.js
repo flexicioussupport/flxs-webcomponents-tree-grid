@@ -1033,7 +1033,8 @@
             style[type] = s;
         }
 
-        if ((isNaN(value) && !isNaN(value.replace(/\%?$/g, ''))) || !isNaN(value.toString())) {
+        var lValue;
+        if (isNaN(value) && !isNaN((lValue = value.replace(/\%?$/g, ''))) || !isNaN(value.toString())) {
             if(!isNaN(value.toString())) {
                 if(value !== '')
                     // if no value after decimal point no need to show zeros
@@ -1043,9 +1044,9 @@
                 }
                 cell.metadata.type = 'number';
             } else {
-                if(!isNaN(value.replace(/\%?$/g, ''))) {
-                    cell['value'] = Number(cell['value'].replace(/\%?$/g, ''))/100;
-                    style[type].format = '0.00%';
+                if(lValue !== '' && !isNaN(lValue)) {
+                    cell['value'] = Number(lValue)/100;
+                    style[type].format = '0' + this.getDecimalZeroPaddings(Number(lValue)) + '%';
                     cell.metadata.type = 'number';
                 }
             }

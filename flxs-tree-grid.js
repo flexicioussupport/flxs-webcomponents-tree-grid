@@ -36,6 +36,7 @@
     var oldMSCBShowDialog = flexiciousNmsp.MultiSelectComboBox.prototype.showPopup;
     flexiciousNmsp.MultiSelectComboBox.prototype.showPopup = function (parent) {
         var documentComponent = new flexiciousNmsp.UIComponent();
+        var gridDomElement =this.grid.domElement;
         documentComponent.setDomElement(this.grid ? this.grid.domElement : parent.domElement);
         oldMSCBShowDialog.apply(this, [parent || documentComponent]);
         var pt = new flexiciousNmsp.Point(0, 0);
@@ -43,6 +44,7 @@
         var pt1 = new flexiciousNmsp.Point(0, 0);
         pt1 = documentComponent.localToGlobal(pt1);
         this.popup.move(pt.x - pt1.x, pt.y - pt1.y + this.getHeight());
+        this.grid.setDomElement(gridDomElement);
     };
     flexiciousNmsp.MultiSelectComboBox.prototype.onDocumentMouseUp = function (e) {
         if (e.triggerEvent.path && this.popup && (e.triggerEvent.path.indexOf(this.popup.domElement) >= 0)) {

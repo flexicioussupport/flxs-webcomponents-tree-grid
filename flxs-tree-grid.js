@@ -194,6 +194,13 @@
     var allStyles = [
 
         /**
+         * Bounding box sides enabled by default
+         * @default false
+         * @type boolean
+         * @see border-sides
+         */
+        "enable-default-border",
+        /**
          *  Bounding box sides.
          *  A space-delimited String that specifies the sides of the border to show.
          *  The String can contain <code>"left"</code>, <code>"top"</code>,
@@ -1597,7 +1604,8 @@
             }
 
             this.grid = new flexiciousNmsp.FlexDataGrid(this.$.gridContainer);
-
+            
+            this.grid.enableDefaultBorder = true;
             this.grid.pdfOptions.popupParent = this.grid;
             this.grid.printOptions.popupParent = this.grid;
             this.grid.sortIconPlacementFunction = this._placeSortIcon;

@@ -28,6 +28,7 @@
     CBFilter.prototype.initialize = function () {
         flexiciousNmsp.UIComponent.prototype.initialize.apply(this);
         var that = this;
+        //DUMMY CALL TO GET SOME SAMPLE DATA. YOU CAN MAKE A CALL TO SERVER TO GET YOUR DATA HERE.
         setTimeout(function() {
             that.setDataProvider(that.getItems());
         }, this, 1000);

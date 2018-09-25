@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../flxs-tree-grid-column-level.html">
+</head>
+
+<body class="fullbleed" unresolved>
+  
+  <dom-module id="basic-grid-demo">
+    <template>
+      <div class="card">
+        <h1>Nested grid demo</h1>
+        <flxs-tree-grid dataProvider="{{data}}" headerRowHeight="50" style="width: 200px; height: 200px"> 
+            <flxs-tree-grid-column dataField="ctry" headerText="Country Names" width="50" headerWordWrap="true" paddingRight="0" columnWidthMode="fixed"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="city"></flxs-tree-grid-column>
+            <flxs-tree-grid-column dataField="state"></flxs-tree-grid-column>
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+
+        flexiciousNmsp.Constants.IMAGE_PATH = "../images";
+        flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+        flexiciousNmsp.StyleDefaults.defaults.toolbarImagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+
+        Polymer({
+          is: 'basic-grid-demo',
+          properties: {
+            data: {
+              type: Array,
+              value: function() {
+                return [
+                  {ctry: 'US', city: 'Houston', state: 'TX'},  
+                  {ctry: 'US', city: 'New York', state: 'NY'},
+                  {ctry: 'Canada', city: 'Toronto', state: 'ON'}, 
+                  {ctry: 'Canada', city: 'Calgary', state: 'AB'},
+                ];
+              }
+            }
+          }
+        });
+      })
+    </script>
+  </dom-module>
+  
+  <basic-grid-demo></basic-grid-demo>
+</body>
+
+</html>

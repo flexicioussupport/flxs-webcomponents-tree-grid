@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+</head>
+
+<body class="fullbleed" unresolved>
+  
+  <dom-module id="basic-grid">
+    <template>
+      <div class="card">
+        <h1>Nested grid demo</h1>
+        
+        <flxs-tree-grid dataProvider="{{data}}" enableFilters="true" filterComboBoxDataProviderEnableReduce="true" style="height: 400px"> 
+          <flxs-tree-grid-column dataField="type" filterControl="TextInput" filterOperation="BeginsWith"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="fruit" filterControl="MultiSelectComboBox" filterComboBoxBuildFromGrid="true" filterComboBoxLabelFunction="[[_filteredFruit]]"></flxs-tree-grid-column>
+        </flxs-tree-grid>
+      </div>
+    </template>
+
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+
+        flexiciousNmsp.Constants.IMAGE_PATH = "../images";
+        flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+        flexiciousNmsp.StyleDefaults.defaults.toolbarImagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+
+        Polymer({
+          is: 'basic-grid',
+          properties: {
+            data: {
+              type: Array,
+              value: function() {
+                return [
+                  {type: 'xx', fruit: 'A'},
+                  {type: 'xx', fruit: 'B'},
+                  {type: 'yy', fruit: 'M'},
+                ];
+              }
+            }
+          },
+          _filteredFruit: function(item) {
+            switch(item['fruit']) {
+              case 'A': return '[A] Apple';
+              case 'B': return '[B] Banana';
+              case 'M': return '[M] Mango';
+            }
+
+            return '';
+          }
+        });
+      })
+    </script>
+  </dom-module>
+  
+  <basic-grid></basic-grid>
+</body>
+
+</html>

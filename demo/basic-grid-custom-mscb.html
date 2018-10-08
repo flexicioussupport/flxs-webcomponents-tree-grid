@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+      <div class="card">
+        <h1>Basic grid custom MultiSelectComboBox demo</h1>
+        <flxs-tree-grid
+          id="gridel"
+          dataProvider="{{ data }}"
+          enableFilters="true"
+          forcePagerRow="true"
+          filterComboBoxDataProviderEnableReduce="true"
+          style="width:400px;height:400px"
+          >
+          <flxs-tree-grid-column 
+            dataField="type"
+            headerText="Types"
+            filterControl="MultiSelectComboBox"
+            filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+          <flxs-tree-grid-column 
+            dataField="fruit"
+            headerText="Fruit Code"
+            filterRenderer="[[_customFilter]]"
+            filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
+        </flxs-tree-grid>
+      </div>
+    </template>
+    <script src="CustomMSCB.js"></script>
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+        Polymer({
+          is: 'basic-grid-demo',
+          properties: {
+            data: {
+              type: Array,
+              value: function() {
+                return [
+                  {type: 'xx', fruit: 'A'},
+                  {type: 'xy', fruit: 'B'},
+                  {type: 'yy', fruit: 'M'},
+                  {type: 'yz', fruit: ''},
+                  {type: 'xx', fruit: 'MA'},
+                  {type: 'zy', fruit: 'ZY'},
+                  {type: 'yz', fruit: 'XYA'}
+                ];
+              }
+            }
+          },
+          _customFilter: new flexiciousNmsp.ClassFactory(flexiciousNmsp.CustomMSCB)
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

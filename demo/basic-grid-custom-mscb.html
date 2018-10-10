@@ -37,6 +37,7 @@
             dataField="fruit"
             headerText="Fruit Code"
             filterRenderer="[[_customFilter]]"
+            labelFunction="[[_customLabel]]"
             filterComboBoxBuildFromGrid="true"></flxs-tree-grid-column>
         </flxs-tree-grid>
       </div>
@@ -55,14 +56,17 @@
                   {type: 'xy', fruit: 'B'},
                   {type: 'yy', fruit: 'M'},
                   {type: 'yz', fruit: ''},
-                  {type: 'xx', fruit: 'MA'},
+                  {type: '', fruit: 'MA'},
                   {type: 'zy', fruit: 'ZY'},
                   {type: 'yz', fruit: 'XYA'}
                 ];
               }
             }
           },
-          _customFilter: new flexiciousNmsp.ClassFactory(flexiciousNmsp.CustomMSCB)
+          _customFilter: new flexiciousNmsp.ClassFactory(flexiciousNmsp.CustomMSCB),
+          _customLabel: function(i, c) {
+            return '<span style="color: orange">' + flexiciousNmsp.UIUtils.resolveExpression(i, c.getDataField()) + '</span>';
+          }
         });
       })
     </script>

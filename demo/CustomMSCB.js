@@ -10,6 +10,8 @@
     CustomMSCB=function(){
         //make sure to call constructor
         flexiciousNmsp.MultiSelectComboBox.apply(this);//second parameter is the tag name for the dom element.
+
+        this.blankValuesData = '_none_';
     };
 
     flexiciousNmsp.CustomMSCB = CustomMSCB; //add to name space
@@ -25,21 +27,32 @@
     };
 
     CustomMSCB.prototype.initialize = function () {
-        flexiciousNmsp.MultiSelectComboBox.prototype.initialize.apply(this);
-        this.grid.addEventListener(this, flexiciousNmsp.FlexDataGrid.EVENT_FILTERPAGESORTCHANGE, this.onFilterPageSortChange);
+        flexiciousNmsp.TextInput.prototype.initialize.apply(this);
+        if(this.grid) {
+            this.grid.addEventListener(this, flexiciousNmsp.FlexDataGrid.EVENT_FILTERPAGESORTCHANGE, this.onFilterPageSortChange);
+        }
+        this.getTextBox().readOnly = true;
+        if (!this.getHeight()) {
+            this.setActualSize(this.defaultWidth, flxConstants.DEFAULT_MSCB_HEIGHT);//defaults
+        }
+        this.setLabel();
+        
     };
 
     CustomMSCB.prototype.setDataProvider = function(items) {
         // maniplate before call super.setDataProvider
+        if(items && items.length>0 && items[0].hasOwnProperty('selected')) {
+            flexiciousNmsp.MultiSelectComboBox.prototype.setDataProvider.apply(this, [items]);
+            return;
+        }
         var col = this.parent.getColumn();
         var val, 
             letters = [],
             letterItems = [];
         items.forEach(function(item) {
             val = item.data || '';
-            if(val.length === 0 && letters.indexOf('') === -1) {
-                letters.push('');
-                letterItems.push({ label: col.blankValuesLabel, data: '' });
+            if(!val) {
+                letterItems.push({ label: col.blankValuesLabel, data: this.blankValuesData });
             }
             for(var i=0;i<val.length;i++) {
                 var ch = val.charAt(i);
@@ -51,13 +64,9 @@
         }, this);
         uiUtil.sortOn(letterItems,"label");
 
-        letterItems.splice(0, 0, {
-            label: this.addAllItemText,
-            data: this.addAllItemText
-        });
         flexiciousNmsp.MultiSelectComboBox.prototype.setDataProvider.apply(this, [letterItems]);
     }
-
+    
     CustomMSCB.prototype.onFilterPageSortChange = function (evt) {
         if (evt.cause === "filterChange") {
             var triggerEvent = evt.triggerEvent.triggerEvent;
@@ -91,7 +100,8 @@
         if(o && o.hasOwnProperty(column.dataField) && expr.length > 0) {
             val = o[column.dataField] || '';
             for(let i=0;i<expr.length;i++) {
-                if((!val && !expr[i]) || (val && expr[i] && (val.indexOf(expr[i]) !==-1 || expr[i].indexOf(val) !== -1))) {
+                var ex = expr[i] === this.blankValuesData ? '' : expr[i];
+                if((!val && !ex) || (val && ex && (val.indexOf(ex) !==-1 || ex.indexOf(val) !== -1))) {
                     return true;
                 }
             }

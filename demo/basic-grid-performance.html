@@ -1,0 +1,247 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../../polymer/polymer-element.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+
+  <style is="custom-style">
+    body {
+      background: #222222;
+      color: #DFDFDF;
+    }
+  </style>
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <template>
+      <style>
+        #chars {
+          font: normal 11px Arial;
+          position: absolute;
+          visibility: hidden;
+          height: auto;
+          width: auto;
+          white-space: nowrap; /* Thanks to Herb Caudill comment */
+          margin: 0;
+          padding: 0;
+        }
+      </style>
+      <iron-ajax auto url="data/investors.json" handle-as="json" last-response="{{ gridData }}" id="xhr"></iron-ajax>
+     
+      <div class="card">
+        <flxs-tree-grid id="gridElem" 
+                        dataProvider="{{ gridData }}" 
+                        enableFooters="false" 
+                        forcePagerRow="true"
+                        enableFilters="true"
+                        variableRowHeight="true"
+                        enableActiveCellHighlight="false" 
+                        footerHorizontalGridLines="true"
+                        horizontalScrollPolicy="auto"
+                        getRowHeightFunction="[[_rowHeight]]"
+                        style="width:100%;height:400px">
+
+          <flxs-tree-grid-column  editable="false" 
+                                  width="15"
+                                  enableIcon="false"
+                                  columnWidthMode="fixed" 
+                                  excludeFromExport="true" 
+                                  sortable="false"
+                                  excludeFromSettings="true">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column  enableIcon="false" 
+                                  dataField="investors" 
+                                  headerText="Investors" 
+                                  headerAlign="center"
+                                  columnWidthMode="fitToContent">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column  dataField="investorType" 
+                                  headerText="Investor Type" 
+                                  filterControl="MultiSelectComboBox" 
+                                  filterComboBoxBuildFromGrid="true"
+                                  width="150" 
+                                  enableIcon="true" 
+                                  headerAlign="center">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column  dataField="ctry" 
+                                  filterControl="ComboBox" 
+                                  filterComboBoxBuildFromGrid="true" 
+                                  width="150" 
+                                  enableIcon="true"
+                                  headerAlign="center">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column  dataField="owner"
+                                  headerText="Owner"
+                                  editable="true" 
+                                  editorDataField="value"
+                                  headerAlign="center"
+                                  enableIcon="false"
+                                  width="80">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column  dataField="dealers"
+                                  headerText="Dealers"
+                                  editable="false" 
+                                  enableIcon="false" 
+                                  headerAlign="center"
+                                  columnWidthMode="fitToContent">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column  dataField="mv"
+                                  headerText="MV"
+                                  width="60"
+                                  editorDataField="value"
+                                  itemEditorApplyOnValueCommit="true"
+                                  editable="true" 
+                                  headerAlign="center"
+                                  columnWidthMode="fixed"
+                                  filterComboBoxBuildFromGrid="false"
+                                  >
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column  dataField="effDemand"
+                                  headerText="Eff Demand"
+                                  width="150"
+                                  editorDataField="value"
+                                  itemEditorApplyOnValueCommit="true" 
+                                  itemEditorManagesPersistence="false" 
+                                  enableEditCancelOnClickOutsideEditor="true"
+                                  columnWidthMode="fixed"  
+                                  textAlign="right" 
+                                  enableIcon="true" 
+                                  sortNumeric="true"
+                                  headerAlign="center"
+                                  footerOperation="sum" 
+                                  footerAlign="right" 
+                                  >
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column  dataField="demandDetail" 
+                                  headerText="Demand Detail"
+                                  editable="false" 
+                                  enableIcon="false"
+                                  headerAlign="center"
+                                  width="80"
+                                  wordWrap="true"
+                                  textAlign="right">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column  dataField="effDemandUsd" 
+                                  headerText="Eff Demand (USD)"
+                                  editable="true" 
+                                  enableIcon="false"
+                                  width="150"
+                                  textAlign="right" 
+                                  headerAlign="center"
+                                  footerOperation="sum" 
+                                  footerAlign="right" 
+                                  >
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column  dataField="effDetail" 
+                                  headerText="Eff Detail"
+                                  editable="false" 
+                                  enableIcon="false"
+                                  headerAlign="center"
+                                  width="150"
+                                  textAlign="right">
+          </flxs-tree-grid-column>
+          <flxs-tree-grid-column  editable="false" 
+                                  width="15"
+                                  sortable="false"
+                                  enableIcon="false"
+                                  columnWidthMode="fixed" 
+                                  excludeFromExport="true" 
+                                  excludeFromSettings="true">
+          </flxs-tree-grid-column>
+        </flxs-tree-grid>
+        <div id="chars"></div>
+      </div>
+    </template>
+
+    <script>
+
+      let charsMap = {};
+
+      const ichars = [
+
+        // letters, digits & other symbols (ASCII 32 - 126)
+        { char: ' ', range: 95 },
+
+        // special symbols
+        { char: '\t', range: 01 },
+        { char: '\n', range: 01 },
+        { char: '\r', range: 01 }
+      ];
+
+      function updateCharsMap(dummydom, ichar, range) {
+        var aInt = ichar.charCodeAt(0);
+        for(i=0;i<range;i++) {
+          const char = String.fromCharCode(aInt++);
+          dummydom.innerText = char;
+          charsMap[char] = dummydom.clientWidth;
+        }
+      }
+      
+      window.addEventListener('WebComponentsReady', function () {
+        
+        flexiciousNmsp.Constants.IMAGE_PATH = "../../images";
+        flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+        flexiciousNmsp.StyleDefaults.defaults.toolbarImagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+        flexiciousNmsp.Constants.VERTICAL_SCROLLBAR_WIDTH = 10;
+        flexiciousNmsp.Constants.HORIZONTAL_SCROLLBAR_HEIGHT = 10;
+        
+        Polymer({
+          is: 'basic-grid-demo',
+          ready: function() {
+            const dummydom = this.$.chars;
+            [].forEach.call(ichars, function (i) {
+              updateCharsMap(dummydom, i.char, i.range);
+            });
+          },
+          _rowHeight: function(item, level, rowType) {
+            var largestH = 0;
+            const cols = level.getVisibleColumns();
+
+            cols.forEach(function(col) {
+              if(col.wordWrap && col.dataField) {
+                const v = String(item[col.dataField]);
+                if(v && v !== 'undefined') {
+                  let t = 0;
+                  for(var i=0;i<v.length;i++) {
+                    t += charsMap[v.charAt(i)];
+                  }
+
+                  let lines = Math.round(t/col.getWidth()) || 1;
+
+                  t = lines * level.grid.getRowHeight();
+                  t += (col.paddingBottom ? col.paddingBottom : 2);
+                  t += (col.paddingTop ? col.paddingTop : 2);
+
+                  if(largestH < t) {
+                    largestH = t;
+                  }
+                }
+              }
+              
+            });
+
+            return largestH;
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+</body>
+
+</html>

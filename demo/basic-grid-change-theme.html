@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <title>flxs-tree-grid demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../paper-styles/demo-pages.html">
+  <link rel="import" href="../../iron-ajax/iron-ajax.html">
+  <link rel="import" href="../flxs-tree-grid.html">
+  <link rel="import" href="../flxs-tree-grid-column.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
+
+</head>
+
+<body class="fullbleed" unresolved>
+  <dom-module id="basic-grid-demo">
+    <template>
+        
+      <iron-ajax auto url="data/englishmonarchs.2.json" handle-as="json" last-response="{{ data }}" id="xhr"></iron-ajax>
+
+      <div class="card">
+        <h1>Basic grid demo</h1>
+        <paper-button onClick="[[loadDefaultTheme]]">Default Theme</paper-button>
+        <paper-button onClick="[[loadColorfulTheme]]">Change Theme</paper-button>
+        <flxs-tree-grid 
+          id="gelem" 
+          dataProvider="{{ data }}"
+          enableFilters="true"
+          forcePagerRow="true"
+          style="width:800px;height:400px"
+          >
+          <flxs-tree-grid-column type="checkbox"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="nm" headerText="ID "></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="cty" headerWordWrap="true" headerText="Legal Name of the Organization"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="hse" headerText="House"></flxs-tree-grid-column>
+          <flxs-tree-grid-column dataField="yrs" headerText="Years" textAlign="right" headerAlign="right"></flxs-tree-grid-column>
+        </flxs-tree-grid>
+      </div>
+    </template>
+    <script>
+      window.addEventListener('WebComponentsReady', function () {
+
+        flexiciousNmsp.Constants.IMAGE_PATH = "http://www.htmltreegrid.com/demo/flexicious/css/images/";
+        flexiciousNmsp.StyleDefaults.defaults.imagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+        flexiciousNmsp.StyleDefaults.defaults.toolbarImagesRoot = flexiciousNmsp.Constants.IMAGE_PATH;
+        flexiciousNmsp.Constants.VERTICAL_SCROLLBAR_WIDTH = 10;
+        flexiciousNmsp.Constants.HORIZONTAL_SCROLLBAR_HEIGHT = 10;
+        const colorful = {
+          /**
+           * Usually the toolbar root is the same as the images root, but for some custom themes, we have their own icons.
+           */
+          toolbarImagesRoot:flexiciousNmsp.Constants.IMAGE_PATH + "/themeIcons/sharedicons/pinkGreenColorfulIcons/32",
+          pagerRowHeight : 50,
+          pagerStyleName:"largeIcons",
+          alternatingItemColors:  [0xB7F5F4, 0xDAFAF9],
+          alternatingTextColors:  [0x111111, 0x111111],
+          rollOverColor: [0xF7F7EF, 0xE7E7E7],
+          headerRollOverColors:  [0xEBE27D, 0xDFCD4D] ,
+          headerColors:  [0xEBE27D, 0xDFCD4D],
+          columnGroupRollOverColors:  [0xEBE27D, 0xDFCD4D],
+          columnGroupColors:  [0xEBE27D, 0xDFCD4D],
+          pagerRollOverColors:  [0xF7F7EF, 0xE7E7E7],
+          pagerColors:  [0x75B837, 0x5F9929],
+          footerRollOverColors:  [0xF7F7EF, 0xE7E7E7],
+          footerColors:  [0x75B837, 0x5F9929] ,
+          filterRollOverColors:  [0xF7F7EF, 0xE7E7E7],
+          filterColors:  [0xF7F4C1, 0xF9F3BF],
+          fixedColumnFillColors:  [0xEFEFEF,0xEFEFEF],
+          activeCellColor: 0xB7DBFF,
+          rendererRollOverColors:  [0xFFFFFF, 0xFFFFFF],
+          rendererColors:   [0xFFFFFF,0xFFFFFF],
+          textSelectedColor:0x000000,
+          textRollOverColor:0x000000,
+          borderColor: 0x666666
+        };
+
+
+        Polymer({
+          is: 'basic-grid-demo',
+          properties: {
+            data: {
+              type: Array,
+              value: function() { return []; },
+              notify: true
+            },
+            colorful: {
+              type: Boolean,
+              value: false
+            }
+          },
+          loadTheme: function(){
+            const root = document.querySelector('basic-grid-demo');
+            // put here own theme object
+            const theme = root.colorful?colorful:{};
+
+            if(!flexiciousNmsp.StyleDefaults._defaults){
+              flexiciousNmsp.StyleDefaults._defaults={};
+              flexiciousNmsp.UIUtils.mergeObjects(flexiciousNmsp.StyleDefaults._defaults, flexiciousNmsp.StyleDefaults.defaults);
+            }
+            var newStyles = {};
+            flexiciousNmsp.UIUtils.mergeObjects(newStyles, flexiciousNmsp.StyleDefaults._defaults);
+            flexiciousNmsp.UIUtils.mergeObjects(newStyles, theme);
+            flexiciousNmsp.UIUtils.mergeObjects(flexiciousNmsp.StyleDefaults.defaults, newStyles);
+            
+            root.$.gelem.reload();
+
+          },
+          loadColorfulTheme: function() {
+            const root = document.querySelector('basic-grid-demo');
+            root.colorful = true;
+            root.loadTheme();
+          },
+          loadDefaultTheme: function() {
+            const root = document.querySelector('basic-grid-demo');
+            root.colorful = false;
+            root.loadTheme();
+          }
+        });
+      })
+    </script>
+  </dom-module>
+
+  <basic-grid-demo></basic-grid-demo>
+
+</body>
+
+</html>

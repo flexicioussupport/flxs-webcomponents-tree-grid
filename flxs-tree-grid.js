@@ -1592,7 +1592,17 @@
         /**
          * On attached element to DOM
          */
-        attached: function () {
+        attached: function() {
+            this.initiate();
+        },
+        reload: function() {
+            if(this.grid) {
+                this.grid = null;
+            }
+            this.style = {}
+            this.initiate();
+        },
+        initiate: function () {
             flexiciousNmsp.SettingsParser.log("grid attached")
             this.listen(this, 'iron-resize', '_resizeHandler');
 
